@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <stdio.h>
 #include <sys/select.h>
 
@@ -87,6 +88,7 @@ bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, b
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
     clock_t start = clock();
+    clock_t overall_start = start;
 
     std::cout << "Running " << n << " soups per haul:" << std::endl;
 
@@ -105,10 +107,12 @@ bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, b
 
         i += 1;
 
-        double elapsed = ((double) (clock() - start)) / CLOCKS_PER_SEC;
+        clock_t current = clock();
+        double elapsed = ((double) (current - start)) / CLOCKS_PER_SEC;
+        double overall_elapsed = ((double) (current - overall_start)) / CLOCKS_PER_SEC;
 
         if (elapsed >= 10.0) {
-            std::cout << i << " soups completed (" << ((int) ((i - lasti) / elapsed)) << " soups per second)." << std::endl;
+            std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(2) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
             lasti = i;
             start = clock();
 
