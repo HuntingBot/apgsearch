@@ -1,3 +1,5 @@
+#pragma once
+
 #include <iomanip>
 #include <stdio.h>
 #include <sys/select.h>
@@ -18,7 +20,16 @@ int keyWaiting() {
     return FD_ISSET(STDIN_FILENO, &fds);
 }
 
-#pragma once
+void populateLuts() {
+
+        apg::bitworld bw = apg::hashsoup("", SYMMETRY);
+        std::vector<apg::bitworld> vbw;
+        vbw.push_back(bw);
+        UPATTERN pat;
+        pat.insertPattern(vbw);
+        pat.advance(0, 0, 8);
+
+}
 
 #ifdef USE_OPEN_MP
 
@@ -28,6 +39,9 @@ bool parallelSearch(int n, int m, std::string payoshaKey, std::string seed, int 
 
     long long offset = 0;
     bool finishedSearch = false;
+
+    // Ensure the lookup tables are populated by the main thread:
+    populateLuts();
 
     while (finishedSearch == false) {
 
