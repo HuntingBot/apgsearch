@@ -50,6 +50,15 @@ void OnComplete( const happyhttp::Response* r, void* userdata )
     // std::cout << "Response completed (" << presp->length << " bytes): " << presp->m_Status << " " << presp->m_Reason << std::endl;
 }
 
+void increment_catagolue() {
+
+        std::string oldcat = CATAGOLUE_NAME;
+        INCREMENT_CATAGOLUE;
+        std::string newcat = CATAGOLUE_NAME;
+        std::cerr << "henceforth trying " << newcat;
+        std::cerr << " instead of " << oldcat << "..." << std::endl;
+
+}
 
 std::string catagolueRequest(const char *payload, const char *endpoint)
 {
@@ -94,11 +103,8 @@ std::string catagolueRequest(const char *payload, const char *endpoint)
     }
     catch( happyhttp::Wobbly& e )
     {
-        std::string oldcat = CATAGOLUE_NAME;
-        INCREMENT_CATAGOLUE;
-        std::string newcat = CATAGOLUE_NAME;
-        std::cerr << "Internet does not exist; henceforth trying " << newcat;
-        std::cerr << " instead of " << oldcat << "..." << std::endl;
+        std::cerr << "Internet does not exist; ";
+        increment_catagolue();
         return "";
     }
 
@@ -145,7 +151,8 @@ std::string authenticate(const char *payosha256_key, const char *operation_name)
     }
 
     if (token.length() == 0) {
-        std::cout << "Invalid response from payosha256." << std::endl;
+        std::cerr << "Invalid response from payosha256; ";
+        increment_catagolue();
         return "";
     } else {
         // std::cout << "Token " << token << " obtained from payosha256." << std::endl;
