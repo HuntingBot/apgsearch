@@ -21,6 +21,10 @@ public:
     }
 };
 
+int __catagolue_retries = 0;
+const char* __possible_catagolues[] = {"catagolue.appspot.com", "gol.hatsya.co.uk"};
+#define CATAGOLUE_NAME __possible_catagolues[__catagolue_retries % 2]
+#define INCREMENT_CATAGOLUE __catagolue_retries += 1
 
 void OnBegin( const happyhttp::Response* r, void* userdata )
 {
@@ -61,7 +65,7 @@ std::string catagolueRequest(const char *payload, const char *endpoint)
     try {
 
     // std::cout << "Making connection..." << std::endl;
-    happyhttp::Connection conn( "catagolue.appspot.com", 80 );
+    happyhttp::Connection conn( CATAGOLUE_NAME , 80 );
     conn.connect();
     // std::cout << "...connection made." << std::endl;
     ProcessedResponse processedResp; // create an empty ProcessedResponse object
@@ -75,7 +79,7 @@ std::string catagolueRequest(const char *payload, const char *endpoint)
         conn.pump();
 
     if (presp->completed == false) {
-        std::cout << "Response incomplete." << std::endl;
+        std::cerr << "Response incomplete." << std::endl;
         return "";
     }
 
@@ -83,14 +87,18 @@ std::string catagolueRequest(const char *payload, const char *endpoint)
         std::string response = presp->contents.str();
         return response;
     } else {
-        std::cout << "Bad status: " << presp->m_Status << std::endl;
+        std::cerr << "Bad status: " << presp->m_Status << std::endl;
         return "";
     }
 
     }
     catch( happyhttp::Wobbly& e )
     {
-        std::cout << "Internet does not exist." << std::endl;
+        std::string oldcat = CATAGOLUE_NAME;
+        INCREMENT_CATAGOLUE;
+        std::string newcat = CATAGOLUE_NAME;
+        std::cerr << "Internet does not exist; henceforth trying " << newcat;
+        std::cerr << " instead of " << oldcat << "..." << std::endl;
         return "";
     }
 
