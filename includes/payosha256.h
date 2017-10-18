@@ -21,6 +21,10 @@ public:
     }
 };
 
+int __catagolue_retries = 0;
+const char* __possible_catagolues[] = {"catagolue.appspot.com", "gol.hatsya.co.uk"};
+#define CATAGOLUE_NAME __possible_catagolues[__catagolue_retries % 2]
+#define INCREMENT_CATAGOLUE __catagolue_retries += 1
 
 void OnBegin( const happyhttp::Response* r, void* userdata )
 {
@@ -46,6 +50,15 @@ void OnComplete( const happyhttp::Response* r, void* userdata )
     // std::cout << "Response completed (" << presp->length << " bytes): " << presp->m_Status << " " << presp->m_Reason << std::endl;
 }
 
+void increment_catagolue() {
+
+        std::string oldcat = CATAGOLUE_NAME;
+        INCREMENT_CATAGOLUE;
+        std::string newcat = CATAGOLUE_NAME;
+        std::cerr << "henceforth trying " << newcat;
+        std::cerr << " instead of " << oldcat << "..." << std::endl;
+
+}
 
 std::string catagolueRequest(const char *payload, const char *endpoint)
 {
@@ -61,7 +74,7 @@ std::string catagolueRequest(const char *payload, const char *endpoint)
     try {
 
     // std::cout << "Making connection..." << std::endl;
-    happyhttp::Connection conn( "catagolue.appspot.com", 80 );
+    happyhttp::Connection conn( CATAGOLUE_NAME , 80 );
     conn.connect();
     // std::cout << "...connection made." << std::endl;
     ProcessedResponse processedResp; // create an empty ProcessedResponse object
@@ -75,7 +88,7 @@ std::string catagolueRequest(const char *payload, const char *endpoint)
         conn.pump();
 
     if (presp->completed == false) {
-        std::cout << "Response incomplete." << std::endl;
+        std::cerr << "Response incomplete." << std::endl;
         return "";
     }
 
@@ -83,14 +96,15 @@ std::string catagolueRequest(const char *payload, const char *endpoint)
         std::string response = presp->contents.str();
         return response;
     } else {
-        std::cout << "Bad status: " << presp->m_Status << std::endl;
+        std::cerr << "Bad status: " << presp->m_Status << std::endl;
         return "";
     }
 
     }
     catch( happyhttp::Wobbly& e )
     {
-        std::cout << "Internet does not exist." << std::endl;
+        std::cerr << "Internet does not exist; ";
+        increment_catagolue();
         return "";
     }
 
@@ -137,7 +151,8 @@ std::string authenticate(const char *payosha256_key, const char *operation_name)
     }
 
     if (token.length() == 0) {
-        std::cout << "Invalid response from payosha256." << std::endl;
+        std::cerr << "Invalid response from payosha256; ";
+        increment_catagolue();
         return "";
     } else {
         // std::cout << "Token " << token << " obtained from payosha256." << std::endl;
