@@ -143,6 +143,12 @@ bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, b
         }
 
         if ((i % n == 0) || quitByUser) {
+            last_current = current;
+            current = clock();
+            double elapsed = ((double) (current - start)) / CLOCKS_PER_SEC;
+            double overall_elapsed = ((double) (current - overall_start)) / CLOCKS_PER_SEC;
+
+            std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
             std::cout << "----------------------------------------------------------------------" << std::endl;
             std::cout << i << " soups completed." << std::endl;
             std::cout << "Attempting to contact payosha256." << std::endl;
