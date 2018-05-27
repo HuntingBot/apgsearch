@@ -50,7 +50,7 @@ bool parallelSearch(int n, int m, std::string payoshaKey, std::string seed, int 
             int threadNumber = omp_get_thread_num();
 
             SoupSearcher localSoup;
-            apg::lifetree<uint32_t, BITPLANES> lt(400);
+            apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
             apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
             long long elapsed = 0;

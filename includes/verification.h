@@ -58,7 +58,7 @@ void verifySearch(std::string payoshakey) {
     ss << "@SYMMETRY " << SYMMETRY << "\n";
 
     SoupSearcher soup;
-    apg::lifetree<uint32_t, BITPLANES> lt(400);
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
     for (unsigned int i = 4; i < stringlist.size(); i++)
