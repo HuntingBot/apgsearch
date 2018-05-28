@@ -157,7 +157,7 @@ bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, b
                 std::cout << "Connection was unsuccessful; continuing search..." << std::endl;
             } else {
                 if (payoshaResponse == "testing") { std::cout << "testing mode" << std::endl; }
-                std::cout << "\033[35m" << payoshaResponse << "\033[0m" << std::endl;
+                std::cout << "\033[31;1m" << payoshaResponse << "\033[0m" << std::endl;
                 std::cout << "Connection was successful; starting new search..." << std::endl;
                 finishedSearch = true;
             }
