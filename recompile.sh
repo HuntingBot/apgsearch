@@ -57,7 +57,7 @@ fi
 
 echo "Configuring rule $rulearg; symmetry $symmarg"
 
-python lifelib/avxlife/rule2asm.py $rulearg
+python lifelib/rule3asm.py $rulearg
 python mkparams.py $rulearg $symmarg
 make
 

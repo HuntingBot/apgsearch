@@ -3,6 +3,7 @@
 import sys
 import re
 
+from lifelib.genera import rule_property
 
 def main():
 
@@ -30,11 +31,7 @@ def main():
 
     m = re.match('b1?2?3?4?5?6?7?8?s0?1?2?3?4?5?6?7?8?$', rulestring)
 
-    if (rulestring[0] == 'g'):
-        bitplanes = int(rulestring[1:rulestring.index('b')])
-        bitplanes = 2 if (bitplanes == 3) else len(bin(bitplanes - 3))
-    else:
-        bitplanes = 1
+    bitplanes = rule_property(rulestring, 'bitplanes')
 
     if m is None:
         # Arbitrary rules should use the Universal Leaf Iterator:
