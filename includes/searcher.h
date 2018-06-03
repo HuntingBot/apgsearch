@@ -38,16 +38,19 @@ public:
 
         pat.decache();
         pat.advance(0, 1, duration);
-        std::vector<apg::bitworld> bwv(BITPLANES + 1);
+
 
         #ifdef INCUBATE
         apg::incubator<56, 56> icb;
         apg::copycells(&pat, &icb);
         uint64_t excess[8] = {0};
         icb.purge(excess);
+        std::vector<apg::bitworld> bwv(BITPLANES + 2);
         icb.to_bitworld(bwv[0], 0);
         icb.to_bitworld(bwv[1], 1);
+        icb.to_bitworld(bwv[2], 2);
         #else
+        std::vector<apg::bitworld> bwv(BITPLANES + 1);
         pat.extractPattern(bwv);
         #endif
 
