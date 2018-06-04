@@ -38,13 +38,14 @@ public:
 
         pat.decache();
         pat.advance(0, 1, duration);
-
+        std::map<std::string, int64_t> cm;
 
         #ifdef INCUBATE
         apg::incubator<56, 56> icb;
         apg::copycells(&pat, &icb);
-        uint64_t excess[8] = {0};
-        icb.purge(excess);
+
+        cfier.deeppurge(cm, icb, &classifyAperiodic);
+
         std::vector<apg::bitworld> bwv(BITPLANES + 2);
         icb.to_bitworld(bwv[0], 0);
         icb.to_bitworld(bwv[1], 1);
@@ -54,14 +55,7 @@ public:
         pat.extractPattern(bwv);
         #endif
 
-        std::map<std::string, int64_t> cm = cfier.census(bwv, &classifyAperiodic);
-
-        #ifdef INCUBATE
-        if (excess[3] > 0) { cm["xp2_7"] += excess[3]; }
-        if (excess[4] > 0) { cm["xs4_33"] += excess[4]; }
-        if (excess[5] > 0) { cm["xq4_153"] += excess[5]; }
-        if (excess[6] > 0) { cm["xs6_696"] += excess[6]; }
-        #endif
+        cfier.census(cm, bwv, &classifyAperiodic, true);
 
         bool ignorePathologicals = false;
         int pathologicals = 0;
