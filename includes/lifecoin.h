@@ -95,4 +95,18 @@ std::pair<std::string, std::string> unsign_message(std::vector<unsigned char> &t
 
 }
 
+uint32_t verify_crc32(std::string addr) {
+
+    uint32_t dig32[9];
+    memset(dig32, 0, 36);
+    if (base85decode(dig32, addr, 9) != 9) { return -1; }
+    uint8_t digest[32];
+    std::memcpy(digest, dig32, 32);
+    uint32_t crc = 0;
+    crc32(digest, 32, &crc);
+    
+    return (crc ^ dig32[8]);
+
+}
+
 } // namespace apg

@@ -40,22 +40,22 @@ int main (int argc, char *argv[]) {
     {
     auto tx = apg::sign_message("first_message", "first_password");
     auto ty = apg::unsign_message(tx);
-    std::cout << ty.first << " " << ty.second << std::endl;
+    std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
     }
     {
     auto tx = apg::sign_message("second_message", "first_password");
     auto ty = apg::unsign_message(tx);
-    std::cout << ty.first << " " << ty.second << std::endl;
+    std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
     }
     {
     auto tx = apg::sign_message("third_message", "second_password");
     auto ty = apg::unsign_message(tx);
-    std::cout << ty.first << " " << ty.second << std::endl;
+    std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
     }
     {
     auto tx = apg::sign_message("fourth_message", "second_password");
     auto ty = apg::unsign_message(tx);
-    std::cout << ty.first << " " << ty.second << std::endl;
+    std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
     }
 
     return 0;
