@@ -33,7 +33,32 @@
 #include "includes/verification.h"
 #include "includes/searching.h"
 
+#include "includes/lifecoin.h"
+
 int main (int argc, char *argv[]) {
+
+    {
+    auto tx = apg::sign_message("first_message", "first_password");
+    auto ty = apg::unsign_message(tx);
+    std::cout << ty.first << " " << ty.second << std::endl;
+    }
+    {
+    auto tx = apg::sign_message("second_message", "first_password");
+    auto ty = apg::unsign_message(tx);
+    std::cout << ty.first << " " << ty.second << std::endl;
+    }
+    {
+    auto tx = apg::sign_message("third_message", "second_password");
+    auto ty = apg::unsign_message(tx);
+    std::cout << ty.first << " " << ty.second << std::endl;
+    }
+    {
+    auto tx = apg::sign_message("fourth_message", "second_password");
+    auto ty = apg::unsign_message(tx);
+    std::cout << ty.first << " " << ty.second << std::endl;
+    }
+
+    return 0;
 
     // Default values:
     int soups_per_haul = 10000000;
