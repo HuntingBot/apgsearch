@@ -132,3 +132,21 @@ If you would prefer to have the full capabilities, download a copy of gcc
 and replace g++ with g++-4.2.0 (or whatever your version is) at the
 beginning of the makefile. You may also need to alter an environment
 variable for the terminal to find g++.
+
+Credits and licences
+====================
+
+The software `apgluxe` and `lifelib` are both written by Adam P. Goucher and
+available under an MIT licence. Thanks go to Dave Greene, Tom Rokicki, and
+'Apple Bottom' for contributions, suggestions, testing, and feedback. All
+third-party components are similarly free and open-source:
+
+ - 'CRYSTALS-Dilithium: A Lattice-Based Digital Signature Scheme' is Licensed
+   under Creative Commons License CC-BY 4.0;
+ - The SHA-256 hash function implementation, by Olivier Gay, is available
+   under a BSD 3-clause licence;
+ - The 'RSA Data Security, Inc. MD5 Message-Digest Algorithm' reference
+   implementation can be copied, modified and used under the condition
+   that the copyright notice is included;
+ - The 'HappyHTTP' library, by Ben Campbell, can be copied, modified and
+   used under the condition that the copyright notice is included.
