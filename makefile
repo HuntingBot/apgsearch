@@ -1,4 +1,6 @@
-CC=g++
+CPP_COMPILER=g++
+C_COMPILER=gcc
+LINKER=g++
 
 # Thanks to Andrew Trevorrow for the following routine to handle clang:
 ifeq "$(shell uname)" "Darwin"
@@ -8,18 +10,22 @@ ifeq "$(shell uname)" "Darwin"
         MACOSX_109_OR_LATER=1
     endif
 endif
+
+C_FLAGS=-c -Wall -Wextra -O3 -march=native -fomit-frame-pointer
+
 ifdef MACOSX_109_OR_LATER
     # g++ is really clang++ and there is currently no OpenMP support
-    CFLAGS=-c -Wall -O3 -march=native --std=c++11
+    CPP_FLAGS=-c -Wall -O3 -march=native --std=c++11
 else
     # assume we're using gcc with OpenMP support
-    CFLAGS=-c -Wall -O3 -march=native -fopenmp -DUSE_OPEN_MP --std=c++11
-    LDFLAGS=-fopenmp
+    CPP_FLAGS=-c -Wall -O3 -march=native -fopenmp -DUSE_OPEN_MP --std=c++11
+    LD_FLAGS=-fopenmp
 endif
 
-SOURCES=main.cpp includes/sha256.cpp includes/md5.cpp includes/happyhttp.cpp
+CPP_SOURCES=main.cpp includes/sha256.cpp includes/md5.cpp includes/happyhttp.cpp
+C_SOURCES=dilithium/fips202.c dilithium/packing.c dilithium/polyvec.c dilithium/rounding.c dilithium/ntt.c dilithium/poly.c dilithium/reduce.c dilithium/sign.c
 
-OBJECTS=$(SOURCES:.cpp=.o)
+OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o)
 EXECUTABLE=apgluxe
 
 # Compile:
@@ -39,8 +45,11 @@ clean:
 	echo Clean done
 
 $(EXECUTABLE): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(LINKER) $(LD_FLAGS) $(OBJECTS) -o $@
 
 .cpp.o:
-	$(CC) $(CFLAGS) $< -o $@
+	$(CPP_COMPILER) $(CPP_FLAGS) $< -o $@
+
+.c.o:
+	$(C_COMPILER) $(C_FLAGS) $< -o $@
 
