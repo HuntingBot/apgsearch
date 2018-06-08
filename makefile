@@ -31,10 +31,12 @@ endif
 
 ifdef FULLNODE
     CPP_FLAGS += -lmicrohttpd -DFULLNODE
+    EXECUTABLE="lifecoin-server"
+else
+    EXECUTABLE="apgluxe"
 endif
 
 OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o)
-EXECUTABLE=apgluxe
 
 # Compile:
 all: $(SOURCES) $(EXECUTABLE)

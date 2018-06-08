@@ -40,33 +40,37 @@ bash update-lifelib.sh
 rm -rf "lifelib/avxlife/lifelogic" | true
 
 launch=0
-rulearg=""
-symmarg=""
 
-if [ "$1" = "fullnode" ]; then
-    export FULLNODE=1
+if [ "$1" = "lifecoin" ]; then
+    rulearg="b3s23"
+    symmarg="C1"
     export LIFECOIN=1
-elif [ "$1" = "lifecoin" ]; then
-    export LIFECOIN=1
+    if [ "$2" = "server" ]; then
+        export FULLNODE=1
+        printf "Compiling full \033[32;1mlifecoin-server\033[0m...\n"
+    else
+        printf "Compiling \033[32;1mapgluxe\033[0m with lifecoin support...\n"
+    fi
 else
+    printf "Compiling \033[32;1mapgluxe\033[0m without lifecoin support...\n"
     rulearg=`echo "$@" | grep -o "\\-\\-rule [a-z0-9-]*" | sed "s/\\-\\-rule\\ //"`
     symmarg=`echo "$@" | grep -o "\\-\\-symmetry [a-zA-Z0-9_+]*" | sed "s/\\-\\-symmetry\\ //"`
-fi
 
-if ((${#rulearg} == 0))
-then
-rulearg="b3s23"
-echo "Rule unspecified; assuming b3s23."
-else
-launch=1
-fi
+    if ((${#rulearg} == 0))
+    then
+    rulearg="b3s23"
+    echo "Rule unspecified; assuming b3s23."
+    else
+    launch=1
+    fi
 
-if ((${#symmarg} == 0))
-then
-symmarg="C1"
-echo "Symmetry unspecified; assuming C1."
-else
-launch=1
+    if ((${#symmarg} == 0))
+    then
+    symmarg="C1"
+    echo "Symmetry unspecified; assuming C1."
+    else
+    launch=1
+    fi
 fi
 
 echo "Configuring rule $rulearg; symmetry $symmarg"
