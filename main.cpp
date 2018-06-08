@@ -33,32 +33,40 @@
 #include "includes/verification.h"
 #include "includes/searching.h"
 
+#ifdef LIFECOIN
 #include "includes/lifecoin.h"
+#endif
 
 int main (int argc, char *argv[]) {
 
+    /*
     {
     auto tx = apg::sign_message("first_message", "first_password");
+    std::cout << "Signed transaction length: " << tx.size() << std::endl;
     auto ty = apg::unsign_message(tx);
     std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
     }
     {
     auto tx = apg::sign_message("second_message", "first_password");
+    std::cout << "Signed transaction length: " << tx.size() << std::endl;
     auto ty = apg::unsign_message(tx);
     std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
     }
     {
     auto tx = apg::sign_message("third_message", "second_password");
+    std::cout << "Signed transaction length: " << tx.size() << std::endl;
     auto ty = apg::unsign_message(tx);
     std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
     }
     {
     auto tx = apg::sign_message("fourth_message", "second_password");
+    std::cout << "Signed transaction length: " << tx.size() << std::endl;
     auto ty = apg::unsign_message(tx);
     std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
     }
 
     return 0;
+    */
 
     // Default values:
     int soups_per_haul = 10000000;

@@ -23,7 +23,15 @@ else
 endif
 
 CPP_SOURCES=main.cpp includes/sha256.cpp includes/md5.cpp includes/happyhttp.cpp
-C_SOURCES=dilithium/fips202.c dilithium/packing.c dilithium/polyvec.c dilithium/rounding.c dilithium/ntt.c dilithium/poly.c dilithium/reduce.c dilithium/sign.c
+
+ifdef LIFECOIN
+    C_SOURCES=dilithium/fips202.c dilithium/packing.c dilithium/polyvec.c dilithium/rounding.c dilithium/ntt.c dilithium/poly.c dilithium/reduce.c dilithium/sign.c
+    CPP_FLAGS += -DLIFECOIN
+endif
+
+ifdef FULLNODE
+    CPP_FLAGS += -lmicrohttpd -DFULLNODE
+endif
 
 OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o)
 EXECUTABLE=apgluxe
@@ -41,7 +49,7 @@ all: $(SOURCES) $(EXECUTABLE)
 
 # Clean the build environment by deleting any object files:
 clean: 
-	rm -f $(OBJECTS)
+	rm -f includes/*.o dilithium/*.o *.o
 	echo Clean done
 
 $(EXECUTABLE): $(OBJECTS) 

@@ -10,8 +10,8 @@ rm -f "main.o" | true
 # Ensures compilation will fail unless rule2asm succeeds:
 rm -f "includes/params.h" | true
 
-rulearg=`echo "$@" | grep -o "\\-\\-rule [a-z0-9-]*" | sed "s/\\-\\-rule\\ //"`
-symmarg=`echo "$@" | grep -o "\\-\\-symmetry [a-zA-Z0-9_+]*" | sed "s/\\-\\-symmetry\\ //"`
+# --------------------------------
+
 updatearg=`echo "$@" | grep -o "\\-\\-update" | sed "s/\\-\\-update/u/"`
 
 if ((${#updatearg} != 0))
@@ -33,11 +33,25 @@ else
 echo "Skipping updates; use --update to update apgluxe automatically."
 fi
 
+# --------------------------------
+
 # Ensure lifelib matches the version in the repository:
 bash update-lifelib.sh
 rm -rf "lifelib/avxlife/lifelogic" | true
 
 launch=0
+rulearg=""
+symmarg=""
+
+if [ "$1" = "fullnode" ]; then
+    export FULLNODE=1
+    export LIFECOIN=1
+elif [ "$1" = "lifecoin" ]; then
+    export LIFECOIN=1
+else
+    rulearg=`echo "$@" | grep -o "\\-\\-rule [a-z0-9-]*" | sed "s/\\-\\-rule\\ //"`
+    symmarg=`echo "$@" | grep -o "\\-\\-symmetry [a-zA-Z0-9_+]*" | sed "s/\\-\\-symmetry\\ //"`
+fi
 
 if ((${#rulearg} == 0))
 then
