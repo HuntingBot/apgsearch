@@ -1,4 +1,8 @@
 #pragma once
+#include <string>
+#include <sstream>
+#include <fstream>
+#include <iostream>
 
 /*
  * This contains everything necessary for performing a soup search.
@@ -9,6 +13,8 @@ public:
 
     std::map<std::string, long long> census;
     std::map<std::string, std::vector<std::string> > alloccur;
+
+    std::map<std::string, int64_t> difficulties;
 
     void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
@@ -34,7 +40,46 @@ public:
         }
     }
 
-    bool separate(UPATTERN &pat, int duration, bool proceedNonetheless, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
+    void load_difficulties(std::istream &instream) {
+
+        std::string line = "";
+        while (std::getline(instream, line)) {
+            if (line.empty()) {
+                continue;
+            } else if (line[0] == '#') {
+                continue;
+            } else {
+                std::stringstream s(line);
+                int64_t x = 0;
+                std::string apgcode = "";
+                s >> x >> apgcode;
+                difficulties[apgcode] = x;
+            }
+        }
+    }
+
+    int64_t get_difficulty(std::string apgcode) {
+
+        if (difficulties.size() == 0) {
+            std::ifstream f("includes/lcdiff.txt");
+            load_difficulties(f);
+        }
+
+        auto it = difficulties.find(apgcode);
+        if (it == difficulties.end()) {
+            auto x = apgcode.find('_');
+            if (x == std::string::npos) {
+                return 1000000000000000000ull;
+            } else {
+                return get_difficulty(apgcode.substr(0, x));
+            }
+        } else {
+            return it->second;
+        }
+
+    }
+
+    int64_t separate(UPATTERN &pat, int duration, bool proceedNonetheless, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
 
         pat.decache();
         pat.advance(0, 1, duration);
@@ -72,9 +117,11 @@ public:
             if (proceedNonetheless) {
                 if (ignorePathologicals == false) { std::cout << "Pathological object detected!!!" << std::endl; }
             } else {
-                return true;
+                return -1;
             }
         }
+
+        int64_t max_difficulty = 0;
 
         for (auto it = cm.begin(); it != cm.end(); ++it) {
             std::string apgcode = it->first;
@@ -88,6 +135,14 @@ public:
             }
 
             #ifdef STANDARD_LIFE
+
+            #ifdef LIFECOIN
+            if ((apgcode[0] == 'y') || ((apgcode[0] == 'x') && (apgcode[1] != 's'))) {
+                int64_t difficulty = get_difficulty(apgcode);
+                if (difficulty > max_difficulty) { max_difficulty = difficulty; }
+            }
+            #endif
+
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
                 if ((apgcode[2] != '2') || (apgcode[3] != '_')) {
                     if (apgcode.compare("xp3_co9nas0san9oczgoldlo0oldlogz1047210127401") != 0 && apgcode.compare("xp15_4r4z4r4") != 0) {
@@ -114,11 +169,12 @@ public:
 
 
         }
-        return false;
+
+        return max_difficulty;
 
     }
 
-    void censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
+    int64_t censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
 
         apg::bitworld bw = apg::hashsoup(seedroot + suffix, SYMMETRY);
         std::vector<apg::bitworld> vbw;
@@ -130,6 +186,7 @@ public:
 
         bool failure = true;
         int attempt = 0;
+        int64_t max_difficulty = 0;
 
         // Repeat until there are no pathological objects, or until five attempts have elapsed:
         while (failure) {
@@ -138,7 +195,8 @@ public:
 
             if (pat.nonempty()) {
 
-                failure = separate(pat, duration, (attempt >= 5), cfier, suffix);
+                max_difficulty = separate(pat, duration, (attempt >= 5), cfier, suffix);
+                failure = (max_difficulty == -1);
 
             }
 
@@ -151,6 +209,8 @@ public:
                 duration = 4000;
             }
         }
+
+        return max_difficulty;
     }
 
 

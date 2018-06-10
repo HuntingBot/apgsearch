@@ -150,6 +150,18 @@ int main (int argc, char *argv[]) {
 
     std::cout << std::endl;
 
+
+    #ifdef LIFECOIN
+
+    {
+    SoupSearcher soup;
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
+    apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
+    std::cout << "Coe ship difficulty: " << soup.censusSoup("n_CvtBYspKyzAx19112245", "", cfier) << std::endl;
+    }
+
+    #endif
+
     while (!quitByUser) {
         if (verifications > 0) {
             std::cout << "Peer-reviewing hauls:\n" << std::endl;
