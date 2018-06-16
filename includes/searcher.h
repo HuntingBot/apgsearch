@@ -40,29 +40,16 @@ public:
         }
     }
 
-    void load_difficulties(std::istream &instream) {
+    void load_difficulties() {
 
-        std::string line = "";
-        while (std::getline(instream, line)) {
-            if (line.empty()) {
-                continue;
-            } else if (line[0] == '#') {
-                continue;
-            } else {
-                std::stringstream s(line);
-                int64_t x = 0;
-                std::string apgcode = "";
-                s >> x >> apgcode;
-                difficulties[apgcode] = x;
-            }
-        }
+        #include "difficulties.inc"
+
     }
 
     int64_t get_difficulty(std::string apgcode) {
 
         if (difficulties.size() == 0) {
-            std::ifstream f("includes/lcdiff.txt");
-            load_difficulties(f);
+            load_difficulties();
         }
 
         auto it = difficulties.find(apgcode);
