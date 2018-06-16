@@ -33,7 +33,11 @@ ifdef FULLNODE
     CPP_FLAGS += -lmicrohttpd -DFULLNODE
     EXECUTABLE="lifecoin-server"
 else
+ifdef LIFECOIN
+    EXECUTABLE="lifecoin"
+else
     EXECUTABLE="apgluxe"
+endif
 endif
 
 OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o)

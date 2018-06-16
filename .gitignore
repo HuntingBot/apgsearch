@@ -1,4 +1,5 @@
 **/*.o
 apgluxe
+lifecoin
 lifecoin-server
 includes/params.h

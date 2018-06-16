@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <iostream>
 #include <utility>
 
 #include "sha256.h"
@@ -68,12 +69,40 @@ std::string pubkey2addr(const unsigned char* pkbytes) {
     std::memcpy(dig32, digest, 32);
     crc32(digest, 32, dig32 + 8);
 
-    std::string address = "";
+    std::string address = "'";
     for (int i = 0; i < 9; i++) {
         address += base85encode(dig32[i]);
     }
+    address += "'";
 
     return address;
+}
+
+std::string password2addr(const std::string &password) {
+
+    unsigned char sk[CRYPTO_SECRETKEYBYTES];
+    unsigned char pk[CRYPTO_PUBLICKEYBYTES];
+
+    uint8_t digest[32];
+    memset(digest, 0, 32);
+
+    SHA256 ctx = SHA256();
+    ctx.init();
+    ctx.update( (unsigned char*) password.c_str(), password.length());
+    ctx.final(digest);
+
+    crypto_sign_keypair(digest, pk, sk);
+    std::string address = pubkey2addr(pk);
+
+    return address;
+
+}
+
+void addrgen() {
+    std::string password;
+    while (std::getline(std::cin, password)) {
+        std::cout << password2addr(password) << std::endl;
+    }
 }
 
 std::pair<std::string, std::string> unsign_message(std::vector<unsigned char> &tx) {
@@ -97,9 +126,15 @@ std::pair<std::string, std::string> unsign_message(std::vector<unsigned char> &t
 
 uint32_t verify_crc32(std::string addr) {
 
+    std::string address = addr;
+
+    if ((address.length()) && (address[0] == 0x27)) {
+        address = address.substr(1);
+    }
+
     uint32_t dig32[9];
     memset(dig32, 0, 36);
-    if (base85decode(dig32, addr, 9) != 9) { return -1; }
+    if (base85decode(dig32, address, 9) != 9) { return -1; }
     uint8_t digest[32];
     std::memcpy(digest, dig32, 32);
     uint32_t crc = 0;

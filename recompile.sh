@@ -47,10 +47,11 @@ if [ "$1" = "lifecoin" ]; then
     export LIFECOIN=1
     if [ "$2" = "server" ]; then
         export FULLNODE=1
-        printf "Compiling full \033[32;1mlifecoin-server\033[0m...\n"
+        printf "Compiling full \033[32;1mlifecoin-server\033[0m executable...\n"
     else
-        printf "Compiling \033[32;1mapgluxe\033[0m with lifecoin support...\n"
+        printf "Compiling lightweight \033[32;1mlifecoin\033[0m executable...\n"
     fi
+    launch=2
 else
     printf "Compiling \033[32;1mapgluxe\033[0m without lifecoin support...\n"
     rulearg=`echo "$@" | grep -o "\\-\\-rule [a-z0-9-]*" | sed "s/\\-\\-rule\\ //"`
@@ -82,7 +83,8 @@ make
 if (($launch == 1))
 then
 ./apgluxe "$@"
-else
+elif (($launch == 0))
+then
 ./apgluxe --rule $rulearg --symmetry $symmarg
 fi
 
