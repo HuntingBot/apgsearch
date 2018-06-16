@@ -46,16 +46,23 @@ public:
 
         cfier.deeppurge(cm, icb, &classifyAperiodic);
 
-        std::vector<apg::bitworld> bwv(BITPLANES + 2);
-        icb.to_bitworld(bwv[0], 0);
-        icb.to_bitworld(bwv[1], 1);
-        icb.to_bitworld(bwv[2], 2);
+        // std::vector<apg::bitworld> bwv(BITPLANES + 2);
+        // icb.to_bitworld(bwv[0], 0);
+        // icb.to_bitworld(bwv[1], 1);
+
+        apg::bitworld bwv0;
+        icb.to_bitworld(bwv0, 0);
+        int64_t n_gliders = bwv0.population() / 5;
+        if (n_gliders > 0) {
+            cm["xq4_153"] += n_gliders;
+        }
+
         #else
         std::vector<apg::bitworld> bwv(BITPLANES + 1);
         pat.extractPattern(bwv);
+        cfier.census(cm, bwv, &classifyAperiodic, true);
         #endif
 
-        cfier.census(cm, bwv, &classifyAperiodic, true);
 
         bool ignorePathologicals = false;
         int pathologicals = 0;
