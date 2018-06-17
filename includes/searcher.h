@@ -3,6 +3,8 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <utility>
+#include <set>
 
 /*
  * This contains everything necessary for performing a soup search.
@@ -62,6 +64,32 @@ public:
             }
         } else {
             return it->second;
+        }
+
+    }
+
+    void set_difficulties(std::string standard, std::map<std::string, int64_t> &occ) {
+        /*
+        * Update difficulty estimates based upon initial segment of blockchain
+        * objects. This only affects the difficulties of objects in such a way
+        * that it cannot invalidate existing blocks.
+        */
+
+        std::set<std::pair<int64_t, std::string> > nocc;
+        int64_t totobj = 0;
+        for (auto it = occ.begin(); it != occ.end(); ++it) {
+            if (get_difficulty(it->first) > difficulties[standard]) {
+                nocc.emplace(it->second, it->first);
+                totobj += it->second;
+            }
+        }
+
+        totobj += occ[standard];
+
+        int64_t cumobj = 0;
+        for (auto it = nocc.begin(); it != nocc.end(); ++it) {
+            cumobj += it->first;
+            difficulties[it->second] = (difficulties[standard] * totobj) / cumobj;
         }
 
     }
