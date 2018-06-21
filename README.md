@@ -143,6 +143,8 @@ third-party components are similarly free and open-source:
 
  - 'CRYSTALS-Dilithium: A Lattice-Based Digital Signature Scheme' is Licensed
    under Creative Commons License CC-BY 4.0;
+ - The SHA3 (Keccak) hash function implementation, by Dr. Markku-Juhani O.
+   Saarinen, is available under an MIT licence;
  - The SHA-256 hash function implementation, by Olivier Gay, is available
    under a BSD 3-clause licence;
  - The 'RSA Data Security, Inc. MD5 Message-Digest Algorithm' reference
