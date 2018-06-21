@@ -98,7 +98,7 @@ bool parallelSearch(int n, int m, std::string payoshaKey, std::string seed, int 
 bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
 
     SoupSearcher soup;
-    apg::lifetree<uint32_t, BITPLANES> lt(400);
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
     clock_t start = clock();
