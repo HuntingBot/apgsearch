@@ -41,6 +41,8 @@
 
 #ifdef LIFECOIN
 
+#include "coincludes/entrypoint.h"
+
 #else
 
 int main(int argc, char* argv[]) {

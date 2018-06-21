@@ -5,7 +5,7 @@
 #include <iostream>
 #include <utility>
 
-#include "sha256.h"
+#include "../includes/sha256.h"
 extern "C"
 {
 #include "../dilithium/api.h"
@@ -53,29 +53,46 @@ namespace apg {
         *crc = table[(uint8_t)* crc ^ data[i]] ^ *crc >> 8;
     }
 
-    std::string pubkey2addr(const unsigned char* pkbytes) {
+    std::string sha288encode(const unsigned char* data, size_t nbytes) {
+        /*
+        * Produces a SHA-256 hash, appends a CRC-32 checksum, and converts
+        * the resulting 36 bytes into a 48-character URL-safe representation.
+        */
 
         uint32_t dig32[9];
-        uint8_t digest[32];
+        uint8_t digest[36];
         memset(digest, 0, 32);
 
         SHA256 ctx = SHA256();
         ctx.init();
-        ctx.update(pkbytes, CRYPTO_PUBLICKEYBYTES);
+        ctx.update(data, nbytes);
         ctx.final(digest);
 
         memset(dig32, 0, 36);
 
         std::memcpy(dig32, digest, 32);
         crc32(digest, 32, dig32 + 8);
+        std::memcpy(digest, dig32, 36);
 
-        std::string address = "'";
-        for (int i = 0; i < 9; i++) {
-            address += base85encode(dig32[i]);
+        std::string x = "";
+
+        for (int i = 0; i < 36; i += 3) {
+            uint64_t a = 0;
+            a += digest[i+2]; a <<= 8;
+            a += digest[i+1]; a <<= 8;
+            a += digest[i+0];
+            for (int j = 0; j < 4; j++) {
+                x += "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-"[a & 63];
+                a >>= 6;
+            }
         }
-        address += "'";
 
-        return address;
+        return x;
+    }
+
+    std::string pubkey2addr(const unsigned char* pkbytes) {
+
+        return sha288encode(pkbytes, CRYPTO_PUBLICKEYBYTES);
     }
 
     std::string password2addr(const std::string &password) {
@@ -117,26 +134,43 @@ namespace apg {
 
     }
 
-    uint32_t verify_crc32(std::string addr, uint32_t *binaddr) {
+    uint32_t verify_crc32(std::string address, uint8_t *binaddr) {
 
-        std::string address = addr;
+        if (address.length() != 48) { return -1; }
+        uint8_t digest[36];
 
-        if ((address.length()) && (address[0] == 0x27)) {
-            address = address.substr(1);
+        for (int i = 0; i < 12; i++) {
+            uint32_t a = 0;
+            for (int j = 4*i+3; j >= 4*i; j--) {
+                char c = address[j];
+                a <<= 6;
+                if ((c >= '0') && (c <= '9')) {
+                    a += ((c - '0') + 0);
+                } else if ((c >= 'a') && (c <= 'z')) {
+                    a += ((c - 'a') + 10);
+                } else if ((c >= 'A') && (c <= 'Z')) {
+                    a += ((c - 'A') + 36);
+                } else if (c == '_') {
+                    a += 62;
+                } else if (c == '-') {
+                    a += 63;
+                }
+            }
+            digest[3*i]   = (a & 255);
+            digest[3*i+1] = ((a >> 8) & 255);
+            digest[3*i+2] = ((a >> 16) & 255);
         }
 
-        uint32_t dig32[9];
-        memset(dig32, 0, 36);
-        if (base85decode(dig32, address, 9) != 9) { return -1; }
-        uint8_t digest[32];
-        std::memcpy(digest, dig32, 32);
         uint32_t crc = 0;
+        uint32_t crc2 = 0;
+        std::memcpy(&crc2, digest + 32, 4);
+
         crc32(digest, 32, &crc);
         
-        uint32_t check = (crc ^ dig32[8]);
+        uint32_t check = (crc ^ crc2);
 
         if ((check == 0) && (binaddr != 0)) {
-            std::memcpy(binaddr, dig32, 36);
+            std::memcpy(binaddr, digest, 32);
         }
 
         return check;
