@@ -25,7 +25,7 @@ endif
 CPP_SOURCES=main.cpp includes/sha256.cpp includes/md5.cpp includes/happyhttp.cpp
 
 ifdef LIFECOIN
-    C_SOURCES=dilithium/fips202.c dilithium/packing.c dilithium/polyvec.c dilithium/rounding.c dilithium/ntt.c dilithium/poly.c dilithium/reduce.c dilithium/sign.c
+    C_SOURCES=dilithium/fips202.c dilithium/packing.c dilithium/polyvec.c dilithium/rounding.c dilithium/ntt.c dilithium/poly.c dilithium/reduce.c dilithium/sign.c coincludes/sha3/sha3.c
     CPP_FLAGS += -DLIFECOIN
 endif
 
@@ -55,7 +55,7 @@ all: $(SOURCES) $(EXECUTABLE)
 
 # Clean the build environment by deleting any object files:
 clean: 
-	rm -f includes/*.o dilithium/*.o *.o
+	rm -f includes/*.o dilithium/*.o coincludes/sha3/*.o *.o
 	echo Clean done
 
 $(EXECUTABLE): $(OBJECTS) 

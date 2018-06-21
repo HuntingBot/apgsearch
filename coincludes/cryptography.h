@@ -8,6 +8,7 @@
 #include "../includes/sha256.h"
 extern "C"
 {
+#include "sha3/sha3.h"
 #include "../dilithium/api.h"
 }
 
@@ -105,9 +106,9 @@ namespace apg {
         uint32_t dig32[9];
         memset(dig32, 0, 36);
         std::memcpy(dig32, data, 32);
+        crc32(data, 32, dig32 + 8);
 
         uint8_t digest[36];
-        crc32(digest, 32, dig32 + 8);
         std::memcpy(digest, dig32, 36);
 
         std::string x = "";
@@ -128,21 +129,24 @@ namespace apg {
 
     std::string sha288encode(const unsigned char* data, size_t nbytes) {
         /*
-        * Produces a SHA-256 hash, appends a CRC-32 checksum, and converts
+        * Produces a SHA3-256 hash, appends a CRC-32 checksum, and converts
         * the resulting 36 bytes into a 48-character URL-safe representation.
         *
-        * Note: this only offers the same security level as SHA-256; the
+        * Note: this only offers the same security level as SHA3-256; the
         * extra 32 bits function simply to ensure the hash has not been
         * mistyped.
         */
 
-        uint8_t digest[36];
+        uint8_t digest[32];
         memset(digest, 0, 32);
+        sha3((void*) data, nbytes, (void*) digest, 32);
 
+        /*
         SHA256 ctx = SHA256();
         ctx.init();
         ctx.update(data, nbytes);
         ctx.final(digest);
+        */
 
         return human_readable(digest);
     }
