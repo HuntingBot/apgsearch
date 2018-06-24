@@ -25,6 +25,7 @@ then
 printf "\033[0m...your copy of apgluxe does not match the repository.\n"
 echo "New version: $newversion"
 echo "Old version: $oldversion"
+bash update-lifelib.sh
 git pull
 else
 printf "\033[0m...your copy of apgluxe is already up-to-date.\n"
