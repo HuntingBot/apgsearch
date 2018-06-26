@@ -34,11 +34,15 @@ public:
         }
     }
 
-    bool separate(UPATTERN &pat, int duration, bool proceedNonetheless, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
+    bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
+
+        bool proceedNonetheless = (attempt >= 5);
 
         pat.decache();
         pat.advance(0, 1, duration);
         std::map<std::string, int64_t> cm;
+
+        cfier.gmax = (1024 << (attempt * 2));
 
         #ifdef INCUBATE
         apg::incubator<56, 56> icb;
@@ -62,6 +66,8 @@ public:
         pat.extractPattern(bwv);
         cfier.census(cm, bwv, &classifyAperiodic, true);
         #endif
+
+        cfier.gmax = 1048576;
 
 
         bool ignorePathologicals = false;
@@ -145,7 +151,7 @@ public:
 
             if (pat.nonempty()) {
 
-                failure = separate(pat, duration, (attempt >= 5), cfier, suffix);
+                failure = separate(pat, duration, attempt, cfier, suffix);
 
             }
 
