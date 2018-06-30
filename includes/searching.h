@@ -97,6 +97,14 @@ bool parallelSearch(int n, int m, std::string payoshaKey, std::string seed, int 
 
 bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
 
+    struct termios ttystate;
+
+    // turn on non-blocking reads
+    tcgetattr(STDIN_FILENO, &ttystate);
+    ttystate.c_lflag &= ~ICANON;
+    ttystate.c_cc[VMIN] = 1;
+    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+
     SoupSearcher soup;
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
@@ -166,6 +174,11 @@ bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, b
 
     }
     
+    // turn on blocking reads
+    tcgetattr(STDIN_FILENO, &ttystate);
+    ttystate.c_lflag |= ICANON;
+    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+
     return quitByUser;
 
 }
