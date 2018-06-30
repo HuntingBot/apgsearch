@@ -1,35 +1,6 @@
 
 int run_apgluxe(int argc, char *argv[]) {
 
-    /*
-    {
-    auto tx = apg::sign_message("first_message", "first_password");
-    std::cout << "Signed transaction length: " << tx.size() << std::endl;
-    auto ty = apg::unsign_message(tx);
-    std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
-    }
-    {
-    auto tx = apg::sign_message("second_message", "first_password");
-    std::cout << "Signed transaction length: " << tx.size() << std::endl;
-    auto ty = apg::unsign_message(tx);
-    std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
-    }
-    {
-    auto tx = apg::sign_message("third_message", "second_password");
-    std::cout << "Signed transaction length: " << tx.size() << std::endl;
-    auto ty = apg::unsign_message(tx);
-    std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
-    }
-    {
-    auto tx = apg::sign_message("fourth_message", "second_password");
-    std::cout << "Signed transaction length: " << tx.size() << std::endl;
-    auto ty = apg::unsign_message(tx);
-    std::cout << ty.first << " " << ty.second << " " << apg::verify_crc32(ty.second) << std::endl;
-    }
-
-    return 0;
-    */
-
     // Default values:
     int soups_per_haul = 10000000;
     std::string payoshaKey = "#anon";
@@ -40,7 +11,6 @@ int run_apgluxe(int argc, char *argv[]) {
     bool testing = false;
     int nullargs = 1;
     bool quitByUser = false;
-    struct termios ttystate;
     
     // Extract options:
     for (int i = 1; i < argc - 1; i++) {
@@ -96,12 +66,6 @@ int run_apgluxe(int argc, char *argv[]) {
         verifications = (parallelisation <= 4) ? 3 : 0;
     }
     
-    // turn on non-blocking reads
-    tcgetattr(STDIN_FILENO, &ttystate);
-    ttystate.c_lflag &= ~ICANON;
-    ttystate.c_cc[VMIN] = 1;
-    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
-
     std::cout << "\nGreetings, this is \033[1;33mapgluxe " << APG_VERSION;
     std::cout << "\033[0m, configured for \033[1;34m" << RULESTRING << "/";
     std::cout << SYMMETRY << "\033[0m.\n" << std::endl;
@@ -150,11 +114,6 @@ int run_apgluxe(int argc, char *argv[]) {
 
         if (testing) { break; }
     }
-
-    // turn on blocking reads
-    tcgetattr(STDIN_FILENO, &ttystate);
-    ttystate.c_lflag |= ICANON;
-    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
 
     return quitByUser ? 1 : 0;
 }
