@@ -127,6 +127,22 @@ namespace apg {
         return x;
     }
 
+    void hashpair(const unsigned char* data, size_t nbytes, uint8_t* output) {
+        /*
+        * Produce a 64-byte hash by concatenating a SHA2-256 and a SHA3-256
+        * of the input data. As Keccak and the Merkle-Damgard construction
+        * are very dissimilar, it is doubly unlikely that someone could
+        * perform a second-preimage attack on both hashes simultaneously.
+        */
+
+        memset(output, 0, 64);
+        SHA256 ctx = SHA256();
+        ctx.init();
+        ctx.update(data, nbytes);
+        ctx.final(output);
+        sha3((void*) data, nbytes, (void*) (output + 32), 32);
+    }
+
     std::string sha288encode(const unsigned char* data, size_t nbytes) {
         /*
         * Produces a SHA3-256 hash, appends a CRC-32 checksum, and converts
@@ -140,13 +156,6 @@ namespace apg {
         uint8_t digest[32];
         memset(digest, 0, 32);
         sha3((void*) data, nbytes, (void*) digest, 32);
-
-        /*
-        SHA256 ctx = SHA256();
-        ctx.init();
-        ctx.update(data, nbytes);
-        ctx.final(digest);
-        */
 
         return human_readable(digest);
     }
