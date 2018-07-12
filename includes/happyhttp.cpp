@@ -28,34 +28,32 @@
 #include "happyhttp.h"
 
 #ifndef _WIN32
-//	#include <sys/types.h>
-        #include <strings.h>
-	#include <sys/select.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <netdb.h>	// for gethostbyname()
-	#include <errno.h>
-	#include <unistd.h>
+    #include <strings.h>
+    #include <sys/select.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+    #include <netdb.h>	// for gethostbyname()
+    #include <errno.h>
+    #include <unistd.h>
 #else
-	#include <WinSock2.h>
-	#define vsnprintf _vsnprintf
+    #include <WinSock2.h>
+    #include <ws2tcpip.h>
+    #define vsnprintf _vsnprintf
 #endif
 
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <cstdarg>
 #include <assert.h>
 
-#include <iostream>
-
 #include <string>
 #include <vector>
-#include <string>
 #include <algorithm>
 
 #ifndef _WIN32
-	#define _stricmp strcasecmp
+    #define _stricmp strcasecmp
 #endif
 
 
@@ -174,23 +172,19 @@ bool datawaiting( int sock )
 		return false;
 }
 
-
 // Try to work out address from string
 // returns 0 if bad
 struct in_addr *atoaddr( const char* address)
 {
-
 	struct hostent *host;
 	static struct in_addr saddr;
 
 	// First try nnn.nnn.nnn.nnn form
 	saddr.s_addr = inet_addr(address);
-	unsigned int inaddr_none = -1;
-	if (saddr.s_addr != inaddr_none)
+	if (saddr.s_addr != INADDR_NONE)
 		return &saddr;
 
 	host = gethostbyname(address);
-
 	if( host )
 		return (struct in_addr *) *host->h_addr_list;
 
@@ -260,13 +254,9 @@ void Connection::setcallbacks(
 
 void Connection::connect()
 {
-
 	in_addr* addr = atoaddr( m_Host.c_str() );
-
-	if( !addr ) {
+	if( !addr )
 		throw Wobbly( "Invalid network address" );
-
-        }
 
 	sockaddr_in address;
 	memset( (char*)&address, 0, sizeof(address) );
@@ -282,7 +272,6 @@ void Connection::connect()
 
 	if( ::connect( m_Sock, (sockaddr const*)&address, sizeof(address) ) < 0 )
 		BailOnSocketError( "connect()" );
-
 }
 
 
@@ -329,7 +318,9 @@ void Connection::request( const char* method,
 		while( *h )
 		{
 			const char* name = *h++;
+#ifndef NDEBUG
 			const char* value = *h++;
+#endif
 			assert( value != 0 );	// name with no value!
 
 			if( 0==_stricmp( name, "content-length" ) )
@@ -369,8 +360,10 @@ void Connection::putrequest( const char* method, const char* url )
 
 	m_State = REQ_STARTED;
 
-	char req[ 512 ];
-	sprintf( req, "%s %s HTTP/1.1", method, url );
+	std::string req = method;
+	req.append(" ");
+	req.append(url);
+	req.append(" HTTP/1.1");
 	m_Buffer.push_back( req );
 
 	putheader( "Host", m_Host.c_str() );	// required for HTTP1.1
