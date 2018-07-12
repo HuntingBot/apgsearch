@@ -3,52 +3,13 @@
 #include <string>
 #include <iostream>
 
-#include "happyhttp.h"
 #include "sha256.h"
-
-class ProcessedResponse {
-public:
-    int m_Status;           // Status-Code
-    std::string m_Reason;   // Reason-Phrase
-    int length;             // String length (in bytes)
-    bool completed;         // Indicates whether successful
-    std::stringstream contents;
-
-    ProcessedResponse() {
-        length = 0;
-        m_Status = 0;
-        completed = false;
-    }
-};
+#include "webclient.h"
 
 int __catagolue_retries = 0;
 const char* __possible_catagolues[] = {"catagolue.appspot.com", "gol.hatsya.co.uk"};
 #define CATAGOLUE_NAME __possible_catagolues[__catagolue_retries % 2]
 #define INCREMENT_CATAGOLUE __catagolue_retries += 1
-
-void OnBegin( const happyhttp::Response* r, void* userdata )
-{
-    ProcessedResponse* presp = static_cast<ProcessedResponse*>(userdata);
-
-    presp->m_Status = r->getstatus();
-    presp->m_Reason = r->getreason();
-    presp->length = 0;
-}
-
-void OnData( const happyhttp::Response* r, void* userdata, const unsigned char* data, int n )
-{
-    ProcessedResponse* presp = static_cast<ProcessedResponse*>(userdata);
-    for (int i = 0; i < n; i++)
-        presp->contents << data[i];
-    presp->length += n;
-}
-
-void OnComplete( const happyhttp::Response* r, void* userdata )
-{
-    ProcessedResponse* presp = static_cast<ProcessedResponse*>(userdata);
-    presp->completed = true;
-    // std::cout << "Response completed (" << presp->length << " bytes): " << presp->m_Status << " " << presp->m_Reason << std::endl;
-}
 
 void increment_catagolue() {
 
