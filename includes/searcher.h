@@ -48,6 +48,8 @@ public:
 
     }
 
+    const static int64_t max_difficulty = 1000000000000000000ull;
+
     int64_t get_difficulty(std::string apgcode) {
 
         if (difficulties.size() == 0) {
@@ -58,7 +60,13 @@ public:
         if (it == difficulties.end()) {
             auto x = apgcode.find('_');
             if (x == std::string::npos) {
-                return 1000000000000000000ull;
+                if (apgcode.substr(0, 2) == "yl") {
+                    uint64_t period = std::stoll(apgcode.substr(2));
+                    if ((period == 144) || (period % 96 == 0)) {
+                        return 4000000;
+                    }
+                }
+                return max_difficulty;
             } else {
                 return get_difficulty(apgcode.substr(0, x));
             }
@@ -89,7 +97,9 @@ public:
         int64_t cumobj = 0;
         for (auto it = nocc.begin(); it != nocc.end(); ++it) {
             cumobj += it->first;
-            difficulties[it->second] = (difficulties[standard] * totobj) / cumobj;
+            if ((difficulties.find(it->second) != difficulties.end()) || (get_difficulty(it->second) == max_difficulty)) {
+                difficulties[it->second] = (difficulties[standard] * totobj) / cumobj;
+            }
         }
 
     }
