@@ -14,11 +14,13 @@ extern "C"
 
 namespace apg {
 
-    std::vector<unsigned char> sign_message(const std::string &message, const std::string &password) {
+    typedef std::vector<uint8_t> bytevec;
+
+    bytevec sign_message(const bytevec &message, const bytevec &password) {
 
         unsigned long long smlen;
 
-        std::vector<unsigned char> tx(CRYPTO_PUBLICKEYBYTES + message.length() + CRYPTO_BYTES);
+        bytevec tx(CRYPTO_PUBLICKEYBYTES + message.size() + CRYPTO_BYTES);
         unsigned char sk[CRYPTO_SECRETKEYBYTES];
 
         uint8_t digest[32];
@@ -26,11 +28,11 @@ namespace apg {
 
         SHA256 ctx = SHA256();
         ctx.init();
-        ctx.update( (unsigned char*) password.c_str(), password.length());
+        ctx.update(password.data(), password.size());
         ctx.final(digest);
 
         crypto_sign_keypair(digest, &tx[0], sk);
-        crypto_sign(&tx[CRYPTO_PUBLICKEYBYTES], &smlen, (unsigned char*) message.c_str(), message.length(), sk);
+        crypto_sign(&tx[CRYPTO_PUBLICKEYBYTES], &smlen, message.data(), message.size(), sk);
         tx.resize(CRYPTO_PUBLICKEYBYTES + smlen);
 
         return tx;
@@ -165,7 +167,7 @@ namespace apg {
         return sha288encode(pkbytes, CRYPTO_PUBLICKEYBYTES);
     }
 
-    std::string password2addr(const std::string &password) {
+    std::string password2addr(const uint8_t *password_data, const size_t password_length) {
 
         unsigned char sk[CRYPTO_SECRETKEYBYTES];
         unsigned char pk[CRYPTO_PUBLICKEYBYTES];
@@ -175,7 +177,7 @@ namespace apg {
 
         SHA256 ctx = SHA256();
         ctx.init();
-        ctx.update( (unsigned char*) password.c_str(), password.length());
+        ctx.update(password_data, password_length);
         ctx.final(digest);
 
         crypto_sign_keypair(digest, pk, sk);
@@ -185,22 +187,34 @@ namespace apg {
 
     }
 
-    std::pair<std::string, std::string> unsign_message(std::vector<unsigned char> &tx) {
+    std::string password2addr(const bytevec &password) {
+
+        return password2addr(password.data(), password.size());
+
+    }
+
+    std::string password2addr(const std::string &password) {
+
+        return password2addr((uint8_t*) password.c_str(), password.size());
+
+    }
+
+    bytevec unsign_message(bytevec &tx, uint8_t* output) {
 
         unsigned long long smlen = tx.size() - CRYPTO_PUBLICKEYBYTES;
         unsigned long long mlen = 0;
         unsigned char m2[tx.size() + CRYPTO_BYTES];
         int ret = crypto_sign_open(m2, &mlen, &tx[CRYPTO_PUBLICKEYBYTES], smlen, &tx[0]);
 
-        std::string message;
-        std::string address;
+        bytevec message;
 
         if (ret == 0) {
-            message.assign((char*) m2, mlen);
-            address = pubkey2addr((unsigned char*) &tx[0]);
+            message.assign(m2, m2 + mlen);
+            // address = pubkey2addr(&tx[0]);
+            sha3((void*) &tx[0], CRYPTO_PUBLICKEYBYTES, (void*) output, 32);
         }
 
-        return std::pair<std::string, std::string>(message, address);
+        return message;
 
     }
 
