@@ -226,4 +226,4 @@ namespace cgold {
         }
     }
 
-} // namespace apg
+}
