@@ -12,7 +12,7 @@ extern "C"
 #include "../dilithium/api.h"
 }
 
-namespace apg {
+namespace cgold {
 
     typedef std::vector<uint8_t> bytevec;
 

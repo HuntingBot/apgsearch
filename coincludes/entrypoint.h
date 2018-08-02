@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
         }
     } else if (modus_operandi == "addrgen") {
         std::cerr << "Enter passwords line-by-line, with Ctrl+D to exit" << std::endl;
-        apg::addrgen();
+        cgold::addrgen();
     } else {
         std::cerr << "Usage: ./lifecoin MODUS_OPERANDI [OPTIONS]" << std::endl;
         std::cerr << "    where MODUS_OPERANDI is one of the following:\n" << std::endl;
