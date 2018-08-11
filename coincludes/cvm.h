@@ -1,5 +1,6 @@
 #include "cryptography.h"
 #include "blob256.h"
+#include "turtlestack.h"
 #include <map>
 
 namespace cgold {
@@ -9,6 +10,7 @@ namespace cgold {
         public:
 
         std::map<blob256, bytevec> subroutines;
+        TurtleStack<blob256> stack;
 
         void register_subroutine(bytevec &sub) {
 

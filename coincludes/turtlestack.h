@@ -34,7 +34,7 @@ namespace cgold {
             }
         }
 
-        void push_back(const T &x) { stack.push_back(x); }
+        void push(const T &x) { stack.push_back(x); }
 
     };
 
