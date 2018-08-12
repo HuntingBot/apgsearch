@@ -136,7 +136,7 @@ public:
 
     }
 
-    int64_t separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
+    std::pair<int64_t, std::string> separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
 
@@ -183,11 +183,12 @@ public:
             if (proceedNonetheless) {
                 if (ignorePathologicals == false) { std::cout << "Pathological object detected!!!" << std::endl; }
             } else {
-                return -1;
+                return std::pair<int64_t, std::string>(-1, "");
             }
         }
 
         int64_t max_difficulty = 0;
+        std::string rarest_object = "";
 
         for (auto it = cm.begin(); it != cm.end(); ++it) {
             std::string apgcode = it->first;
@@ -204,7 +205,7 @@ public:
 
             #ifdef LIFECOIN
             int64_t difficulty = get_difficulty(apgcode);
-            if (difficulty > max_difficulty) { max_difficulty = difficulty; }
+            if (difficulty > max_difficulty) { max_difficulty = difficulty; rarest_object = apgcode; }
             #endif
 
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
@@ -234,11 +235,11 @@ public:
 
         }
 
-        return max_difficulty;
+        return std::pair<int64_t, std::string>(max_difficulty, rarest_object);
 
     }
 
-    int64_t censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
+    std::pair<int64_t, std::string> censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
 
         apg::bitworld bw = apg::hashsoup(seedroot + suffix, SYMMETRY);
         std::vector<apg::bitworld> vbw;
@@ -250,7 +251,7 @@ public:
 
         bool failure = true;
         int attempt = 0;
-        int64_t max_difficulty = 0;
+        std::pair<int64_t, std::string> retval(0, "");
 
         // Repeat until there are no pathological objects, or until five attempts have elapsed:
         while (failure) {
@@ -259,8 +260,8 @@ public:
 
             if (pat.nonempty()) {
 
-                max_difficulty = separate(pat, duration, attempt, cfier, suffix);
-                failure = (max_difficulty == -1);
+                retval = separate(pat, duration, attempt, cfier, suffix);
+                failure = (retval.first == -1);
 
             }
 
@@ -274,7 +275,7 @@ public:
             }
         }
 
-        return max_difficulty;
+        return retval;
     }
 
 

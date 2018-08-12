@@ -83,8 +83,8 @@ int run_apgluxe(int argc, char *argv[]) {
     SoupSearcher soup;
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
-    int64_t coediff = soup.censusSoup("n_CvtBYspKyzAx19112245", "", cfier);
-    std::cout << "Coe ship difficulty: " << coediff << std::endl;
+    auto coediff = soup.censusSoup("n_CvtBYspKyzAx19112245", "", cfier);
+    std::cout << "apgcode='" << coediff.second << "', difficulty=" << coediff.first << std::endl;
     }
 
     #endif

@@ -9,6 +9,14 @@
 
 int main(int argc, char* argv[]) {
 
+    /*
+    std::string genesis_seedroot = cgold::Blockheader(0, 0).prevblock_seed().substr(0, 48);
+    char genesis_hash[33]; std::memset(genesis_hash, 0, 33);
+    std::cerr << genesis_seedroot << std::endl;
+    std::cerr << cgold::human_unreadable(genesis_seedroot, ((uint8_t*) genesis_hash)) << std::endl;
+    std::cerr << genesis_hash << std::endl;
+    */
+
     std::string modus_operandi = "";
     if (argc >= 2) {
         modus_operandi = argv[1];
