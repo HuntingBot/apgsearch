@@ -6,6 +6,10 @@
 #include <utility>
 #include <set>
 
+#define MAX_DIFFICULTY 1.0e80
+typedef double difficul_t;
+typedef std::pair<difficul_t, std::string> dsentry;
+
 /*
  * This contains everything necessary for performing a soup search.
  */
@@ -16,7 +20,7 @@ public:
     std::map<std::string, long long> census;
     std::map<std::string, std::vector<std::string> > alloccur;
 
-    std::map<std::string, int64_t> difficulties;
+    std::map<std::string, difficul_t> difficulties;
 
     void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
@@ -71,7 +75,7 @@ public:
 
     }
 
-    int64_t rep_difficulty(std::string rep) {
+    difficul_t rep_difficulty(std::string rep) {
 
         if (difficulties.size() == 0) {
             load_difficulties();
@@ -79,14 +83,14 @@ public:
 
         auto it = difficulties.find(rep);
         if (it == difficulties.end()) {
-            return 1000000000000000000ll;
+            return MAX_DIFFICULTY;
         } else {
             return it->second;
         }
 
     }
 
-    int64_t get_difficulty(std::string apgcode) {
+    difficul_t get_difficulty(std::string apgcode) {
 
         if ((apgcode[0] != 'y') && ((apgcode[0] != 'x') || (apgcode[1] == 's'))) {
             // Not an oscillator, spaceship, or linear-growth pattern:
@@ -119,7 +123,7 @@ public:
         std::set<std::pair<int64_t, std::string> > nocc;
         int64_t totobj = 0;
         for (auto it = occ.begin(); it != occ.end(); ++it) {
-            int64_t di = rep_difficulty(it->first);
+            difficul_t di = rep_difficulty(it->first);
             if (di > difficulties[standard]) {
                 nocc.emplace(it->second, it->first);
                 totobj += it->second;
@@ -136,7 +140,7 @@ public:
 
     }
 
-    std::pair<int64_t, std::string> separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
+    dsentry separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
 
@@ -183,11 +187,11 @@ public:
             if (proceedNonetheless) {
                 if (ignorePathologicals == false) { std::cout << "Pathological object detected!!!" << std::endl; }
             } else {
-                return std::pair<int64_t, std::string>(-1, "");
+                return dsentry(-1, "");
             }
         }
 
-        int64_t max_difficulty = 0;
+        difficul_t max_difficulty = 0;
         std::string rarest_object = "";
 
         for (auto it = cm.begin(); it != cm.end(); ++it) {
@@ -204,7 +208,7 @@ public:
             #ifdef STANDARD_LIFE
 
             #ifdef LIFECOIN
-            int64_t difficulty = get_difficulty(apgcode);
+            difficul_t difficulty = get_difficulty(apgcode);
             if (difficulty > max_difficulty) { max_difficulty = difficulty; rarest_object = apgcode; }
             #endif
 
@@ -235,11 +239,11 @@ public:
 
         }
 
-        return std::pair<int64_t, std::string>(max_difficulty, rarest_object);
+        return dsentry(max_difficulty, rarest_object);
 
     }
 
-    std::pair<int64_t, std::string> censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
+    dsentry censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
 
         apg::bitworld bw = apg::hashsoup(seedroot + suffix, SYMMETRY);
         std::vector<apg::bitworld> vbw;
@@ -251,7 +255,7 @@ public:
 
         bool failure = true;
         int attempt = 0;
-        std::pair<int64_t, std::string> retval(0, "");
+        dsentry retval(0, "");
 
         // Repeat until there are no pathological objects, or until five attempts have elapsed:
         while (failure) {
