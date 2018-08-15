@@ -1,6 +1,19 @@
 #include "blockheader.h"
 #include "cvm.h"
 
+void print_testing_info() {
+
+    std::string genesis_seed = cgold::Blockheader(0).prevblock_seed();
+    std::cerr << genesis_seed << std::endl;
+
+    SoupSearcher ss;
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
+    apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
+    auto p = ss.censusSoup(genesis_seed, "", cfier);
+    std::cerr << p.first << " : " << p.second << std::endl;
+
+}
+
 #ifdef FULLNODE
 
 
@@ -9,13 +22,7 @@
 
 int main(int argc, char* argv[]) {
 
-    /*
-    std::string genesis_seedroot = cgold::Blockheader(0, 0).prevblock_seed().substr(0, 48);
-    char genesis_hash[33]; std::memset(genesis_hash, 0, 33);
-    std::cerr << genesis_seedroot << std::endl;
-    std::cerr << cgold::human_unreadable(genesis_seedroot, ((uint8_t*) genesis_hash)) << std::endl;
-    std::cerr << genesis_hash << std::endl;
-    */
+    print_testing_info();
 
     std::string modus_operandi = "";
     if (argc >= 2) {
@@ -31,8 +38,8 @@ int main(int argc, char* argv[]) {
         SoupSearcher ss;
         while (std::getline(std::cin, apgcode)) {
             std::string rep = ss.representative(apgcode);
-            int64_t difficulty = ss.get_difficulty(apgcode);
-            std::cout << apgcode << " : " << difficulty << " : " << apgcode << std::endl;
+            auto difficulty = ss.get_difficulty(apgcode);
+            std::cout << apgcode << " : " << difficulty << " : " << rep << std::endl;
         }
     } else if (modus_operandi == "addrgen") {
         std::cerr << "Enter passwords line-by-line, with Ctrl+D to exit" << std::endl;

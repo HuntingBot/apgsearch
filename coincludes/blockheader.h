@@ -66,6 +66,8 @@ namespace cgold {
 
         }
 
+        Blockheader(uint64_t genesis_time) : Blockheader(442350544, genesis_time) {}
+
         double get_difficulty() {
 
             double x;
