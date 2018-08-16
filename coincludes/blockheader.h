@@ -3,6 +3,7 @@
 #include <string>
 #include <sstream>
 #include "cryptography.h"
+#include "blob256.h"
 
 // We impose the minimum = initial difficulty to be 7 CPU-hours per block.
 // This is the equilibrium difficulty if there are 42 cores mining (as we
@@ -101,9 +102,24 @@ namespace cgold {
             }
         }
 
+        uint32_t include_transactions(const bytevec &merkle_root, std::string &addr) {
+
+            hashpair(merkle_root.data(), merkle_root.size(), tx_merkle_hashes);
+            return human_unreadable(addr, address_fullnode);
+
+        }
+
+        uint32_t include_tail(const blob256 &xn, std::string &addr) {
+
+            std::memcpy(extranonce, xn.data, 32);
+            return human_unreadable(addr, address_miner);
+
+        }
+
     };
 
     static_assert(sizeof(Blockheader) == 256,
         "Sanity check failed: Blockheader must be exactly 256 bytes");
+
 
 }

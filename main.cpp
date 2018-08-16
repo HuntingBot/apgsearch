@@ -33,10 +33,6 @@
 #include "includes/verification.h"
 #include "includes/searching.h"
 
-#ifdef LIFECOIN
-#include "coincludes/cryptography.h"
-#endif
-
 #include "includes/apgluxe.h"
 
 #ifdef LIFECOIN

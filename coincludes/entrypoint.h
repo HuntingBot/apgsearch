@@ -1,4 +1,5 @@
 #include "blockheader.h"
+#include "nanotime.h"
 #include "cvm.h"
 
 void print_testing_info() {
@@ -11,6 +12,8 @@ void print_testing_info() {
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
     auto p = ss.censusSoup(genesis_seed, "", cfier);
     std::cerr << p.first << " : " << p.second << std::endl;
+
+    std::cerr << "nanotime: " << cgold::nanotime() << std::endl;
 
 }
 
