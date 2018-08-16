@@ -90,12 +90,12 @@ namespace cgold {
             // We update the difficulty to target a 10-minute block time:
             int64_t actual_time = ((int64_t) (t - prevblock.prevblock_time));
             int64_t desired_time = 600000000000ll;
-            int64_t max_change  =  200000000000ll;
-            int64_t min_change  = -200000000000ll;
+            int64_t max_change  =  desired_time;
+            int64_t min_change  = -desired_time;
             int64_t earlyness = desired_time - actual_time;
             earlyness = (earlyness < min_change) ? min_change : earlyness;
             earlyness = (earlyness > max_change) ? max_change : earlyness;
-            log_difficulty = prevblock.log_difficulty + earlyness * 100;
+            log_difficulty = prevblock.log_difficulty + earlyness * 32;
             if (log_difficulty < MIN_LOG_DIFFICULTY) {
                 log_difficulty = MIN_LOG_DIFFICULTY;
             }
