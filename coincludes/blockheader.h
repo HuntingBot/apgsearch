@@ -2,6 +2,7 @@
 
 #include <string>
 #include <sstream>
+#include <fstream>
 #include "cryptography.h"
 #include "blob256.h"
 
@@ -116,6 +117,20 @@ namespace cgold {
             std::memcpy(extranonce, xn.data, 32);
             return human_unreadable(addr, address_miner);
 
+        }
+
+        uint32_t include_tail(std::string &addr) {
+            /*
+            * Populates the extranonce with 32 bytes from /dev/urandom so
+            * that multiple instances of the searcher will use different
+            * seedroots and therefore not repeat any territory.
+            */
+            blob256 xn;
+            std::ifstream ur("/dev/urandom", std::ios::in | std::ios::binary);
+            ur.read((char*) xn.data, 32);
+            ur.close();
+
+            return include_tail(xn, addr);
         }
 
     };
