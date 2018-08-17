@@ -47,11 +47,13 @@ namespace cgold {
             return ss.str();
         }
 
+        void clear() { std::memset(this, 0, 256); }
+
         Blockheader() = default;
 
         Blockheader(uint64_t genesis_nonce, uint64_t genesis_time) {
 
-            std::memset(this, 0, 256);
+            clear();
 
             uint8_t genesis_info[64] = {84, 104, 101, 32, 82, 101, 103, 105,
             115, 116, 101, 114, 32, 48, 54, 47, 77, 97, 114, 47, 50, 48,
@@ -69,17 +71,9 @@ namespace cgold {
 
         Blockheader(uint64_t genesis_time) : Blockheader(442350544, genesis_time) {}
 
-        double get_difficulty() {
-
-            double x;
-            std::memcpy(&x, &log_difficulty, 8);
-            return x;
-
-        }
-
         Blockheader(const Blockheader &prevblock, uint64_t n, uint64_t t) {
 
-            std::memset(this, 0, 256);
+            clear();
             uint8_t prevblock_contents[256];
             std::memcpy(prevblock_contents, &prevblock, 256);
             hashpair(prevblock_contents, 256, prevblock_hashes);
@@ -100,6 +94,14 @@ namespace cgold {
             if (log_difficulty < MIN_LOG_DIFFICULTY) {
                 log_difficulty = MIN_LOG_DIFFICULTY;
             }
+        }
+
+        double get_difficulty() {
+
+            double x;
+            std::memcpy(&x, &log_difficulty, 8);
+            return x;
+
         }
 
         uint32_t include_transactions(const bytevec &merkle_root, std::string &addr) {

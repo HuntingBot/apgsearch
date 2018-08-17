@@ -1,5 +1,5 @@
 #include "blockheader.h"
-#include "nanotime.h"
+#include "mining.h"
 #include "cvm.h"
 
 void print_testing_info() {
