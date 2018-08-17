@@ -57,8 +57,8 @@ def dispblock(x):
     s += 'Hexadecimal representation:\n'
     s += '---------------------------\n'
 
-    l = ['prev_SHA2', 'prev_SHA3', 'misc_info', 'addr_full',
-         'txmr_SHA2', 'txmr_SHA3', 'xtra_nonc', 'addr_mine']
+    l = ['prev_sha2', 'prev_sha3', 'misc_info', 'addr_full',
+         'txmr_sha2', 'txmr_sha3', 'xtra_nonc', 'addr_mine']
 
     for (i, r) in enumerate(l):
 
@@ -84,8 +84,8 @@ def dispblock(x):
     seedroot = human_readable(x[32:64])
     prevseed = seedroot + str(pn)
 
-    s += '#C Seed: %s\n' % prevseed
-    s += '#C SHA2: %s\n' % sha2(prevseed.encode('utf8')).hexdigest()
+    s += '#C seed: %s\n' % prevseed
+    s += '#C sha2: %s\n' % sha2(prevseed.encode('utf8')).hexdigest()
 
     digest = sha2(prevseed.encode('utf8')).digest()
     bits = [((b >> (7-i)) & 1) for b in digest for i in range(8)]
@@ -103,8 +103,8 @@ def dispblock(x):
 
     s += '\nBlock hashes:\n'
     s +=    '------------\n'
-    s += '%s|%s\n' % (sha2(x).hexdigest(), 'this_SHA2')
-    s += '%s|%s\n' % (sha3(x).hexdigest(), 'this_SHA3')
+    s += '%s|%s\n' % (sha2(x).hexdigest(), 'this_sha2')
+    s += '%s|%s\n' % (sha3(x).hexdigest(), 'this_sha3')
 
     s += ('\n' + ('=' * 64) + '\n')
     return s
