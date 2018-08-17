@@ -133,6 +133,12 @@ namespace cgold {
             return include_tail(xn, addr);
         }
 
+        void save_block(std::string filename) {
+            std::ofstream bl(filename, std::ios::out | std::ios::binary);
+            bl.write((char*) this, 256);
+            bl.close();
+        }
+
     };
 
     static_assert(sizeof(Blockheader) == 256,
