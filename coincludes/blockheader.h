@@ -139,6 +139,14 @@ namespace cgold {
             bl.close();
         }
 
+        void save_block() {
+            std::stringstream ss;
+            ss << "block";
+            ss << blocknumber;
+            ss << ".cbc";
+            save_block(ss.str());
+        }
+
     };
 
     static_assert(sizeof(Blockheader) == 256,

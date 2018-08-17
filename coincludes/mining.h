@@ -44,6 +44,8 @@ cgold::Blockheader parallelMine(int m, std::string payoshaKey,
             if (dp.first >= difficulty) {
                 bestSoup = i; // this transcends the difficulty target
                 running = false; // we can now exit
+                std::cerr << "Block won: " << seedroot << i << " contains a " << dp.second << std::endl;
+                std::cerr << "Target: " << difficulty << "; attained: " << dp.first << std::endl;
             }
 
         }
@@ -73,6 +75,26 @@ cgold::Blockheader parallelMine(int m, std::string payoshaKey,
     }
     
     return new_bh;
+
+}
+
+void greedy_mine(int m, std::string payoshaKey, std::string addr) {
+
+    cgold::Blockheader currentBlock(cgold::nanotime());
+
+    while (true) {
+
+        uint32_t check1 = currentBlock.include_transactions(cgold::bytevec(), addr);
+        uint32_t check2 = currentBlock.include_tail(addr);
+
+        std::cerr << "check1: " << check1 << ", check2: " << check2 << std::endl;
+
+        currentBlock.save_block();
+
+        std::atomic<bool> running(true);
+
+        currentBlock = parallelMine(m, payoshaKey, currentBlock, running);
+    }
 
 }
 
