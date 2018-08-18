@@ -1,6 +1,6 @@
 CC=g++
 
-CFLAGS=-c -Wall -O3 -march=native --std=c++11
+CFLAGS=-c -Wall -Wextra -pedantic -O3 -march=native --std=c++11
 
 LDFLAGS=-pthread
 
