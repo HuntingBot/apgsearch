@@ -35,7 +35,8 @@ void populateLuts() {
 }
 
 void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
-    SoupSearcher *localSoup, uint64_t *j, std::atomic<bool> *running) {
+    SoupSearcher *localSoup, uint64_t *j, std::atomic<bool> *running,
+    double difficulty, std::atomic<uint64_t> *bestSoup) {
 
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
@@ -48,27 +49,28 @@ void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
 
         std::ostringstream ss;
         ss << i;
-        /* dsentry dp = */ localSoup->censusSoup(seedroot, ss.str(), cfier);
+        dsentry dp = localSoup->censusSoup(seedroot, ss.str(), cfier);
 
         if (i % 100000 == 0) { std::cout << i << " soups processed..." << std::endl; }
 
         (*j)++;
 
-        /*
-        if (dp.first >= difficulty) {
-            bestSoup = i; // this transcends the difficulty target
-            running = false; // we can now exit
-            std::cerr << "Block won: " << seedroot << i << " contains a " << dp.second << std::endl;
-            std::cerr << "Target: " << difficulty << "; attained: " << dp.first << std::endl;
+        if (bestSoup != 0) {
+            if (dp.first >= difficulty) {
+                (*bestSoup) = i; // this transcends the difficulty target
+                (*running) = false; // we can now exit
+                std::cerr << "Block won: " << seedroot << i << " contains a " << dp.second << std::endl;
+                std::cerr << "Target: " << difficulty << "; attained: " << dp.first << std::endl;
+            }
         }
-        */
 
     }
 
 }
 
 void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
-                    int local_log, std::atomic<bool> &running) {
+                    int local_log, std::atomic<bool> &running, double difficulty,
+                    std::atomic<uint64_t> *bestSoup) {
 
     SoupSearcher globalSoup;
 
@@ -86,7 +88,8 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
         std::vector<std::thread> lsthreads(m);
 
         for (int i = 0; i < m; i++) {
-            lsthreads[i] = std::thread(partialSearch, maxcount, m, i, seed, &(localSoups[i]), completed + i, &running);
+            lsthreads[i] = std::thread(partialSearch, maxcount, m, i, seed, &(localSoups[i]),
+                                        completed + i, &running, difficulty, bestSoup);
         }
 
         for (int i = 0; i < m; i++) {
@@ -119,7 +122,7 @@ bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
     std::atomic<bool> running(true);
 
-    threadSearch(n, m, payoshaKey, seed, local_log, running);
+    threadSearch(n, m, payoshaKey, seed, local_log, running, 0.0, 0);
 
     bool was_running = running;
 
