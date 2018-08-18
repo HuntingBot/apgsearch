@@ -78,7 +78,7 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
     populateLuts();
 
-    uint64_t completed[m] = {0ull};
+    std::vector<uint64_t> completed(m, 0);
 
     uint64_t maxcount = 0;
 
@@ -92,7 +92,7 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
         for (int i = 0; i < m; i++) {
             localSoups[i].difficulties = globalSoup.difficulties;
             lsthreads[i] = std::thread(partialSearch, maxcount, m, i, seed, &(localSoups[i]),
-                                        completed + i, &running, difficulty, bestSoup);
+                                        &(completed[i]), &running, difficulty, bestSoup);
         }
 
         for (int i = 0; i < m; i++) {

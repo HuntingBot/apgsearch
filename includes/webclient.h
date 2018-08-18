@@ -34,11 +34,13 @@ void OnData( const happyhttp::Response* r, void* userdata, const unsigned char* 
     for (int i = 0; i < n; i++)
         presp->contents << data[i];
     presp->length += n;
+    (void) (r);
 }
 
 void OnComplete( const happyhttp::Response* r, void* userdata )
 {
     ProcessedResponse* presp = static_cast<ProcessedResponse*>(userdata);
     presp->completed = true;
+    (void) (r);
 }
 

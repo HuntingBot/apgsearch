@@ -2,11 +2,11 @@ CPP_COMPILER=g++
 C_COMPILER=gcc
 LINKER=g++
 
-C_FLAGS=-c -Wall -Wextra -O3 -march=native -fomit-frame-pointer
+C_FLAGS=-c -Wall -Wextra -pedantic -O3 -march=native -fomit-frame-pointer
 
 LD_FLAGS=-pthread
 
-CPP_FLAGS=-c -Wall -O3 -march=native --std=c++11
+CPP_FLAGS=-c -Wall -Wextra -pedantic -O3 -march=native --std=c++11
 
 CPP_SOURCES=main.cpp includes/sha256.cpp includes/md5.cpp includes/happyhttp.cpp
 
