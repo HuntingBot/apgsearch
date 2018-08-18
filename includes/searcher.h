@@ -207,10 +207,8 @@ public:
 
             #ifdef STANDARD_LIFE
 
-            #ifdef LIFECOIN
             difficul_t difficulty = get_difficulty(apgcode);
             if (difficulty > max_difficulty) { max_difficulty = difficulty; rarest_object = apgcode; }
-            #endif
 
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
                 if ((apgcode[2] != '2') || (apgcode[3] != '_')) {

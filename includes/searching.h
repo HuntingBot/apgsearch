@@ -36,7 +36,7 @@ void populateLuts() {
 
 void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
     SoupSearcher *localSoup, uint64_t *j, std::atomic<bool> *running,
-    double difficulty, std::atomic<uint64_t> *bestSoup) {
+    difficul_t difficulty, std::atomic<uint64_t> *bestSoup) {
 
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
@@ -69,10 +69,12 @@ void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
 }
 
 void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
-                    int local_log, std::atomic<bool> &running, double difficulty,
-                    std::atomic<uint64_t> *bestSoup) {
+                    int local_log, std::atomic<bool> &running, difficul_t difficulty,
+                    std::atomic<uint64_t> *bestSoup, std::map<std::string, difficul_t> *dtab) {
 
     SoupSearcher globalSoup;
+
+    if (dtab != 0) { globalSoup.difficulties = (*dtab); }
 
     populateLuts();
 
@@ -88,6 +90,7 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
         std::vector<std::thread> lsthreads(m);
 
         for (int i = 0; i < m; i++) {
+            localSoups[i].difficulties = globalSoup.difficulties;
             lsthreads[i] = std::thread(partialSearch, maxcount, m, i, seed, &(localSoups[i]),
                                         completed + i, &running, difficulty, bestSoup);
         }
@@ -122,7 +125,7 @@ bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
     std::atomic<bool> running(true);
 
-    threadSearch(n, m, payoshaKey, seed, local_log, running, 0.0, 0);
+    threadSearch(n, m, payoshaKey, seed, local_log, running, 0, 0, 0);
 
     bool was_running = running;
 
