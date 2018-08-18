@@ -203,14 +203,13 @@ namespace cgold {
 
         unsigned long long smlen = tx.size() - CRYPTO_PUBLICKEYBYTES;
         unsigned long long mlen = 0;
-        unsigned char m2[tx.size() + CRYPTO_BYTES];
-        int ret = crypto_sign_open(m2, &mlen, &tx[CRYPTO_PUBLICKEYBYTES], smlen, &tx[0]);
+        bytevec m2(tx.size() + CRYPTO_BYTES);
+        int ret = crypto_sign_open(m2.data(), &mlen, &tx[CRYPTO_PUBLICKEYBYTES], smlen, &tx[0]);
 
         bytevec message;
 
         if (ret == 0) {
-            message.assign(m2, m2 + mlen);
-            // address = pubkey2addr(&tx[0]);
+            message.assign(m2.data(), m2.data() + mlen);
             sha3((void*) &tx[0], CRYPTO_PUBLICKEYBYTES, (void*) output, 32);
         }
 
