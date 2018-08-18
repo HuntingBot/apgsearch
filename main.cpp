@@ -9,15 +9,11 @@
 #include <unistd.h>
 #include <termios.h>
 
-#ifdef USE_OPEN_MP
-#include <omp.h>
-#endif
-
 #include "lifelib/upattern.h"
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.45-" LIFELIB_VERSION
+#define APG_VERSION "v4.46-" LIFELIB_VERSION
 
 #include "includes/params.h"
 #include "includes/sha256.h"

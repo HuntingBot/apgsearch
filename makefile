@@ -2,25 +2,9 @@ CPP_COMPILER=g++
 C_COMPILER=gcc
 LINKER=g++
 
-# Thanks to Andrew Trevorrow for the following routine to handle clang:
-ifeq "$(shell uname)" "Darwin"
-    # we're on Mac OS X, so check if clang is available
-    ifeq "$(shell which clang++)" "/usr/bin/clang++"
-        # assume we're on Mac OS 10.9 or later
-        MACOSX_109_OR_LATER=1
-    endif
-endif
-
 C_FLAGS=-c -Wall -Wextra -O3 -march=native -fomit-frame-pointer
 
-ifdef MACOSX_109_OR_LATER
-    # g++ is really clang++ and there is currently no OpenMP support
-    CPP_FLAGS=-c -Wall -O3 -march=native --std=c++11
-else
-    # assume we're using gcc with OpenMP support
-    CPP_FLAGS=-c -Wall -O3 -march=native -fopenmp -DUSE_OPEN_MP --std=c++11
-    LD_FLAGS=-fopenmp
-endif
+CPP_FLAGS=-c -Wall -O3 -march=native --std=c++11
 
 CPP_SOURCES=main.cpp includes/sha256.cpp includes/md5.cpp includes/happyhttp.cpp
 

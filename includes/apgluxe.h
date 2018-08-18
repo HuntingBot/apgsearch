@@ -27,9 +27,6 @@ int run_apgluxe(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-t") == 0) {
             testing = true;
         } else if (strcmp(argv[i], "-p") == 0) {
-            #ifndef USE_OPEN_MP
-            std::cout << "\033[1;31mWarning: apgluxe has not been compiled with OpenMP support.\033[0m" << std::endl;
-            #endif
             parallelisation = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "--rule") == 0) {
             std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
@@ -102,11 +99,7 @@ int run_apgluxe(int argc, char *argv[]) {
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
         if (parallelisation > 0) {
-            #ifdef USE_OPEN_MP
             quitByUser = parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log);
-            #else
-            quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, false);
-            #endif
         } else {
             quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
         }

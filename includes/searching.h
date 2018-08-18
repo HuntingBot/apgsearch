@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <sys/select.h>
 
+#include <atomic>
+#include <thread>
+
 // determine whether there's a keystroke waiting
 int keyWaiting() {
     struct timeval tv;
@@ -31,69 +34,98 @@ void populateLuts() {
 
 }
 
-#ifdef USE_OPEN_MP
+void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
+    SoupSearcher *localSoup, uint64_t *j, std::atomic<bool> *running) {
 
-bool parallelSearch(int n, int m, std::string payoshaKey, std::string seed, int local_log) {
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
+    apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
-    SoupSearcher globalSoup;
+    while (*running) {
 
-    long long offset = 0;
-    bool finishedSearch = false;
+        uint64_t i = threadNumber + m * ((*j));
 
-    // Ensure the lookup tables are populated by the main thread:
-    populateLuts();
+        if ((n > 0) && (i >= n)) { break; }
 
-    while (finishedSearch == false) {
+        std::ostringstream ss;
+        ss << i;
+        /* dsentry dp = */ localSoup->censusSoup(seedroot, ss.str(), cfier);
 
-        #pragma omp parallel num_threads(m)
-        {
-            int threadNumber = omp_get_thread_num();
+        if (i % 100000 == 0) { std::cout << i << " soups processed..." << std::endl; }
 
-            SoupSearcher localSoup;
-            apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
-            apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
+        (*j)++;
 
-            long long elapsed = 0;
-
-            #pragma omp for
-            for (long long i = offset; i < offset + n; i++) {
-                long long pseudoElapsed = offset + elapsed * m + threadNumber;
-                elapsed += 1;
-                if (pseudoElapsed % 10000 == 0) {
-                    std::cout << pseudoElapsed << " soups processed..." << std::endl;
-                }
-                std::ostringstream ss;
-                ss << i;
-                localSoup.censusSoup(seed, ss.str(), cfier);
-            }
-
-            #pragma omp critical
-            {
-
-                globalSoup.aggregate(&(localSoup.census), &(localSoup.alloccur));
-
-            }
+        /*
+        if (dp.first >= difficulty) {
+            bestSoup = i; // this transcends the difficulty target
+            running = false; // we can now exit
+            std::cerr << "Block won: " << seedroot << i << " contains a " << dp.second << std::endl;
+            std::cerr << "Target: " << difficulty << "; attained: " << dp.first << std::endl;
         }
+        */
 
-        offset += n;
-        std::cout << "----------------------------------------------------------------------" << std::endl;
-        std::cout << offset << " soups completed." << std::endl;
-        std::cout << "Attempting to contact payosha256." << std::endl;
-        std::string payoshaResponse = globalSoup.submitResults(payoshaKey, seed, offset, local_log, 0);
-        if (payoshaResponse.length() == 0) {
-            std::cout << "Connection was unsuccessful; continuing search..." << std::endl;
-        } else {
-            std::cout << "Connection was successful; starting new search..." << std::endl;
-            finishedSearch = true;
-        }
-        std::cout << "----------------------------------------------------------------------" << std::endl;
     }
-    
-    return false;
 
 }
 
-#endif
+void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
+                    int local_log, std::atomic<bool> &running) {
+
+    SoupSearcher globalSoup;
+
+    populateLuts();
+
+    uint64_t completed[m] = {0ull};
+
+    uint64_t maxcount = 0;
+
+    while (running) {
+
+        maxcount += n;
+
+        std::vector<SoupSearcher> localSoups(m);
+        std::vector<std::thread> lsthreads(m);
+
+        for (int i = 0; i < m; i++) {
+            lsthreads[i] = std::thread(partialSearch, maxcount, m, i, seed, &(localSoups[i]), completed + i, &running);
+        }
+
+        for (int i = 0; i < m; i++) {
+            lsthreads[i].join();
+            globalSoup.aggregate(&(localSoups[i].census), &(localSoups[i].alloccur));
+        }
+
+        uint64_t totalSoups = 0;
+
+        for (int i = 0; i < m; i++) { totalSoups += completed[i]; }
+
+        std::cout << "----------------------------------------------------------------------" << std::endl;
+        std::cout << totalSoups << " soups completed." << std::endl;
+        std::cout << "Attempting to contact payosha256." << std::endl;
+        std::string payoshaResponse = globalSoup.submitResults(payoshaKey, seed, totalSoups, local_log, 0);
+
+        if (payoshaResponse.length() == 0) {
+            std::cout << "Connection was unsuccessful." << std::endl;
+        } else {
+            std::cout << "Connection was successful." << std::endl;
+            running = false;
+        }
+
+        if (running) { std::cout << "Continuing search..." << std::endl; }
+    }
+
+}
+
+bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed, int local_log) {
+
+    std::atomic<bool> running(true);
+
+    threadSearch(n, m, payoshaKey, seed, local_log, running);
+
+    bool was_running = running;
+
+    return was_running;
+
+}
 
 bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
 
