@@ -2,7 +2,7 @@
 int run_apgluxe(int argc, char *argv[]) {
 
     // Default values:
-    int soups_per_haul = 10000000;
+    int64_t soups_per_haul = 10000000;
     std::string payoshaKey = "#anon";
     std::string seed = reseed("original seed");
     int verifications = -1;

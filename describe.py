@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-from sys import argv
+from sys import argv, stderr
 import hashlib
 import struct
 from datetime import datetime as dt
@@ -11,7 +11,12 @@ except ImportError as e:
     pass
 
 sha2 = hashlib.sha256    # Merkle-Damgard
-sha3 = hashlib.sha3_256  # Keccak
+try:
+    sha3 = hashlib.sha3_256  # Keccak
+except AttributeError as e:
+    stderr.write('\033[31;1mWarning:\033[0m SHA3 algorithm not present; ' +
+    'please upgrade to Python 3.6 or pip install pysha3\n')
+    sha3 = None
 
 def crc32_for_byte(r):
     for j in range(8):
@@ -104,7 +109,9 @@ def dispblock(x):
     s += '\nBlock hashes:\n'
     s +=    '------------\n'
     s += '%s|%s\n' % (sha2(x).hexdigest(), 'this_sha2')
-    s += '%s|%s\n' % (sha3(x).hexdigest(), 'this_sha3')
+
+    if sha3 is not None:
+        s += '%s|%s\n' % (sha3(x).hexdigest(), 'this_sha3')
 
     s += ('\n' + ('=' * 64) + '\n')
     return s
