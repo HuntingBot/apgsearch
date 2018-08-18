@@ -74,7 +74,8 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
     populateLuts();
 
-    uint64_t completed[m] = {0ull};
+    uint64_t completed[m];
+    for (int i = 0; i < m; i++) { completed[i] = 0; }
 
     uint64_t maxcount = 0;
 
