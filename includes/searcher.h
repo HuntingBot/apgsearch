@@ -150,8 +150,8 @@ public:
 
         cfier.gmax = (1024 << (attempt * 2));
 
-        #ifdef INCUBATE
-        apg::incubator<56, 56> icb;
+        #ifdef INCUBATOR
+        INCUBATOR icb;
         apg::copycells(&pat, &icb);
 
         cfier.deeppurge(cm, icb, &classifyAperiodic);
@@ -301,7 +301,11 @@ public:
 
     std::string submitResults(std::string payoshakey, std::string root, long long numsoups, int local_log, bool testing) {
 
-        std::string authstring = authenticate(payoshakey.c_str(), "post_apgsearch_haul");
+        std::string authstring = "testing";
+
+        if (!testing) {
+            authstring = authenticate(payoshakey.c_str(), "post_apgsearch_haul");
+        }
 
         // Authentication failed:
         if (authstring.length() == 0)
