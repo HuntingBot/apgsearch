@@ -41,6 +41,7 @@ void OnData( const happyhttp::Response* r, void* userdata, const unsigned char* 
     for (int i = 0; i < n; i++)
         presp->contents << data[i];
     presp->length += n;
+    (void) (r);
 }
 
 void OnComplete( const happyhttp::Response* r, void* userdata )
@@ -48,6 +49,7 @@ void OnComplete( const happyhttp::Response* r, void* userdata )
     ProcessedResponse* presp = static_cast<ProcessedResponse*>(userdata);
     presp->completed = true;
     // std::cout << "Response completed (" << presp->length << " bytes): " << presp->m_Status << " " << presp->m_Reason << std::endl;
+    (void) (r);
 }
 
 void increment_catagolue() {

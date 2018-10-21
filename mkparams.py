@@ -41,7 +41,7 @@ def main():
         upattern = "apg::upattern<apg::UTile<BITPLANES + 1, BITPLANES>, 16>"
     else:
         # Special speedup for life-like rules to ensure comparable performance to v3.x:
-        upattern = "apg::upattern<apg::VTile28, 28>"
+        upattern = "apg::upattern<apg::VTile28, 28, 28>"
 
     with open('includes/params.h', 'w') as g:
 
@@ -50,14 +50,21 @@ def main():
         g.write('#define SYMMETRY "%s"\n' % symmetry)
         g.write('#define RULESTRING "%s"\n' % rulestring)
         g.write('#define RULESTRING_SLASHED "%s"\n' % rulestring.replace('b', 'B').replace('s', '/S'))
-        g.write("#define UPATTERN %s\n" % upattern)
         g.write('#define CLASSIFIER apg::base_classifier<BITPLANES>\n')
 
         if (symmetry == 'C1'):
             g.write('#define C1_SYMMETRY 1\n')
         if (rulestring == 'b3s23'):
             g.write('#define STANDARD_LIFE 1\n')
-            g.write('#define INCUBATE 1\n')
+            g.write('#ifdef __AVX512F__\n')
+            g.write('#define UPATTERN apg::upattern<apg::VTile44, 28, 44>\n')
+            g.write('#define INCUBATOR apg::incubator<56, 88>\n')
+            g.write('#else\n')
+            g.write('#define UPATTERN apg::upattern<apg::VTile28, 28, 28>\n')
+            g.write('#define INCUBATOR apg::incubator<56, 56>\n')
+            g.write('#endif\n')
+        else:
+            g.write("#define UPATTERN %s\n" % upattern)
         if (re.match('b36?7?8?s0?235?6?7?8?$', rulestring)):
             g.write('#define GLIDERS_EXIST 1\n')
 
