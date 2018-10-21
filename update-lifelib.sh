@@ -4,8 +4,7 @@ then
 if [ -d "lifelib/avxlife" ]
 then
 printf "Ensuring lifelib is up-to-date...\n"
-rm -rf "lifelib/avxlife/lifelogic" | true
-python lifelib/rule3asm.py "b3s23" > /dev/null
+printf "import lifelib\nlifelib.reset_tree()\n" | python
 else
 printf "\033[33;1mDownloading lifelib...\033[0m\n"
 fi
