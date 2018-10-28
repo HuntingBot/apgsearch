@@ -127,6 +127,21 @@ public:
 
 
         }
+
+        #ifdef STANDARD_LIFE
+        if ((attempt == 0) && (ignorePathologicals == false)) {
+            int estgen = pat.gensElapsed - 7500; // calibrated against Lidka
+            if (estgen >= 30000) {
+                std::cerr << "Soup " << suffix << " lasts an estimated \033[1;34m" << estgen << "\033[0m generations." << std::endl;
+                std::ostringstream ss;
+                ss << "meth_" << (estgen / 1000) << "k";
+                std::string apgcode = ss.str();
+                census[apgcode] += 1;
+                alloccur[apgcode].push_back(suffix);
+            }
+        }
+        #endif
+
         return false;
 
     }
@@ -134,7 +149,7 @@ public:
     void censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
 
         apg::bitworld bw = apg::hashsoup(seedroot + suffix, SYMMETRY);
-        std::vector<apg::bitworld> vbw;
+        std::vector<apg::bitworld> vbw; // = apg::rle2vec("bo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!");
         vbw.push_back(bw);
         UPATTERN pat;
         pat.insertPattern(vbw);
