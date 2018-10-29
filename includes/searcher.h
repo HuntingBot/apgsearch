@@ -136,6 +136,8 @@ public:
                 std::cerr << "Soup " << (seedroot + suffix) << " lasts an estimated \033[1;34m";
                 std::cerr << estgen << "\033[0m generations; rerunning..." << std::endl;
 
+                estgen = 0;
+
                 apg::bitworld bw2 = apg::hashsoup(seedroot + suffix, SYMMETRY);
                 apg::pattern origsoup(cfier.lab, cfier.lab->demorton(bw2, 1), RULESTRING);
                 std::vector<uint64_t> popseq;
@@ -162,7 +164,7 @@ public:
                     if (period_found) { break; }
                 }
 
-                if ((period_found) && (estgen >= 25000)) {
+                if (estgen >= 25000) {
                     std::ostringstream ss;
                     ss << "methuselah_" << (estgen / 1000) << "k";
                     std::string apgcode = ss.str();
