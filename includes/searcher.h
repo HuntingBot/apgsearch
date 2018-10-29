@@ -130,8 +130,8 @@ public:
 
         #ifdef STANDARD_LIFE
         if ((attempt == 0) && (ignorePathologicals == false)) {
-            int estgen = pat.gensElapsed - 7500; // calibrated against Lidka
-            if (estgen >= 30000) {
+            int estgen = pat.gensElapsed - 11000;
+            if (estgen >= 25000) {
                 std::cerr << "Soup " << suffix << " lasts an estimated \033[1;34m" << estgen << "\033[0m generations." << std::endl;
                 std::ostringstream ss;
                 ss << "meth_" << (estgen / 1000) << "k";
