@@ -34,7 +34,7 @@ public:
         }
     }
 
-    bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string suffix) {
+    bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
 
@@ -116,6 +116,7 @@ public:
                 std::cout << "Linear-growth pattern detected: \033[1;32m" << apgcode << "\033[0m" << std::endl;
             } else if ((apgcode[0] == 'z') && (apgcode[1] == 'z')) {
                 std::cout << "Chaotic-growth pattern detected: \033[1;32m" << apgcode << "\033[0m" << std::endl;
+                ignorePathologicals = true;
             }
             #else
             if ((apgcode[0] == 'y') && (apgcode[1] == 'l')) {
@@ -131,13 +132,43 @@ public:
         #ifdef STANDARD_LIFE
         if ((attempt == 0) && (ignorePathologicals == false)) {
             int estgen = pat.gensElapsed - 11000;
-            if (estgen >= 25000) {
-                std::cerr << "Soup " << suffix << " lasts an estimated \033[1;34m" << estgen << "\033[0m generations." << std::endl;
-                std::ostringstream ss;
-                ss << "meth_" << (estgen / 1000) << "k";
-                std::string apgcode = ss.str();
-                census[apgcode] += 1;
-                alloccur[apgcode].push_back(suffix);
+            if (estgen >= 24000) {
+                std::cerr << "Soup " << (seedroot + suffix) << " lasts an estimated \033[1;34m";
+                std::cerr << estgen << "\033[0m generations; rerunning..." << std::endl;
+
+                apg::bitworld bw2 = apg::hashsoup(seedroot + suffix, SYMMETRY);
+                apg::pattern origsoup(cfier.lab, cfier.lab->demorton(bw2, 1), RULESTRING);
+                std::vector<uint64_t> popseq;
+
+                for (uint64_t i = 0; i < pat.gensElapsed + 8000; i++) {
+                    popseq.push_back(origsoup.popcount((1 << 30) + 3));
+                    origsoup = origsoup[1];
+                }
+
+                for (uint64_t p = 1; p < 4000; p++) {
+                    bool period_found = true;
+                    for (uint64_t i = pat.gensElapsed; i < pat.gensElapsed + 8000; i++) {
+                        if (popseq[i] != popseq[i - p]) { period_found = false; break; }
+                    }
+                    if (!period_found) { continue; }
+                    for (uint64_t i = pat.gensElapsed + 8000 - (p + 1); i > 0; i--) {
+                        if (popseq[i] != popseq[i + p]) {
+                            estgen = i + 1;
+                            std::cerr << "Soup " << (seedroot + suffix) << " actually lasts \033[1;34m";
+                            std::cerr << estgen << "\033[0m generations." << std::endl;
+                            break;
+                        }
+                    }
+                    if (period_found) { break; }
+                }
+
+                if (estgen >= 25000) {
+                    std::ostringstream ss;
+                    ss << "meth_" << (estgen / 1000) << "k";
+                    std::string apgcode = ss.str();
+                    census[apgcode] += 1;
+                    alloccur[apgcode].push_back(suffix);
+                }
             }
         }
         #endif
@@ -166,7 +197,7 @@ public:
 
             if (pat.nonempty()) {
 
-                failure = separate(pat, duration, attempt, cfier, suffix);
+                failure = separate(pat, duration, attempt, cfier, seedroot, suffix);
 
             }
 
