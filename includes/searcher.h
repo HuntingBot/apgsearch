@@ -162,9 +162,9 @@ public:
                     if (period_found) { break; }
                 }
 
-                if (estgen >= 25000) {
+                if ((period_found) && (estgen >= 25000)) {
                     std::ostringstream ss;
-                    ss << "meth_" << (estgen / 1000) << "k";
+                    ss << "methuselah_" << (estgen / 1000) << "k";
                     std::string apgcode = ss.str();
                     census[apgcode] += 1;
                     alloccur[apgcode].push_back(suffix);
