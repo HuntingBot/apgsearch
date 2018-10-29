@@ -77,7 +77,6 @@ fi
 
 echo "Configuring rule $rulearg; symmetry $symmarg"
 
-python lifelib/rule3asm.py $rulearg
 python mkparams.py $rulearg $symmarg
 make
 

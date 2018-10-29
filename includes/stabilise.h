@@ -35,7 +35,6 @@ int naivestab_awesome(UPATTERN &pat) {
         } else {
             depth = 0;
             if (period <= 12) {
-                i += 1;
                 pat.advance(0, 0, 12);
             }
         }
