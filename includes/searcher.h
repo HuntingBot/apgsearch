@@ -154,7 +154,19 @@ public:
         INCUBATOR icb;
         apg::copycells(&pat, &icb);
 
-        cfier.deeppurge(cm, icb, &classifyAperiodic);
+        #ifdef GLIDERS_EXIST
+        bool remove_gliders = true;
+        #else
+        bool remove_gliders = false;
+        #endif
+
+        #ifdef STANDARD_LIFE
+        bool remove_annoyances = true;
+        #else
+        bool remove_annoyances = false;
+        #endif
+
+        cfier.deeppurge(cm, icb, &classifyAperiodic, remove_annoyances, remove_gliders);
 
         apg::bitworld bwv0;
         icb.to_bitworld(bwv0, 0);
@@ -249,12 +261,8 @@ public:
 
                 apg::bitworld bw2 = apg::hashsoup(seedroot + suffix, SYMMETRY);
                 apg::pattern origsoup(cfier.lab, cfier.lab->demorton(bw2, 1), RULESTRING);
-                std::vector<uint64_t> popseq;
 
-                for (uint64_t i = 0; i < pat.gensElapsed + 8000; i++) {
-                    popseq.push_back(origsoup.popcount((1 << 30) + 3));
-                    origsoup = origsoup[1];
-                }
+                auto popseq = get_popseq(origsoup, pat.gensElapsed + 8000, 1);
 
                 for (uint64_t p = 1; p < 4000; p++) {
                     bool period_found = true;
@@ -282,6 +290,8 @@ public:
                 }
             }
         }
+        #else
+        (void) seedroot;
         #endif
 
         return dsentry(max_difficulty, rarest_object);

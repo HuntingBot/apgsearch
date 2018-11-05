@@ -65,6 +65,9 @@ def main():
             g.write('#endif\n')
         else:
             g.write("#define UPATTERN %s\n" % upattern)
+            if 'VTile28' in upattern:
+                g.write('#define INCUBATOR apg::incubator<56, 56>\n')
+
         if (re.match('b36?7?8?s0?235?6?7?8?$', rulestring)):
             g.write('#define GLIDERS_EXIST 1\n')
 

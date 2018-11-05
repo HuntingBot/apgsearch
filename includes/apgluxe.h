@@ -1,6 +1,11 @@
 
 int run_apgluxe(int argc, char *argv[]) {
 
+    if (apg::rule2int(RULESTRING) != 0) {
+        std::cerr << "Abort: apgsearch rule does not match lifelib rule" << std::endl;
+        return 1;
+    }
+
     // Default values:
     int64_t soups_per_haul = 10000000;
     std::string payoshaKey = "#anon";

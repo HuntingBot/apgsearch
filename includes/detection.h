@@ -57,17 +57,44 @@ std::string powerlyse(apg::pattern &ipat, int stepsize, int numsteps, int startg
 
 }
 
-std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize)
-{
-    std::vector<int> poplist(3 * maxperiod);
-    std::vector<int> difflist(2 * maxperiod);
+void pat2vec(apg::pattern pat, UPATTERN &upat) {
 
-    apg::pattern pat = ipat;
-
-    for (int i = 0; i < 3 * maxperiod; i += stepsize) {
-        pat = pat[stepsize];
-        poplist[i] = pat.popcount((1 << 30) + 3);
+    std::vector<apg::bitworld> vbw;
+    for (int i = 0; i < BITPLANES; i++) {
+        vbw.push_back(pat.flatlayer(i));
     }
+    upat.insertPattern(vbw);
+
+}
+
+std::vector<int> get_popseq(apg::pattern ipat, int ngens, int stepsize) {
+
+    UPATTERN pat0;
+    UPATTERN pat1;
+
+    pat2vec(ipat, pat0);
+    pat2vec(ipat[stepsize], pat1);
+
+    std::vector<int> poplist(ngens);
+
+    for (int i = 0; i < ngens; i += stepsize) {
+        if ((i / stepsize) % 2) {
+            poplist[i] = pat1.totalPopulation();
+            pat1.advance(0, 0, 2*stepsize);
+        } else {
+            poplist[i] = pat0.totalPopulation();
+            pat0.advance(0, 0, 2*stepsize);
+        }
+    }
+
+    return poplist;
+
+}
+
+std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize) {
+
+    std::vector<int> poplist = get_popseq(ipat, 3 * maxperiod, stepsize);
+    std::vector<int> difflist(2 * maxperiod);
 
     int period = -1;
 

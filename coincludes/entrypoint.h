@@ -25,6 +25,11 @@ void print_testing_info() {
 
 int main(int argc, char* argv[]) {
 
+    if (apg::rule2int(RULESTRING) != 0) {
+        std::cerr << "Abort: apgsearch rule does not match lifelib rule" << std::endl;
+        return 1;
+    }
+
     print_testing_info();
 
     std::string modus_operandi = "";
