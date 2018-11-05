@@ -48,7 +48,19 @@ public:
         INCUBATOR icb;
         apg::copycells(&pat, &icb);
 
-        cfier.deeppurge(cm, icb, &classifyAperiodic);
+        #ifdef GLIDERS_EXIST
+        bool remove_gliders = true;
+        #else
+        bool remove_gliders = false;
+        #endif
+
+        #ifdef STANDARD_LIFE
+        bool remove_annoyances = true;
+        #else
+        bool remove_annoyances = false;
+        #endif
+
+        cfier.deeppurge(cm, icb, &classifyAperiodic, remove_annoyances, remove_gliders);
 
         // std::vector<apg::bitworld> bwv(BITPLANES + 2);
         // icb.to_bitworld(bwv[0], 0);
@@ -173,6 +185,8 @@ public:
                 }
             }
         }
+        #else
+        (void) seedroot;
         #endif
 
         return false;
