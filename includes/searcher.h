@@ -152,12 +152,8 @@ public:
 
                 apg::bitworld bw2 = apg::hashsoup(seedroot + suffix, SYMMETRY);
                 apg::pattern origsoup(cfier.lab, cfier.lab->demorton(bw2, 1), RULESTRING);
-                std::vector<uint64_t> popseq;
 
-                for (uint64_t i = 0; i < pat.gensElapsed + 8000; i++) {
-                    popseq.push_back(origsoup.popcount((1 << 30) + 3));
-                    origsoup = origsoup[1];
-                }
+                auto popseq = get_popseq(origsoup, pat.gensElapsed + 8000, 1);
 
                 for (uint64_t p = 1; p < 4000; p++) {
                     bool period_found = true;
@@ -167,7 +163,7 @@ public:
                     if (!period_found) { continue; }
                     for (uint64_t i = pat.gensElapsed + 8000 - (p + 1); i > 0; i--) {
                         if (popseq[i] != popseq[i + p]) {
-                            estgen = i + 1;
+                            estgen = i + p;
                             std::cerr << "Soup " << (seedroot + suffix) << " actually lasts \033[1;34m";
                             std::cerr << estgen << "\033[0m generations." << std::endl;
                             break;

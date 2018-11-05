@@ -67,10 +67,7 @@ void pat2vec(apg::pattern pat, UPATTERN &upat) {
 
 }
 
-std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize)
-{
-    std::vector<int> poplist(3 * maxperiod);
-    std::vector<int> difflist(2 * maxperiod);
+std::vector<int> get_popseq(apg::pattern ipat, int ngens, int stepsize) {
 
     UPATTERN pat0;
     UPATTERN pat1;
@@ -78,8 +75,10 @@ std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize)
     pat2vec(ipat, pat0);
     pat2vec(ipat[stepsize], pat1);
 
-    for (int i = 0; i < 3 * maxperiod; i += stepsize) {
-        if (i % 2) {
+    std::vector<int> poplist(ngens);
+
+    for (int i = 0; i < ngens; i += stepsize) {
+        if ((i / stepsize) % 2) {
             pat1.advance(0, 0, 2*stepsize);
             poplist[i] = pat1.totalPopulation();
         } else {
@@ -87,6 +86,15 @@ std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize)
             poplist[i] = pat0.totalPopulation();
         }
     }
+
+    return poplist;
+
+}
+
+std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize) {
+
+    std::vector<int> poplist = get_popseq(ipat, 3 * maxperiod, stepsize);
+    std::vector<int> difflist(2 * maxperiod);
 
     int period = -1;
 
