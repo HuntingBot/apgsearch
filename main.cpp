@@ -13,7 +13,7 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.59-" LIFELIB_VERSION
+#define APG_VERSION "v4.6-" LIFELIB_VERSION
 
 #include "includes/params.h"
 #include "includes/sha256.h"
@@ -30,6 +30,11 @@
 #include "includes/searching.h"
 
 int main (int argc, char *argv[]) {
+
+    if (apg::rule2int(RULESTRING) != 0) {
+        std::cerr << "Abort: apgsearch rule does not match lifelib rule" << std::endl;
+        return 1;
+    }
 
     // Default values:
     int soups_per_haul = 10000000;
