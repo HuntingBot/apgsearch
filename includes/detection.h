@@ -57,16 +57,35 @@ std::string powerlyse(apg::pattern &ipat, int stepsize, int numsteps, int startg
 
 }
 
+void pat2vec(apg::pattern pat, UPATTERN &upat) {
+
+    std::vector<apg::bitworld> vbw;
+    for (int i = 0; i < BITPLANES; i++) {
+        vbw.push_back(pat.flatlayer(i));
+    }
+    upat.insertPattern(vbw);
+
+}
+
 std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize)
 {
     std::vector<int> poplist(3 * maxperiod);
     std::vector<int> difflist(2 * maxperiod);
 
-    apg::pattern pat = ipat;
+    UPATTERN pat0;
+    UPATTERN pat1;
+
+    pat2vec(ipat, pat0);
+    pat2vec(ipat[stepsize], pat1);
 
     for (int i = 0; i < 3 * maxperiod; i += stepsize) {
-        pat = pat[stepsize];
-        poplist[i] = pat.popcount((1 << 30) + 3);
+        if (i % 2) {
+            pat1.advance(0, 0, 2*stepsize);
+            poplist[i] = pat1.totalPopulation();
+        } else {
+            pat0.advance(0, 0, 2*stepsize);
+            poplist[i] = pat0.totalPopulation();
+        }
     }
 
     int period = -1;
