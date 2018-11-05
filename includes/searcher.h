@@ -163,7 +163,7 @@ public:
                     if (!period_found) { continue; }
                     for (uint64_t i = pat.gensElapsed + 8000 - (p + 1); i > 0; i--) {
                         if (popseq[i] != popseq[i + p]) {
-                            estgen = i + p;
+                            estgen = i + 1;
                             std::cerr << "Soup " << (seedroot + suffix) << " actually lasts \033[1;34m";
                             std::cerr << estgen << "\033[0m generations." << std::endl;
                             break;

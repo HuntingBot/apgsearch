@@ -79,11 +79,11 @@ std::vector<int> get_popseq(apg::pattern ipat, int ngens, int stepsize) {
 
     for (int i = 0; i < ngens; i += stepsize) {
         if ((i / stepsize) % 2) {
-            pat1.advance(0, 0, 2*stepsize);
             poplist[i] = pat1.totalPopulation();
+            pat1.advance(0, 0, 2*stepsize);
         } else {
-            pat0.advance(0, 0, 2*stepsize);
             poplist[i] = pat0.totalPopulation();
+            pat0.advance(0, 0, 2*stepsize);
         }
     }
 
