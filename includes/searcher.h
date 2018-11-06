@@ -68,10 +68,13 @@ public:
 
         apg::bitworld bwv0;
         icb.to_bitworld(bwv0, 0);
+
+        #ifdef GLIDERS_EXIST
         int64_t n_gliders = bwv0.population() / 5;
         if (n_gliders > 0) {
             cm["xq4_153"] += n_gliders;
         }
+        #endif
 
         #else
         std::vector<apg::bitworld> bwv(BITPLANES + 1);
