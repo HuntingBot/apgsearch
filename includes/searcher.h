@@ -140,7 +140,7 @@ public:
 
     }
 
-    dsentry separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string suffix, std::string suffix) {
+    dsentry separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
 
