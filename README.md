@@ -124,3 +124,13 @@ Even though the Cygwin64 solution above will work perfectly on Windows 10,
 utilise the processor. Instead, you are encouraged to use WSL bash as
 described [here](https://gitlab.com/apgoucher/apgmera/issues/2).
 
+It seems that the order of magnitude difference quoted above is on the
+extreme side; other users report [a 20 percent difference][1] between
+WSL, VirtualBox, and Cygwin64 (in descending order of speed).
+
+[1]: http://conwaylife.com/forums/viewtopic.php?f=7&t=3049&p=61174#p61174
+
+Moreover, these comparisons were performed with the old threading model
+(OpenMP threads), whereas apgluxe has subsequently migrated to pure C++11
+threads for increased cross-platform support.
+
