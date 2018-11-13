@@ -5,6 +5,12 @@ import hashlib
 import struct
 from datetime import datetime as dt
 
+'''
+We initially attempt to import sha3. On Python 2, this monkey-patches
+the hashlib library to contain an implementation of sha3_256 (Keccak),
+one of the cryptographic hashes used in the blockchain.
+'''
+
 try:
     import sha3
 except ImportError as e:
@@ -17,6 +23,12 @@ except AttributeError as e:
     stderr.write('\033[31;1mWarning:\033[0m SHA3 algorithm not present; ' +
     'please upgrade to Python 3.6 or pip install pysha3\n')
     sha3 = None
+
+'''
+We represent 256-bit binary blobs by padding them with a 32-bit CRC
+checksum (to increase it to 288 bits) and represent them by 48 characters
+of URL-safe base64.
+'''
 
 def crc32_for_byte(r):
     for j in range(8):
@@ -32,6 +44,9 @@ def crc32(data):
     return crc
 
 def human_readable(data):
+    '''
+    This is a direct translation of the C++ code in coincludes/cryptography.h
+    '''
 
     dig32 = list(struct.unpack('<IIIIIIII', data))
     dig32.append(crc32(data))
