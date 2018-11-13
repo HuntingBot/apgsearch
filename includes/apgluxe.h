@@ -16,6 +16,8 @@ int run_apgluxe(int argc, char *argv[]) {
     bool testing = false;
     int nullargs = 1;
     bool quitByUser = false;
+
+    int iterations = 0;
     
     // Extract options:
     for (int i = 1; i < argc - 1; i++) {
@@ -27,6 +29,8 @@ int run_apgluxe(int argc, char *argv[]) {
             soups_per_haul = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-v") == 0) {
             verifications = atoi(argv[i+1]);
+        } else if (strcmp(argv[i], "-i") == 0) {
+            iterations = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-L") == 0) {
             local_log = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-t") == 0) {
@@ -98,6 +102,8 @@ int run_apgluxe(int argc, char *argv[]) {
         seed = reseed(seed);
 
         if (testing) { break; }
+        iterations -= 1;
+        if (iterations == 0) { break; }
     }
 
     return quitByUser ? 1 : 0;

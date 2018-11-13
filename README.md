@@ -27,14 +27,14 @@ Compilation and execution
 ancient computer, then the recommended alternative is the Python
 script.
 
-This program is designed to be compiled using gcc, the Gnu Compiler
-Collection. If you have this installed, then compiling apgmera is as
+This program is designed to be compiled using `gcc` or `clang`. If you
+have one of these compilers installed, then building apgluxe is as
 simple as running:
 
     bash recompile.sh
 
-in the install directory. If compilation succeeded, the last two lines
-should resemble the following:
+in the repository directory. If compilation succeeded, the last two
+lines should resemble the following:
 
     apgluxe v4.2-ll1.2: Rule b3s23 is correctly configured.
     apgluxe v4.2-ll1.2: Symmetry C1 is correctly configured.
@@ -72,16 +72,16 @@ separate instances, then use the -p command to parallelise:
 
     ./apgluxe -n 20000000 -k mykey -p 4
 
-This will use OpenMP to parallelise across 4 threads, and thus will
-produce and upload soups approximately four times more quickly.
+This will use C++11 multithreading to parallelise across 4 threads, thus
+producing and uploading soups approximately four times more quickly.
 
 Installation
 ============
 
-Linux users
------------
+Linux / Mac OS X users
+----------------------
 
-Compiling and running apgmera is easy, as explained above. To download
+Compiling and running apgluxe is easy, as explained above. To download
 the source code, use the following command:
 
     git clone https://gitlab.com/apgoucher/apgmera.git
@@ -115,23 +115,6 @@ but run inside Windows. This reduces your problem to the above case.
 If you get the error `stoll is not a member of std`, then you are using an
 old version of GCC. Run the Cygwin setup program to ensure that gcc-g++ is
 updated.
-
-Mac OS X users
---------------
-
-Again, use `./recompile.sh` to compile the executable. However, things are
-more complicated:
-
-Specifically, Mac OS X has clang (rather than gcc) as the default
-compiler and symlinks calls to gcc components (such as g++) to redirect
-to clang. Since clang lacks OpenMP support, this means that the -p flag
-will be disabled by default when you compile on a Mac. To utilise all of
-your cores, you will therefore need to run one instance per CPU core.
-
-If you would prefer to have the full capabilities, download a copy of gcc
-and replace g++ with g++-4.2.0 (or whatever your version is) at the
-beginning of the makefile. You may also need to alter an environment
-variable for the terminal to find g++.
 
 Credits and licences
 ====================
