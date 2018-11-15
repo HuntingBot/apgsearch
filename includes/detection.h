@@ -181,9 +181,9 @@ std::string classifyAperiodic(apg::pattern pat) {
 
     uint64_t vm = apg::uli_valid_mantissa(apg::rule2int(pat.getrule()));
     int lss = __builtin_ctzll(vm - 1);
-    std::string repr = linearlyse(pat, 4100, lss);
+    std::string repr = linearlyse(pat, 4800, lss);
     if (repr[0] != 'y') {
-        repr = powerlyse(pat, 128, 8000, 4100);
+        repr = powerlyse(pat, 128, 8000, 4800);
     }
 
     return repr;
