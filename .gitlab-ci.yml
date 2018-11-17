@@ -17,4 +17,5 @@ staging:
     stage: staging
     script:
         - bash recompile.sh
+        - getconf _NPROCESSORS_ONLN
         - ./apgluxe -v 0 -k '#gitlab' -i 1 -n 5000000

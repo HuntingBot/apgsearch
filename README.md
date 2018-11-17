@@ -98,8 +98,8 @@ copy in-place by running:
 
 in the repository directory.
 
-Windows users
--------------
+Windows users (pre-Windows 10)
+------------------------------
 
 Install Cygwin64 (from http://cygwin.com), ensuring that the following
 are checked in the list of plugins to install:
@@ -115,6 +115,24 @@ but run inside Windows. This reduces your problem to the above case.
 If you get the error `stoll is not a member of std`, then you are using an
 old version of GCC. Run the Cygwin setup program to ensure that gcc-g++ is
 updated.
+
+Windows 10 users
+----------------
+
+Even though the Cygwin64 solution above will work perfectly on Windows 10,
+[one user](https://gitlab.com/hedgepiggy) noted that it does not fully
+utilise the processor. Instead, you are encouraged to use WSL bash as
+described [here](https://gitlab.com/apgoucher/apgmera/issues/2).
+
+It seems that the order of magnitude difference quoted above is on the
+extreme side; other users report [a 20 percent difference][1] between
+WSL, VirtualBox, and Cygwin64 (in descending order of speed).
+
+[1]: http://conwaylife.com/forums/viewtopic.php?f=7&t=3049&p=61174#p61174
+
+Moreover, these comparisons were performed with the old threading model
+(OpenMP threads), whereas apgluxe has subsequently migrated to pure C++11
+threads for increased cross-platform support.
 
 Credits and licences
 ====================

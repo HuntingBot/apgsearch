@@ -189,7 +189,9 @@ public:
         int pathologicals = 0;
 
         for (auto it = cm.begin(); it != cm.end(); ++it) {
-            if (it->first[0] == 'y') {
+            if (it->first[0] == 'z') {
+                pathologicals += ((attempt <= 1) ? 1 : 0);
+            } else if (it->first[0] == 'y') {
                 ignorePathologicals = true;
             } else if (it->first == "PATHOLOGICAL") {
                 pathologicals += 1;
@@ -331,7 +333,7 @@ public:
                 pat.clearHistory();
                 pat.decache();
                 pat.advance(0, 0, 10000);
-                duration = 4000;
+                duration = 6000;
             }
         }
 
