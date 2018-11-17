@@ -40,6 +40,8 @@ table = [crc32_for_byte(x) for x in range(256)]
 def crc32(data):
     crc = 0
     for d in data:
+        if not isinstance(d, int):
+            d = ord(d)
         crc = table[(crc & 255) ^ d] ^ crc >> 8;
     return crc
 
@@ -51,7 +53,7 @@ def human_readable(data):
     dig32 = list(struct.unpack('<IIIIIIII', data))
     dig32.append(crc32(data))
     digest = struct.pack('<IIIIIIIII', *dig32)
-    digest = [b for b in digest]
+    digest = [(b if isinstance(b, int) else ord(b)) for b in digest]
 
     x = "";
 
@@ -82,7 +84,13 @@ def dispblock(x):
 
     for (i, r) in enumerate(l):
 
-        h = x[32*i:32*(i+1)].hex()
+        try:
+            # Python 3:
+            h = x[32*i:32*(i+1)].hex()
+        except AttributeError:
+            # Python 2:
+            h = ''.join("{:02x}".format(ord(c)) for c in x[32*i:32*(i+1)])
+
         s += '%s|%s\n' % (h, r)
 
     s += '\nMiscellaneous information:\n'
@@ -107,7 +115,7 @@ def dispblock(x):
     s += '#C seed: %s\n' % prevseed
     s += '#C sha2: %s\n' % sha2(prevseed.encode('utf8')).hexdigest()
 
-    digest = sha2(prevseed.encode('utf8')).digest()
+    digest = [(b if isinstance(b, int) else ord(b)) for b in sha2(prevseed.encode('utf8')).digest()]
     bits = [((b >> (7-i)) & 1) for b in digest for i in range(8)]
     rle = ''.join(['bo'[b] for b in bits])
     rle = tuple([rle[i:16+i] for i in range(0, 256, 16)])
