@@ -16,7 +16,10 @@ def main():
     rulestring = sys.argv[1]
     symmetry = sys.argv[2]
 
-    validsyms = ["C1", "C2_4", "C2_2", "C2_1", "C4_4", "C4_1", "8x32", "4x64", "2x128", "1x256",
+    if rulestring[-1].lower() == 'h':
+        validsyms = ["C1"]
+    else:
+        validsyms = ["C1", "C2_4", "C2_2", "C2_1", "C4_4", "C4_1", "8x32", "4x64", "2x128", "1x256",
                  "D2_+2", "D2_+1", "D2_x", "D4_+4", "D4_+2", "D4_+1", "D4_x4", "D4_x1", "D8_4", "D8_1"]
 
     redsym = symmetry
