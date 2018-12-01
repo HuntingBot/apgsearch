@@ -13,7 +13,7 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.65-" LIFELIB_VERSION
+#define APG_VERSION "v4.66-" LIFELIB_VERSION
 
 #include "includes/params.h"
 #include "includes/sha256.h"
