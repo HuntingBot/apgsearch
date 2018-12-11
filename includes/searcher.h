@@ -34,6 +34,57 @@ public:
         }
     }
 
+    void methudetect(UPATTERN &pat, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
+
+        bool nonempty = pat.nonempty();
+
+        int estgen = pat.gensElapsed - (nonempty ? 11000 : 120);
+        if (estgen >= (nonempty ? 24000 : 500)) {
+            std::cerr << "Soup " << (seedroot + suffix) << " lasts an estimated \033[1;34m";
+            std::cerr << estgen << "\033[0m generations; rerunning..." << std::endl;
+
+            estgen = 0;
+
+            apg::bitworld bw2 = apg::hashsoup(seedroot + suffix, SYMMETRY);
+            apg::pattern origsoup(cfier.lab, cfier.lab->demorton(bw2, 1), RULESTRING);
+
+            auto popseq = get_popseq(origsoup, pat.gensElapsed + 8000, 1);
+
+            for (uint64_t p = 1; p < 4000; p++) {
+                bool period_found = true;
+                for (uint64_t i = pat.gensElapsed; i < pat.gensElapsed + 8000; i++) {
+                    if (popseq[i] != popseq[i - p]) { period_found = false; break; }
+                }
+                if (!period_found) { continue; }
+                for (uint64_t i = pat.gensElapsed + 8000 - (p + 1); i > 0; i--) {
+                    if (popseq[i] != popseq[i + p]) {
+                        estgen = i + 1;
+                        std::cerr << "Soup " << (seedroot + suffix) << " actually lasts \033[1;34m";
+                        std::cerr << estgen << "\033[0m generations." << std::endl;
+                        break;
+                    }
+                }
+                if (period_found) { break; }
+            }
+
+            if ((!nonempty) && (estgen >= 500)) {
+                std::ostringstream ss;
+                ss << "messless_" << (estgen / 100) << "h";
+                std::string apgcode = ss.str();
+                census[apgcode] += 1;
+                alloccur[apgcode].push_back(suffix);
+            }
+
+            if (estgen >= 25000) {
+                std::ostringstream ss;
+                ss << "methuselah_" << (estgen / 1000) << "k";
+                std::string apgcode = ss.str();
+                census[apgcode] += 1;
+                alloccur[apgcode].push_back(suffix);
+            }
+        }
+    }
+
     bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
@@ -146,43 +197,7 @@ public:
 
         #ifdef STANDARD_LIFE
         if ((attempt == 0) && (ignorePathologicals == false)) {
-            int estgen = pat.gensElapsed - 11000;
-            if (estgen >= 24000) {
-                std::cerr << "Soup " << (seedroot + suffix) << " lasts an estimated \033[1;34m";
-                std::cerr << estgen << "\033[0m generations; rerunning..." << std::endl;
-
-                estgen = 0;
-
-                apg::bitworld bw2 = apg::hashsoup(seedroot + suffix, SYMMETRY);
-                apg::pattern origsoup(cfier.lab, cfier.lab->demorton(bw2, 1), RULESTRING);
-
-                auto popseq = get_popseq(origsoup, pat.gensElapsed + 8000, 1);
-
-                for (uint64_t p = 1; p < 4000; p++) {
-                    bool period_found = true;
-                    for (uint64_t i = pat.gensElapsed; i < pat.gensElapsed + 8000; i++) {
-                        if (popseq[i] != popseq[i - p]) { period_found = false; break; }
-                    }
-                    if (!period_found) { continue; }
-                    for (uint64_t i = pat.gensElapsed + 8000 - (p + 1); i > 0; i--) {
-                        if (popseq[i] != popseq[i + p]) {
-                            estgen = i + 1;
-                            std::cerr << "Soup " << (seedroot + suffix) << " actually lasts \033[1;34m";
-                            std::cerr << estgen << "\033[0m generations." << std::endl;
-                            break;
-                        }
-                    }
-                    if (period_found) { break; }
-                }
-
-                if (estgen >= 25000) {
-                    std::ostringstream ss;
-                    ss << "methuselah_" << (estgen / 1000) << "k";
-                    std::string apgcode = ss.str();
-                    census[apgcode] += 1;
-                    alloccur[apgcode].push_back(suffix);
-                }
-            }
+            methudetect(pat, cfier, seedroot, suffix);
         }
         #else
         (void) seedroot;
@@ -214,6 +229,10 @@ public:
 
                 failure = separate(pat, duration, attempt, cfier, seedroot, suffix);
 
+            #ifdef STANDARD_LIFE
+            } else {
+                methudetect(pat, cfier, seedroot, suffix);
+            #endif
             }
 
             // Pathological object detected:
