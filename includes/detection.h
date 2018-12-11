@@ -57,6 +57,22 @@ std::string powerlyse(apg::pattern &ipat, int stepsize, int numsteps, int startg
 
 }
 
+#ifdef HLIFE_POPSEQ
+
+std::vector<int> get_popseq(apg::pattern ipat, int ngens, int stepsize) {
+
+    std::vector<int> poplist(ngens);
+    apg::pattern pat = ipat;
+    for (int i = 0; i < ngens; i += stepsize) {
+        poplist[i] = pat.popcount((1 << 30) + 3);
+        pat = pat[stepsize];
+    }
+    return poplist;
+
+}
+
+#else
+
 void pat2vec(apg::pattern pat, UPATTERN &upat) {
 
     std::vector<apg::bitworld> vbw;
@@ -90,6 +106,8 @@ std::vector<int> get_popseq(apg::pattern ipat, int ngens, int stepsize) {
     return poplist;
 
 }
+
+#endif
 
 std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize) {
 
