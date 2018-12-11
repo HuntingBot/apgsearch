@@ -10,8 +10,6 @@ rm -f "main.o" | true
 # Ensures compilation will fail unless rule2asm succeeds:
 rm -f "includes/params.h" | true
 
-# --------------------------------
-
 updatearg=`echo "$@" | grep -o "\\-\\-update" | sed "s/\\-\\-update/u/"`
 
 if ((${#updatearg} != 0))
@@ -55,8 +53,8 @@ if [ "$1" = "lifecoin" ]; then
     launch=2
 else
     printf "Compiling \033[32;1mapgluxe\033[0m without lifecoin support...\n"
-    rulearg=`echo "$@" | grep -o "\\-\\-rule [a-z0-9-]*" | sed "s/\\-\\-rule\\ //"`
-    symmarg=`echo "$@" | grep -o "\\-\\-symmetry [a-zA-Z0-9_+]*" | sed "s/\\-\\-symmetry\\ //"`
+    rulearg=`echo "$@" | grep -o "\\-\\-rule [^ ]*" | sed "s/\\-\\-rule\\ //"`
+    symmarg=`echo "$@" | grep -o "\\-\\-symmetry [^ ]*" | sed "s/\\-\\-symmetry\\ //"`
 
     if ((${#rulearg} == 0))
     then
