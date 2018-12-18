@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "happyhttp.h"
-#include "sha256.h"
+#include "../lifelib/soup/sha256.h"
 
 class ProcessedResponse {
 public:
