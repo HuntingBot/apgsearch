@@ -4,7 +4,7 @@ CFLAGS=-c -Wall -Wextra -pedantic -O3 -march=native --std=c++11
 
 LDFLAGS=-pthread
 
-SOURCES=main.cpp includes/sha256.cpp includes/md5.cpp includes/happyhttp.cpp
+SOURCES=main.cpp includes/md5.cpp includes/happyhttp.cpp
 
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=apgluxe
