@@ -5,7 +5,7 @@ import re
 
 from lifelib.genera import rule_property
 from lifelib.autocompile import reset_tree
-from lifelib.pythlib.samples import get_symmetries
+from lifelib.pythlib.samples import validate_symmetry
 
 def main():
 
@@ -17,16 +17,7 @@ def main():
     rulestring = sys.argv[1]
     symmetry = sys.argv[2]
 
-    validsyms = get_symmetries(rulestring)
-
-    redsym = symmetry
-    while ((len(redsym) > 0) and (redsym[0] == 'i')):
-        redsym = redsym[1:]
-
-    if redsym not in validsyms:
-        print("Invalid symmetry: \033[1;31m"+symmetry+"\033[0m is not one of the supported symmetries:")
-        print(repr(validsyms))
-        exit(1)
+    validate_symmetry(rulestring, symmetry)
 
     print("Valid symmetry: \033[1;32m"+symmetry+"\033[0m")
 
