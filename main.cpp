@@ -13,7 +13,7 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.72-" LIFELIB_VERSION
+#define APG_VERSION "v4.73-" LIFELIB_VERSION
 
 #include "includes/params.h"
 #include "includes/md5.h"
@@ -47,6 +47,8 @@ int main (int argc, char *argv[]) {
     bool quitByUser = false;
 
     int iterations = 0;
+
+    bool consumed_rule = false;
     
     // Extract options:
     for (int i = 1; i < argc - 1; i++) {
@@ -67,17 +69,20 @@ int main (int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-p") == 0) {
             parallelisation = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "--rule") == 0) {
-            std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
-            std::string desired_rulestring = argv[i+1];
-            if (strcmp(RULESTRING, argv[i+1]) == 0) {
-                std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m is correctly configured." << std::endl;
-                nullargs += 2;
-            } else {
-                std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m does not match desired rule \033[1;34m";
-                std::cout << desired_rulestring << "\033[0m." << std::endl;
-                execvp("./recompile.sh", argv);
-                return 1;
+            if (!consumed_rule) {
+                std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
+                std::string desired_rulestring = argv[i+1];
+                if (strcmp(RULESTRING, argv[i+1]) == 0) {
+                    std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m is correctly configured." << std::endl;
+                } else {
+                    std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m does not match desired rule \033[1;34m";
+                    std::cout << desired_rulestring << "\033[0m." << std::endl;
+                    execvp("./recompile.sh", argv);
+                    return 1;
+                }
             }
+            nullargs += 2;
+            consumed_rule = true;
         } else if (strcmp(argv[i], "--symmetry") == 0) {
             std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
             std::string desired_symmetry = argv[i+1];

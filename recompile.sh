@@ -61,11 +61,12 @@ echo "Configuring rule $rulearg; symmetry $symmarg"
 python mkparams.py $rulearg $symmarg
 make
 
-if (($launch == 1))
-then
-./apgluxe "$@"
+newrule="$( grep 'RULESTRING' 'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
+
+if [ "$launch" = "1" ]; then
+    ./apgluxe --rule $newrule "$@"
 else
-./apgluxe --rule $rulearg --symmetry $symmarg
+    ./apgluxe --rule $newrule --symmetry $symmarg
 fi
 
 exit 0

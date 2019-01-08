@@ -4,7 +4,7 @@ import sys
 import re
 
 from lifelib.genera import rule_property
-from lifelib.autocompile import reset_tree
+from lifelib.autocompile import reset_tree, sanirule
 from lifelib.pythlib.samples import validate_symmetry
 
 def main():
@@ -16,6 +16,12 @@ def main():
 
     rulestring = sys.argv[1]
     symmetry = sys.argv[2]
+
+    # Convert rulestrings such as 'B3/S23' into 'b3s23':
+    newrule = sanirule(rulestring)
+    if newrule != rulestring:
+        print("Warning: \033[1;31m" + rulestring + "\033[0m interpreted as \033[1;32m" + newrule + "\033[0m")
+        rulestring = newrule
 
     validate_symmetry(rulestring, symmetry)
 
@@ -40,7 +46,6 @@ def main():
         g.write('#define BITPLANES %d\n' % bitplanes)
         g.write('#define SYMMETRY "%s"\n' % symmetry)
         g.write('#define RULESTRING "%s"\n' % rulestring)
-        g.write('#define RULESTRING_SLASHED "%s"\n' % rulestring.replace('b', 'B').replace('s', '/S'))
         g.write('#define CLASSIFIER apg::base_classifier<BITPLANES>\n')
 
         if (symmetry == 'C1'):
