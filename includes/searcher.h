@@ -34,6 +34,8 @@ public:
         }
     }
 
+    #ifdef STANDARD_LIFE
+
     void methudetect(UPATTERN &pat, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
 
         bool nonempty = pat.nonempty();
@@ -85,15 +87,22 @@ public:
         }
     }
 
+    #endif
+
     bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
+        std::map<std::string, int64_t> cm;
+        cfier.gmax = (1024 << (attempt * 2));
+
+        #ifdef HASHLIFE_ONLY
+
+        cm = cfier.census(pat, duration, &classifyAperiodic);
+
+        #else
 
         pat.decache();
         pat.advance(0, 1, duration);
-        std::map<std::string, int64_t> cm;
-
-        cfier.gmax = (1024 << (attempt * 2));
 
         #ifdef INCUBATOR
         INCUBATOR icb;
@@ -113,10 +122,6 @@ public:
 
         cfier.deeppurge(cm, icb, &classifyAperiodic, remove_annoyances, remove_gliders);
 
-        // std::vector<apg::bitworld> bwv(BITPLANES + 2);
-        // icb.to_bitworld(bwv[0], 0);
-        // icb.to_bitworld(bwv[1], 1);
-
         apg::bitworld bwv0;
         icb.to_bitworld(bwv0, 0);
 
@@ -129,6 +134,8 @@ public:
         std::vector<apg::bitworld> bwv(BITPLANES + 1);
         pat.extractPattern(bwv);
         cfier.census(cm, bwv, &classifyAperiodic, true);
+        #endif
+
         #endif
 
         cfier.gmax = 1048576;
@@ -212,8 +219,13 @@ public:
         apg::bitworld bw = apg::hashsoup(seedroot + suffix, SYMMETRY);
         std::vector<apg::bitworld> vbw; // = apg::rle2vec("bo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!");
         vbw.push_back(bw);
+
+        #ifdef HASHLIFE_ONLY
+        apg::pattern pat(cfier.lab, cfier.lab->fromplanes(vbw), RULESTRING);
+        #else
         UPATTERN pat;
         pat.insertPattern(vbw);
+        #endif
 
         int duration = stabilise3(pat);
 
@@ -238,9 +250,13 @@ public:
             // Pathological object detected:
             if (failure) {
                 attempt += 1;
+                #ifdef HASHLIFE_ONLY
+                pat = pat[10000];
+                #else
                 pat.clearHistory();
                 pat.decache();
                 pat.advance(0, 0, 10000);
+                #endif
                 duration = 6000;
             }
         }

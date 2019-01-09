@@ -57,7 +57,7 @@ std::string powerlyse(apg::pattern &ipat, int stepsize, int numsteps, int startg
 
 }
 
-#ifdef HLIFE_POPSEQ
+#ifdef HASHLIFE_ONLY
 
 std::vector<int> get_popseq(apg::pattern ipat, int ngens, int stepsize) {
 

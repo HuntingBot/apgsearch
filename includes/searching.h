@@ -28,8 +28,10 @@ void populateLuts() {
     apg::bitworld bw = apg::hashsoup("", SYMMETRY);
     std::vector<apg::bitworld> vbw;
     vbw.push_back(bw);
-    UPATTERN pat;
-    pat.insertPattern(vbw);
+
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
+    apg::pattern pat(&lt, lt.fromplanes(vbw), RULESTRING);
+
     pat.advance(0, 0, 8);
 
 }

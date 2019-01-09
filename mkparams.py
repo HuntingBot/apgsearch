@@ -32,6 +32,7 @@ def main():
     m = re.match('b1?2?3?4?5?6?7?8?s0?1?2?3?4?5?6?7?8?$', rulestring)
 
     bitplanes = rule_property(rulestring, 'bitplanes')
+    family = rule_property(rulestring, 'family')
 
     if m is None:
         # Arbitrary rules should use the Universal Leaf Iterator:
@@ -50,7 +51,11 @@ def main():
 
         if (symmetry == 'C1'):
             g.write('#define C1_SYMMETRY 1\n')
-        if (rulestring == 'b3s23'):
+
+        if (family >= 6):
+            g.write('#define HASHLIFE_ONLY 1\n')
+            g.write('#define UPATTERN apg::pattern\n')
+        elif (rulestring == 'b3s23'):
             g.write('#define STANDARD_LIFE 1\n')
             g.write('#ifdef __AVX512F__\n')
             g.write('#define UPATTERN apg::upattern<apg::VTile44, 28, 44>\n')
