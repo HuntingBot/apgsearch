@@ -13,7 +13,7 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.80-" LIFELIB_VERSION
+#define APG_VERSION "v4.81-" LIFELIB_VERSION
 
 #include "includes/params.h"
 #include "includes/md5.h"
