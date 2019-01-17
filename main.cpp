@@ -39,10 +39,18 @@ int main (int argc, char *argv[]) {
     int soups_per_haul = 10000000;
     std::string payoshaKey = "#anon";
     std::string seed = reseed("original seed");
-    int verifications = -1;
     int parallelisation = 0;
+
+    #ifdef STDIN_SYM
+    int local_log = 1;
+    bool testing = true;
+    int verifications = 0;
+    #else
     int local_log = 0;
     bool testing = false;
+    int verifications = -1;
+    #endif
+
     int nullargs = 1;
     bool quitByUser = false;
 
@@ -65,6 +73,7 @@ int main (int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-L") == 0) {
             local_log = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-t") == 0) {
+            iterations = 1;
             testing = true;
         } else if (strcmp(argv[i], "-p") == 0) {
             parallelisation = atoi(argv[i+1]);
@@ -134,8 +143,6 @@ int main (int argc, char *argv[]) {
             quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
         }
         seed = reseed(seed);
-
-        if (testing) { break; }
 
         iterations -= 1;
         if (iterations == 0) { break; }
