@@ -23,7 +23,8 @@ def main():
         print("Warning: \033[1;31m" + rulestring + "\033[0m interpreted as \033[1;32m" + newrule + "\033[0m")
         rulestring = newrule
 
-    validate_symmetry(rulestring, symmetry)
+    if symmetry != 'stdin':
+        validate_symmetry(rulestring, symmetry)
 
     print("Valid symmetry: \033[1;32m"+symmetry+"\033[0m")
 
@@ -51,6 +52,8 @@ def main():
 
         if (symmetry == 'C1'):
             g.write('#define C1_SYMMETRY 1\n')
+        elif (symmetry == 'stdin'):
+            g.write('#define STDIN_SYM 1\n')
 
         if (family >= 6):
             g.write('#define HASHLIFE_ONLY 1\n')

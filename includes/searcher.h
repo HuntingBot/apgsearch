@@ -321,9 +321,13 @@ public:
 
             ss << censusList[i].second;
 
+            #ifdef STDIN_SYM
+            ss << " " << occurrences[0];
+            #else
             for (unsigned int j = 0; j < occurrences.size(); j++) {
                 ss << " " << occurrences[j];
             }
+            #endif
 
             ss << "\n";
         }
