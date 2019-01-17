@@ -74,7 +74,7 @@ int main (int argc, char *argv[]) {
             local_log = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-t") == 0) {
             iterations = 1;
-            testing = true;
+            testing = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-p") == 0) {
             parallelisation = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "--rule") == 0) {
