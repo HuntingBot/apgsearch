@@ -73,8 +73,8 @@ int main (int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-L") == 0) {
             local_log = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-t") == 0) {
-            iterations = 1;
             testing = atoi(argv[i+1]);
+            if (testing) { iterations = 1; }
         } else if (strcmp(argv[i], "-p") == 0) {
             parallelisation = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "--rule") == 0) {
@@ -143,10 +143,13 @@ int main (int argc, char *argv[]) {
             quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
         }
         seed = reseed(seed);
+        std::cout << "New seed: " << seed << "; iterations = " << iterations << "; quitByUser = " << quitByUser << std::endl;
 
         iterations -= 1;
         if (iterations == 0) { break; }
     }
+
+    std::cout << "Terminating..." << std::endl;
 
     return quitByUser ? 1 : 0;
 }
