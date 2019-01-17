@@ -173,6 +173,8 @@ public:
                 }
             }
 
+            if (census[apgcode] > 50) { continue; }
+
             #ifdef STANDARD_LIFE
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
                 if ((apgcode[2] != '2') || (apgcode[3] != '_')) {
