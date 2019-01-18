@@ -167,7 +167,7 @@ public:
             if ((ignorePathologicals == false) || (apgcode.compare("PATHOLOGICAL") != 0)) {
                 census[apgcode] += it->second;
                 if (alloccur[apgcode].size() == 0 || alloccur[apgcode].back().compare(suffix) != 0) {
-                    if (alloccur[apgcode].size() < 10) {
+                    if ((suffix.length() < 1920) && (alloccur[apgcode].size() < 10)) {
                         alloccur[apgcode].push_back(suffix);
                     }
                 }
@@ -320,6 +320,7 @@ public:
 
         for (int i = censusList.size() - 1; i >= 0; i--) {
             std::vector<std::string> occurrences = alloccur[censusList[i].second];
+            if (occurrences.size() == 0) { continue; }
 
             ss << censusList[i].second;
 

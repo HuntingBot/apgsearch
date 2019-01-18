@@ -151,5 +151,5 @@ int main (int argc, char *argv[]) {
 
     std::cout << "Terminating..." << std::endl;
 
-    return quitByUser ? 1 : 0;
+    return 0;
 }

@@ -11,7 +11,10 @@ before_script:
 test:
     stage: test
     script:
-        - bash lifelib/tests/test_all.sh
+        - bash recompile.sh --symmetry 'gitlab_stdin_test'
+        - cat test/minstrels.rle | ./apgluxe -L 1 -t 1 -s 'test_seed'
+        - cat *.test_seed.txt | tr ' ' '\n' | grep xq6 | sort | uniq > sortedships.txt
+        - sha256sum sortedships.txt | grep b0a11c658
 
 staging:
     stage: staging
