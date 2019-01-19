@@ -47,8 +47,8 @@ public:
 
             estgen = 0;
 
-            apg::bitworld bw2 = apg::hashsoup(seedroot + suffix, SYMMETRY);
-            apg::pattern origsoup(cfier.lab, cfier.lab->demorton(bw2, 1), RULESTRING);
+            std::vector<apg::bitworld> vbw = apg::hashsoup(seedroot + suffix, SYMMETRY);
+            apg::pattern origsoup(cfier.lab, cfier.lab->fromplanes(vbw), RULESTRING);
 
             auto popseq = get_popseq(origsoup, pat.gensElapsed + 8000, 1);
 
@@ -218,9 +218,7 @@ public:
 
     void censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
 
-        apg::bitworld bw = apg::hashsoup(seedroot + suffix, SYMMETRY);
-        std::vector<apg::bitworld> vbw; // = apg::rle2vec("bo$obo$bo8$8bo$6bobo$5b2obo2$4b3o!");
-        vbw.push_back(bw);
+        std::vector<apg::bitworld> vbw = apg::hashsoup(seedroot + suffix, SYMMETRY);
 
         #ifdef HASHLIFE_ONLY
         apg::pattern pat(cfier.lab, cfier.lab->fromplanes(vbw), RULESTRING);

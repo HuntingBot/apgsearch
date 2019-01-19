@@ -25,9 +25,7 @@ int keyWaiting() {
 
 void populateLuts() {
 
-    apg::bitworld bw = apg::hashsoup("", SYMMETRY);
-    std::vector<apg::bitworld> vbw;
-    vbw.push_back(bw);
+    std::vector<apg::bitworld> vbw = apg::hashsoup("", SYMMETRY);
 
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::pattern pat(&lt, lt.fromplanes(vbw), RULESTRING);
