@@ -10,14 +10,24 @@ int run_apgluxe(int argc, char *argv[]) {
     int64_t soups_per_haul = 10000000;
     std::string payoshaKey = "#anon";
     std::string seed = reseed("original seed");
-    int verifications = -1;
     int parallelisation = 0;
+
+    #ifdef STDIN_SYM
+    int local_log = 1;
+    bool testing = true;
+    int verifications = 0;
+    #else
     int local_log = 0;
     bool testing = false;
+    int verifications = -1;
+    #endif
+
     int nullargs = 1;
     bool quitByUser = false;
 
     int iterations = 0;
+
+    bool consumed_rule = false;
     
     // Extract options:
     for (int i = 1; i < argc - 1; i++) {
@@ -34,21 +44,25 @@ int run_apgluxe(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-L") == 0) {
             local_log = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-t") == 0) {
-            testing = true;
+            testing = atoi(argv[i+1]);
+            if (testing) { iterations = 1; }
         } else if (strcmp(argv[i], "-p") == 0) {
             parallelisation = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "--rule") == 0) {
-            std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
-            std::string desired_rulestring = argv[i+1];
-            if (strcmp(RULESTRING, argv[i+1]) == 0) {
-                std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m is correctly configured." << std::endl;
-                nullargs += 2;
-            } else {
-                std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m does not match desired rule \033[1;34m";
-                std::cout << desired_rulestring << "\033[0m." << std::endl;
-                execvp("./recompile.sh", argv);
-                return 1;
+            if (!consumed_rule) {
+                std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
+                std::string desired_rulestring = argv[i+1];
+                if (strcmp(RULESTRING, argv[i+1]) == 0) {
+                    std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m is correctly configured." << std::endl;
+                } else {
+                    std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m does not match desired rule \033[1;34m";
+                    std::cout << desired_rulestring << "\033[0m." << std::endl;
+                    execvp("./recompile.sh", argv);
+                    return 1;
+                }
             }
+            nullargs += 2;
+            consumed_rule = true;
         } else if (strcmp(argv[i], "--symmetry") == 0) {
             std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
             std::string desired_symmetry = argv[i+1];
@@ -100,11 +114,13 @@ int run_apgluxe(int argc, char *argv[]) {
             quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
         }
         seed = reseed(seed);
+        std::cout << "New seed: " << seed << "; iterations = " << iterations << "; quitByUser = " << quitByUser << std::endl;
 
-        if (testing) { break; }
         iterations -= 1;
         if (iterations == 0) { break; }
     }
 
-    return quitByUser ? 1 : 0;
+    std::cout << "Terminating..." << std::endl;
+
+    return 0;
 }
