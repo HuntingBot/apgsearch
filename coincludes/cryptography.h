@@ -5,7 +5,8 @@
 #include <iostream>
 #include <utility>
 
-#include "../includes/sha256.h"
+#include "../lifelib/soup/sha256.h"
+
 extern "C"
 {
 #include "sha3/sha3.h"
