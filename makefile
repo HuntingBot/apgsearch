@@ -8,7 +8,7 @@ LD_FLAGS=-pthread
 
 CPP_FLAGS=-c -Wall -Wextra -pedantic -O3 -march=native --std=c++11
 
-CPP_SOURCES=main.cpp includes/sha256.cpp includes/md5.cpp includes/happyhttp.cpp
+CPP_SOURCES=main.cpp includes/md5.cpp includes/happyhttp.cpp
 
 ifdef LIFECOIN
     C_SOURCES=dilithium/fips202.c dilithium/packing.c dilithium/polyvec.c dilithium/rounding.c dilithium/ntt.c dilithium/poly.c dilithium/reduce.c dilithium/sign.c coincludes/sha3/sha3.c
@@ -52,4 +52,3 @@ $(EXECUTABLE): $(OBJECTS)
 
 .c.o:
 	$(C_COMPILER) $(C_FLAGS) $< -o $@
-

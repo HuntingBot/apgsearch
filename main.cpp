@@ -13,10 +13,9 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.68-" LIFELIB_VERSION
+#define APG_VERSION "v4.86-" LIFELIB_VERSION
 
 #include "includes/params.h"
-#include "includes/sha256.h"
 #include "includes/md5.h"
 #include "includes/payosha256.h"
 #include "includes/hashsoup2.h"

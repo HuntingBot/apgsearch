@@ -4,7 +4,8 @@ import sys
 import re
 
 from lifelib.genera import rule_property
-from lifelib.autocompile import reset_tree
+from lifelib.autocompile import reset_tree, sanirule
+from lifelib.pythlib.samples import validate_symmetry
 
 def main():
 
@@ -16,20 +17,13 @@ def main():
     rulestring = sys.argv[1]
     symmetry = sys.argv[2]
 
-    if rulestring[-1].lower() == 'h':
-        validsyms = ["1x256", "2x128", "4x64", "8x32", "C1"]
-    else:
-        validsyms = ["1x256", "2x128", "4x64", "8x32", "C1", "C2_4", "C2_2", "C2_1", "C4_4", "C4_1",
-                 "D2_+2", "D2_+1", "D2_x", "D4_+4", "D4_+2", "D4_+1", "D4_x4", "D4_x1", "D8_4", "D8_1"]
+    # Convert rulestrings such as 'B3/S23' into 'b3s23':
+    newrule = sanirule(rulestring)
+    if newrule != rulestring:
+        print("Warning: \033[1;31m" + rulestring + "\033[0m interpreted as \033[1;32m" + newrule + "\033[0m")
+        rulestring = newrule
 
-    redsym = symmetry
-    while ((len(redsym) > 0) and (redsym[0] == 'i')):
-        redsym = redsym[1:]
-
-    if redsym not in validsyms:
-        print("Invalid symmetry: \033[1;31m"+symmetry+"\033[0m is not one of the supported symmetries:")
-        print(repr(validsyms))
-        exit(1)
+    validate_symmetry(rulestring, symmetry)
 
     print("Valid symmetry: \033[1;32m"+symmetry+"\033[0m")
 
@@ -38,6 +32,7 @@ def main():
     m = re.match('b1?2?3?4?5?6?7?8?s0?1?2?3?4?5?6?7?8?$', rulestring)
 
     bitplanes = rule_property(rulestring, 'bitplanes')
+    family = rule_property(rulestring, 'family')
 
     if m is None:
         # Arbitrary rules should use the Universal Leaf Iterator:
@@ -52,12 +47,17 @@ def main():
         g.write('#define BITPLANES %d\n' % bitplanes)
         g.write('#define SYMMETRY "%s"\n' % symmetry)
         g.write('#define RULESTRING "%s"\n' % rulestring)
-        g.write('#define RULESTRING_SLASHED "%s"\n' % rulestring.replace('b', 'B').replace('s', '/S'))
         g.write('#define CLASSIFIER apg::base_classifier<BITPLANES>\n')
 
         if (symmetry == 'C1'):
             g.write('#define C1_SYMMETRY 1\n')
-        if (rulestring == 'b3s23'):
+        elif 'stdin' in symmetry:
+            g.write('#define STDIN_SYM 1\n')
+
+        if (family >= 6):
+            g.write('#define HASHLIFE_ONLY 1\n')
+            g.write('#define UPATTERN apg::pattern\n')
+        elif (rulestring == 'b3s23'):
             g.write('#define STANDARD_LIFE 1\n')
             g.write('#ifdef __AVX512F__\n')
             g.write('#define UPATTERN apg::upattern<apg::VTile44, 28, 44>\n')

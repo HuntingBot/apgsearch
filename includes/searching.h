@@ -25,11 +25,11 @@ int keyWaiting() {
 
 void populateLuts() {
 
-    apg::bitworld bw = apg::hashsoup("", SYMMETRY);
-    std::vector<apg::bitworld> vbw;
-    vbw.push_back(bw);
-    UPATTERN pat;
-    pat.insertPattern(vbw);
+    std::vector<apg::bitworld> vbw = apg::hashsoup("", SYMMETRY);
+
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
+    apg::pattern pat(&lt, lt.fromplanes(vbw), RULESTRING);
+
     pat.advance(0, 0, 8);
 
 }
@@ -135,6 +135,7 @@ bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
 bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
 
+    #ifndef STDIN_SYM
     struct termios ttystate;
 
     // turn on non-blocking reads
@@ -142,6 +143,7 @@ bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, b
     ttystate.c_lflag &= ~ICANON;
     ttystate.c_cc[VMIN] = 1;
     tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    #endif
 
     SoupSearcher soup;
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
@@ -163,29 +165,54 @@ bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, b
     while ((finishedSearch == false) && (quitByUser == false)) {
 
         std::ostringstream ss;
+
+        #ifndef STDIN_SYM
         ss << i;
+        #else
+        bool readingrle = false;
+        std::string stdin_line;
+        while (std::getline(std::cin, stdin_line)) {
 
-        soup.censusSoup(seed, ss.str(), cfier);
+            if (stdin_line.length() == 0) { continue; }
 
-        i += 1;
+            if (readingrle) { ss << "-" << stdin_line; }
 
-        last_current = current;
-        current = clock();
-        double elapsed = ((double) (current - start)) / CLOCKS_PER_SEC;
-        double current_elapsed = ((double) (current - last_current)) / CLOCKS_PER_SEC;
-        double overall_elapsed = ((double) (current - overall_start)) / CLOCKS_PER_SEC;
-
-        if ((elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1)))) {
-            std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
-            lasti = i;
-            start = clock();
-
-            if(keyWaiting()) {
-                char c = fgetc(stdin);
-                if ((c == 'q') || (c == 'Q'))
-                    quitByUser = true;
+            if ((stdin_line[0] == 'x') && (readingrle == false)) {
+                readingrle = true;
             }
-            
+
+            if (stdin_line.find('!') != std::string::npos) { break; }
+        }
+        if (readingrle == false) { quitByUser = true; }
+        #endif
+
+        if (quitByUser == false) {
+
+            soup.censusSoup(seed, ss.str(), cfier);
+
+            i += 1;
+
+            last_current = current;
+            current = clock();
+            double elapsed = ((double) (current - start)) / CLOCKS_PER_SEC;
+            double current_elapsed = ((double) (current - last_current)) / CLOCKS_PER_SEC;
+            double overall_elapsed = ((double) (current - overall_start)) / CLOCKS_PER_SEC;
+
+            if ((elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1)))) {
+                std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
+                lasti = i;
+                start = clock();
+
+                #ifndef STDIN_SYM
+                if(keyWaiting()) {
+                    char c = fgetc(stdin);
+                    if ((c == 'q') || (c == 'Q'))
+                        quitByUser = true;
+                }
+                #endif
+                
+            }
+
         }
 
         if ((i % n == 0) || quitByUser) {
@@ -212,10 +239,12 @@ bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, b
 
     }
     
+    #ifndef STDIN_SYM
     // turn on blocking reads
     tcgetattr(STDIN_FILENO, &ttystate);
     ttystate.c_lflag |= ICANON;
     tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    #endif
 
     return quitByUser;
 

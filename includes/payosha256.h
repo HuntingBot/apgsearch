@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-#include "sha256.h"
+#include "../lifelib/soup/sha256.h"
 #include "webclient.h"
 
 int __catagolue_retries = 0;
