@@ -37,9 +37,10 @@ int main(int argc, char* argv[]) {
         modus_operandi = argv[1];
     }
 
-    if ((modus_operandi == "mine") && (argc >= 5)) {
+    if (modus_operandi == "search") {
+        return run_apgluxe(argc - 1, argv + 1);
+    } else if ((modus_operandi == "mine") && (argc >= 5)) {
         // Remove first argument:
-        // return run_apgluxe(argc - 1, argv + 1);
         int parallelism = std::stoll(argv[2]);
         std::string pkey = argv[3];
         std::string addr = argv[4];

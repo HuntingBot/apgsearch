@@ -11,9 +11,13 @@ rm -f "main.o" | true
 rm -f "includes/params.h" | true
 
 updatearg=`echo "$@" | grep -o "\\-\\-update" | sed "s/\\-\\-update/u/"`
+profilearg=`echo "$@" | grep -o "\\-\\-profile" | sed "s/\\-\\-profile/u/"`
 
-if ((${#updatearg} != 0))
-then
+if ((${#profilearg} != 0)); then
+export PROFILE_APGLUXE=1
+fi
+
+if ((${#updatearg} != 0)); then
 
 printf "Checking for updates from repository...\033[30m\n"
 newversion=`curl "https://gitlab.com/apgoucher/apgmera/raw/master/main.cpp" | grep "define APG_VERSION" | sed "s/#define APG_VERSION //"`
