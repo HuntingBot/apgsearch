@@ -84,10 +84,16 @@ make
 
 newrule="$( grep 'RULESTRING' 'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 
-if [ "$launch" = "1" ]; then
-    ./apgluxe --rule $newrule "$@"
+if [ "$1" = "lifecoin" ]; then
+    executable="./lifecoin search"
 else
-    ./apgluxe --rule $newrule --symmetry $symmarg
+    executable="./apgluxe"
+fi
+
+if [ "$launch" = "1" ]; then
+    $executable --rule $newrule "$@"
+else
+    $executable --rule $newrule --symmetry $symmarg
 fi
 
 exit 0

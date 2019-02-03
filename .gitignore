@@ -1,4 +1,6 @@
 **/*.o
+**/*.op
+**/*.gcda
 apgluxe
 lifecoin
 lifecoin-server
