@@ -49,7 +49,7 @@ $(EXECUTABLE): $(OBJECTS)
 $(EXECUTABLE_PROFILE): $(OBJECTS_PROFILE)
 	$(LINKER) $(LD_FLAGS) -fprofile-generate $(OBJECTS_PROFILE) -o $@
 	true        Generating optimization profile, this may take some time...
-	./$@ -n 100000 -k "#anon" -p $(THREADS) -i 1
+	./$@ -n 100000 -t 1 -s l_kEwHfF3ArtPb -p $(THREADS) -i 1 -v 0
 	true        done!
 
 .cpp.op:
