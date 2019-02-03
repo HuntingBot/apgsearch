@@ -138,9 +138,10 @@ Credits and licences
 ====================
 
 The software `apgluxe` and `lifelib` are both written by Adam P. Goucher and
-available under an MIT licence. Thanks go to Dave Greene, Tom Rokicki, and
-'Apple Bottom' for contributions, suggestions, testing, and feedback. All
-third-party components are similarly free and open-source:
+available under an MIT licence. Thanks go to Dave Greene, Tom Rokicki, 'Apple
+Bottom' and Darren Li for contributions, suggestions, testing, and feedback.
+
+All third-party components are similarly free and open-source:
 
  - 'CRYSTALS-Dilithium: A Lattice-Based Digital Signature Scheme' is Licensed
    under Creative Commons License CC-BY 4.0;
