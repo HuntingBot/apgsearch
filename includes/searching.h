@@ -50,7 +50,10 @@ void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
         ss << i;
         /* dsentry dp = */ localSoup->censusSoup(seedroot, ss.str(), cfier);
 
-        if (i % 100000 == 0) { std::cout << i << " soups processed..." << std::endl; }
+        if (i % 100000 == 0)
+        {
+            std::cout << i << " soups processed..." << std::endl;
+        }
 
         (*j)++;
 
