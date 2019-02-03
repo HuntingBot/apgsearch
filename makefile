@@ -2,7 +2,7 @@ CPP_COMPILER=g++
 C_COMPILER=gcc
 LINKER=g++
 
-CPP_FLAGS=-c -Wall -Wextra -pedantic -O3 -Ofast -flto -funsafe-loop-optimizations -Wunsafe-loop-optimizations -frename-registers -march=native --std=c++11
+CPP_FLAGS=-c -Wall -Wextra -pedantic -O3 -flto -funsafe-loop-optimizations -Wunsafe-loop-optimizations -frename-registers -march=native --std=c++11
 C_FLAGS=-c -Wall -Wextra -pedantic -O3 -march=native -fomit-frame-pointer
 LD_FLAGS=-flto -pthread
 
