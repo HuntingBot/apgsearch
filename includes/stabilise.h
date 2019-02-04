@@ -38,9 +38,6 @@ int naivestab_awesome(UPATTERN &pat) {
             depth += 1;
         } else {
             depth = 0;
-            if (period <= 12) {
-                pat.advance(0, 0, 12);
-            }
         }
         prevpop = currpop;
         if (depth == security) {
