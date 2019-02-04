@@ -126,6 +126,11 @@ public:
         icb.to_bitworld(bwv0, 0);
 
         int64_t n_gliders = bwv0.population() / 5;
+
+        #ifndef HASHLIFE_ONLY
+        n_gliders += pat.glider_count;
+        #endif
+
         if (n_gliders > 0) {
             cm["xq4_153"] += n_gliders;
         }
@@ -225,6 +230,9 @@ public:
         #else
         UPATTERN pat;
         pat.insertPattern(vbw);
+        #ifdef GLIDERS_EXIST
+        pat.extremal_mask = 15;
+        #endif
         #endif
 
         int duration = stabilise3(pat);
