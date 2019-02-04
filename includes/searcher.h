@@ -40,7 +40,7 @@ public:
 
         bool nonempty = pat.nonempty();
 
-        int estgen = pat.gensElapsed - (nonempty ? 11000 : 120);
+        int estgen = pat.gensElapsed;
         if (estgen >= (nonempty ? 24000 : 500)) {
             std::cerr << "Soup " << (seedroot + suffix) << " lasts an estimated \033[1;34m";
             std::cerr << estgen << "\033[0m generations; rerunning..." << std::endl;
