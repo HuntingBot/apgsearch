@@ -38,7 +38,7 @@ all: $(CPP_SOURCES) $(PROFILE_DEPENDENCIES) $(EXECUTABLE)
 
 # Clean the build environment by deleting any object files:
 clean: 
-	rm -f $(OBJECTS) $(EXECUTABLE)
+	rm -f *.o */*.o *.op */*.op *.gdca */*.gcda $(EXECUTABLE)
 	echo Clean done
 
 $(EXECUTABLE): $(OBJECTS)
