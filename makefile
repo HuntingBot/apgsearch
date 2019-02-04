@@ -2,8 +2,10 @@ CPP_COMPILER=g++
 C_COMPILER=gcc
 LINKER=g++
 
-CPP_FLAGS=-c -Wall -Wextra -pedantic -O3 -flto -funsafe-loop-optimizations -Wunsafe-loop-optimizations -frename-registers -march=native --std=c++11
-C_FLAGS=-c -Wall -Wextra -pedantic -O3 -flto -march=native -fomit-frame-pointer
+COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3 -flto -march=native
+
+CPP_FLAGS=$(COMPILER_FLAGS) --std=c++11
+C_FLAGS=$(COMPILER_FLAGS) -fomit-frame-pointer
 LD_FLAGS=-flto -pthread
 
 THREADS=4
@@ -19,16 +21,17 @@ else
     PROFILE_PARAMS=-n 100000 -t 1 -s l_kEwHfF3ArtPb -p $(THREADS) -i 1 -v 0
 endif
 
-ifdef PROFILE_APGLUXE
-PROFILE_DEPENDENCIES=$(EXECUTABLE_PROFILE)
-PROFILE_ARGS=-fprofile-use -fprofile-correction
-endif
-
 OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o)
 OBJECTS_PROFILE=$(OBJECTS:.o=.op)
 EXECUTABLE_PROFILE=$(EXECUTABLE)-profile
 
 .SUFFIXES: .c .cpp .o .op
+
+ifdef PROFILE_APGLUXE
+CPP_FLAGS += -funsafe-loop-optimizations -Wunsafe-loop-optimizations
+PROFILE_DEPENDENCIES=$(EXECUTABLE_PROFILE)
+PROFILE_ARGS=-fprofile-use -fprofile-correction
+endif
 
 # Compile:
 all: $(CPP_SOURCES) $(C_SOURCES) $(PROFILE_DEPENDENCIES) $(EXECUTABLE)
