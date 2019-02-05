@@ -7,6 +7,10 @@
 #include <atomic>
 #include <thread>
 
+#ifdef USE_OPEN_MP
+#include <omp.h>
+#endif
+
 // determine whether there's a keystroke waiting
 int keyWaiting() {
     struct timeval tv;
@@ -85,9 +89,22 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
         maxcount += n;
 
+        #ifdef USE_OPEN_MP
+        #pragma omp parallel num_threads(m)
+        {
+            int i = omp_get_thread_num();
+            SoupSearcher localSoup;
+            partialSearch(maxcount, m, i, seed, &localSoup, &(completed[i]), &running);
+            #pragma omp critical
+            {
+                globalSoup.aggregate(&(localSoup.census), &(localSoup.alloccur));
+            }
+        }
+
+        #else
+
         std::vector<SoupSearcher> localSoups(m);
         std::vector<std::thread> lsthreads(m);
-
         for (int i = 0; i < m; i++) {
             lsthreads[i] = std::thread(partialSearch, maxcount, m, i, seed, &(localSoups[i]), &(completed[i]), &running);
         }
@@ -96,6 +113,8 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
             lsthreads[i].join();
             globalSoup.aggregate(&(localSoups[i].census), &(localSoups[i].alloccur));
         }
+
+        #endif
 
         uint64_t totalSoups = 0;
 
