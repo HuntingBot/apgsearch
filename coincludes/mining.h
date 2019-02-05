@@ -50,14 +50,14 @@ int greedy_mine(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-p") == 0) {
             parallelisation = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-a") == 0) {
-            addr = atoi(argv[i+1]);
+            addr = argv[i+1];
         } else if (strcmp(argv[i], "-f") == 0) {
-            filename = atoi(argv[i+1]);
+            filename = argv[i+1];
         }
     }
 
-    if (addr == "") {
-        std::cerr << "Abort: no target address provided" << std::endl;
+    if (addr.length() != 48) {
+        std::cerr << "Abort: invalid target address provided" << std::endl;
         return 1;
     }
 
