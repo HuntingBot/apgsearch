@@ -6,6 +6,7 @@ chmod 755 "recompile.sh"
 # Ensures 'make' works properly:
 rm -f ".depend" | true
 rm -f "main.o" | true
+make clean
 
 # Ensures compilation will fail unless rule2asm succeeds:
 rm -f "includes/params.h" | true
