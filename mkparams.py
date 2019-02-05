@@ -73,6 +73,8 @@ def main():
 
         if (re.match('b36?7?8?s0?235?6?7?8?$', rulestring)):
             g.write('#define GLIDERS_EXIST 1\n')
+        else:
+            g.write('#define DISABLE_GLIDERS 1\n')
 
 
 main()

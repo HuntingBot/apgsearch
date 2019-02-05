@@ -146,7 +146,7 @@ public:
 
         bool nonempty = pat.nonempty();
 
-        int estgen = pat.gensElapsed - (nonempty ? 11000 : 120);
+        int estgen = pat.gensElapsed;
         if (estgen >= (nonempty ? 24000 : 500)) {
             std::cerr << "Soup " << (seedroot + suffix) << " lasts an estimated \033[1;34m";
             std::cerr << estgen << "\033[0m generations; rerunning..." << std::endl;
@@ -232,6 +232,11 @@ public:
         icb.to_bitworld(bwv0, 0);
 
         int64_t n_gliders = bwv0.population() / 5;
+
+        #ifndef HASHLIFE_ONLY
+        n_gliders += pat.glider_count;
+        #endif
+
         if (n_gliders > 0) {
             cm["xq4_153"] += n_gliders;
         }
@@ -338,6 +343,9 @@ public:
         #else
         UPATTERN pat;
         pat.insertPattern(vbw);
+        #ifdef GLIDERS_EXIST
+        pat.extremal_mask = 15;
+        #endif
         #endif
 
         int duration = stabilise3(pat);

@@ -29,14 +29,15 @@ int naivestab_awesome(UPATTERN &pat) {
             period = 30;
 
         pat.advance(0, 0, period);
+        #ifndef HASHLIFE_ONLY
+        if (pat.modified.size() == 0) { return 2; }
+        #endif
+
         currpop = pat.totalPopulation();
         if (currpop == prevpop) {
             depth += 1;
         } else {
             depth = 0;
-            if (period <= 12) {
-                pat.advance(0, 0, 12);
-            }
         }
         prevpop = currpop;
         if (depth == security) {
