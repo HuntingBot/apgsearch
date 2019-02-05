@@ -1,9 +1,26 @@
 #pragma once
 
 #include <atomic>
+#include <fstream>
 
 #include "blockheader.h"
 #include "nanotime.h"
+
+int nprocessors_onln() {
+
+    std::ifstream instream("/proc/cpuinfo");
+    std::string line;
+
+    int nproc = 0;
+
+    while (std::getline(instream, line)) {
+        if (line.empty()) { continue; }
+        if ((line.length() > 8) && (line.substr(0, 9) == "processor")) { nproc += 1; }
+    }
+
+    return nproc;
+
+}
 
 cgold::Blockheader parallelMine(int m, std::string payoshaKey,
                                 cgold::Blockheader &bh,
@@ -64,6 +81,11 @@ int greedy_mine(int argc, char *argv[]) {
     if (cgold::human_unreadable(addr, 0) != 0) {
         std::cerr << "Abort: target address fails cyclic redundancy check." << std::endl;
         return 1;
+    }
+
+    if (parallelisation == 0) {
+        parallelisation = nprocessors_onln();
+        std::cerr << "Warning: using all " << parallelisation << " cores" << std::endl;
     }
 
     cgold::Blockheader currentBlock(cgold::nanotime());

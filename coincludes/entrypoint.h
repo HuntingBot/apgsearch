@@ -41,6 +41,9 @@ int main(int argc, char* argv[]) {
         return run_apgluxe(argc - 1, argv + 1);
     } else if (modus_operandi == "mine") {
         return greedy_mine(argc - 1, argv + 1);
+    } else if (modus_operandi == "cpucount") {
+        std::cout << nprocessors_onln() << std::endl;
+        return 0;
     } else if (modus_operandi == "difficulty") {
         std::cerr << "Enter apgcodes line-by-line, with Ctrl+D to exit" << std::endl;
         std::string apgcode;
