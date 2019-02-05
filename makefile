@@ -8,6 +8,11 @@ CPP_FLAGS=$(COMPILER_FLAGS) --std=c++11
 C_FLAGS=$(COMPILER_FLAGS) -fomit-frame-pointer
 LD_FLAGS=-flto -pthread
 
+ifeq "$(shell uname -s | grep -o CYGWIN)" "CYGWIN"
+CPP_FLAGS += -fopenmp -DUSE_OPEN_MP
+LD_FLAGS += -fopenmp
+endif
+
 CPP_SOURCES=main.cpp includes/md5.cpp includes/happyhttp.cpp
 
 OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o)
