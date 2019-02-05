@@ -31,7 +31,7 @@ cgold::Blockheader parallelMine(int m, std::string payoshaKey,
 
 }
 
-void greedy_mine(int argc, char *argv[]) {
+int greedy_mine(int argc, char *argv[]) {
 
     if (apg::rule2int(RULESTRING) != 0) {
         std::cerr << "Abort: apgsearch rule does not match lifelib rule" << std::endl;
@@ -42,6 +42,7 @@ void greedy_mine(int argc, char *argv[]) {
     std::string payoshaKey = "#anon";
     int parallelisation = 0;
     std::string addr = "";
+    std::string filename = "";
 
     for (int i = 1; i < argc - 1; i++) {
         if (strcmp(argv[i], "-k") == 0) {
@@ -50,6 +51,8 @@ void greedy_mine(int argc, char *argv[]) {
             parallelisation = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-a") == 0) {
             addr = atoi(argv[i+1]);
+        } else if (strcmp(argv[i], "-f") == 0) {
+            filename = atoi(argv[i+1]);
         }
     }
 
@@ -60,12 +63,20 @@ void greedy_mine(int argc, char *argv[]) {
 
     cgold::Blockheader currentBlock(cgold::nanotime());
 
+    if (filename == "") {
+        std::cerr << "Warning: beginning from genesis block" << std::endl;
+    } else {
+        currentBlock.load_block(filename);
+    }
+
     while (true) {
 
         uint32_t check1 = currentBlock.include_transactions(cgold::bytevec(), addr);
         uint32_t check2 = currentBlock.include_tail(addr);
 
         std::cerr << "check1: " << check1 << ", check2: " << check2 << std::endl;
+
+        std::cerr << "Current difficulty: " << currentBlock.get_difficulty() << std::endl;
 
         currentBlock.save_block();
 

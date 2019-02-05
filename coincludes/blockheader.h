@@ -133,6 +133,12 @@ namespace cgold {
             return include_tail(xn, addr);
         }
 
+        void load_block(std::string filename) {
+            std::ifstream bl(filename, std::ios::in | std::ios::binary);
+            bl.read((char*) this, 256);
+            bl.close();
+        }
+
         void save_block(std::string filename) {
             std::ofstream bl(filename, std::ios::out | std::ios::binary);
             bl.write((char*) this, 256);
