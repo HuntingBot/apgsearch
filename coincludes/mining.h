@@ -57,7 +57,12 @@ int greedy_mine(int argc, char *argv[]) {
     }
 
     if (addr.length() != 48) {
-        std::cerr << "Abort: invalid target address provided" << std::endl;
+        std::cerr << "Abort: target address must have 48 characters." << std::endl;
+        return 1;
+    }
+
+    if (cgold::human_unreadable(addr, 0) != 0) {
+        std::cerr << "Abort: target address fails cyclic redundancy check." << std::endl;
         return 1;
     }
 
