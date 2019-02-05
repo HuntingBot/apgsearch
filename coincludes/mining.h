@@ -31,7 +31,32 @@ cgold::Blockheader parallelMine(int m, std::string payoshaKey,
 
 }
 
-void greedy_mine(int m, std::string payoshaKey, std::string addr) {
+void greedy_mine(int argc, char *argv[]) {
+
+    if (apg::rule2int(RULESTRING) != 0) {
+        std::cerr << "Abort: apgsearch rule does not match lifelib rule" << std::endl;
+        return 1;
+    }
+
+    // Default values:
+    std::string payoshaKey = "#anon";
+    int parallelisation = 0;
+    std::string addr = "";
+
+    for (int i = 1; i < argc - 1; i++) {
+        if (strcmp(argv[i], "-k") == 0) {
+            payoshaKey = argv[i+1];
+        } else if (strcmp(argv[i], "-p") == 0) {
+            parallelisation = atoi(argv[i+1]);
+        } else if (strcmp(argv[i], "-a") == 0) {
+            addr = atoi(argv[i+1]);
+        }
+    }
+
+    if (addr == "") {
+        std::cerr << "Abort: no target address provided" << std::endl;
+        return 1;
+    }
 
     cgold::Blockheader currentBlock(cgold::nanotime());
 
@@ -46,8 +71,6 @@ void greedy_mine(int m, std::string payoshaKey, std::string addr) {
 
         std::atomic<bool> running(true);
 
-        currentBlock = parallelMine(m, payoshaKey, currentBlock, running);
+        currentBlock = parallelMine(parallelisation, payoshaKey, currentBlock, running);
     }
-
 }
-

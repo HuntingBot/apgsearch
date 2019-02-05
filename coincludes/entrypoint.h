@@ -39,13 +39,8 @@ int main(int argc, char* argv[]) {
 
     if (modus_operandi == "search") {
         return run_apgluxe(argc - 1, argv + 1);
-    } else if ((modus_operandi == "mine") && (argc >= 5)) {
-        // Remove first argument:
-        int parallelism = std::stoll(argv[2]);
-        std::string pkey = argv[3];
-        std::string addr = argv[4];
-        greedy_mine(parallelism, pkey, addr);
-
+    } else if (modus_operandi == "mine") {
+        return greedy_mine(argc - 1, argv + 1);
     } else if (modus_operandi == "difficulty") {
         std::cerr << "Enter apgcodes line-by-line, with Ctrl+D to exit" << std::endl;
         std::string apgcode;
