@@ -13,7 +13,7 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.92-" LIFELIB_VERSION
+#define APG_VERSION "v4.93-" LIFELIB_VERSION
 
 #include "includes/params.h"
 #include "includes/md5.h"
@@ -114,7 +114,7 @@ int main (int argc, char *argv[]) {
     // Disable verification by default if running on a HPC;
     // otherwise verify three hauls per uploaded haul:
     if (verifications < 0) {
-        verifications = (parallelisation <= 4) ? 3 : 0;
+        verifications = (parallelisation <= 4) ? 5 : 0;
     }
     
     std::cout << "\nGreetings, this is \033[1;33mapgluxe " << APG_VERSION;
@@ -132,7 +132,8 @@ int main (int argc, char *argv[]) {
             std::cout << "Peer-reviewing hauls:\n" << std::endl;
             // Verify some hauls:
             for (int j = 0; j < verifications; j++) {
-                verifySearch(payoshaKey);
+                bool earlyquit = verifySearch(payoshaKey);
+                if (earlyquit) { break; }
             }
             std::cout << "\nPeer-review complete; proceeding search.\n" << std::endl;
         }
