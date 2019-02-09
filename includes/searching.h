@@ -149,7 +149,7 @@ bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
 }
 
-bool runSearch(int n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
+bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
 
     #ifndef STDIN_SYM
     struct termios ttystate;

@@ -36,7 +36,7 @@ int run_apgluxe(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-s") == 0) {
             seed = argv[i+1];
         } else if (strcmp(argv[i], "-n") == 0) {
-            soups_per_haul = atoi(argv[i+1]);
+            soups_per_haul = atoll(argv[i+1]);
         } else if (strcmp(argv[i], "-v") == 0) {
             verifications = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-i") == 0) {
@@ -95,6 +95,16 @@ int run_apgluxe(int argc, char *argv[]) {
     std::cout << "\033[32;1mPython version:\033[0m " << PYTHON_VERSION << std::endl;
 
     std::cout << std::endl;
+
+    if (soups_per_haul <= 0) {
+        std::cout << "Soups per haul, " << soups_per_haul << ", must be positive." << std::endl;
+        return 1;
+    }
+
+    if (soups_per_haul > 100000000000ll) {
+        std::cout << "Soups per haul reduced to maximum of 10^11" << std::endl;
+        soups_per_haul = 100000000000ll;
+    }
 
     while (!quitByUser) {
         if (verifications > 0) {
