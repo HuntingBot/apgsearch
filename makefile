@@ -1,10 +1,15 @@
 
-COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3
+COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3 -pthread
 LD_FLAGS=-pthread
 
 ifdef USE_MINGW
+ifeq "$(shell uname -s | grep -o CYGWIN)" "CYGWIN"
 CPP_COMPILER=x86_64-w64-mingw32-g++
 C_COMPILER=x86_64-w64-mingw32-gcc
+else
+CPP_COMPILER=x86_64-w64-mingw32-g++-posix
+C_COMPILER=x86_64-w64-mingw32-gcc-posix
+endif
 EXTRA_LIBS=-static -lwinpthread -lwsock32 -lws2_32 -static-libstdc++
 else
 COMPILER_FLAGS += -flto -march=native
