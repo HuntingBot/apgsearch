@@ -1,5 +1,5 @@
 
-COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3 -march=native
+COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3
 LD_FLAGS=-pthread
 
 ifdef USE_MINGW
@@ -7,7 +7,7 @@ CPP_COMPILER=x86_64-w64-mingw32-g++
 C_COMPILER=x86_64-w64-mingw32-gcc
 EXTRA_LIBS=-static -lwinpthread -lwsock32 -lws2_32 -static-libstdc++
 else
-COMPILER_FLAGS += -flto
+COMPILER_FLAGS += -flto -march=native
 LD_FLAGS += -flto
 CPP_COMPILER=g++
 C_COMPILER=gcc
