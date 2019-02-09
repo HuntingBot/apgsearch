@@ -19,13 +19,13 @@ std::string obtainWork(std::string payoshakey) {
 
 }
 
-void verifySearch(std::string payoshakey) {
+bool verifySearch(std::string payoshakey) {
 
     std::string response = obtainWork(payoshakey);
 
     if (response.length() <= 3) {
         std::cout << "Received no response from /verify." << std::endl;
-        return;
+        return 1;
     }
 
     std::stringstream iss(response);
@@ -39,7 +39,7 @@ void verifySearch(std::string payoshakey) {
 
     if ((stringlist.size() < 4)) {
         std::cout << "No more hauls to verify." << std::endl;
-        return;
+        return 1;
     }
 
     std::string authstring = authenticate(payoshakey.c_str(), "submit_verification");
@@ -47,7 +47,7 @@ void verifySearch(std::string payoshakey) {
     // Authentication failed:
     if (authstring.length() == 0) {
         std::cout << "Authentication failed." << std::endl;
-        return;
+        return 1;
     }
 
     std::ostringstream ss;
@@ -81,5 +81,7 @@ void verifySearch(std::string payoshakey) {
     }
 
     catagolueRequest(ss.str().c_str(), "/verify");
+
+    return 0;
 
 }
