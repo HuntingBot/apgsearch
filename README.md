@@ -99,8 +99,8 @@ copy in-place by running:
 
 in the repository directory.
 
-Windows users (pre-Windows 10)
-------------------------------
+Windows users (pre-Windows 10, Cygwin)
+--------------------------------------
 
 Install Cygwin64 (from http://cygwin.com), ensuring that the following
 are checked in the list of plugins to install:
@@ -116,6 +116,17 @@ but run inside Windows. This reduces your problem to the above case.
 If you get the error `stoll is not a member of std`, then you are using an
 old version of GCC. Run the Cygwin setup program to ensure that gcc-g++ is
 updated.
+
+Note that the `-p` option for parallelisation does not work in Cygwin.
+
+Windows users (precompiled)
+---------------------------
+
+There is a precompiled Windows binary, only for `b3s23/C1`, available from
+[here](https://catagolue.appspot.com/binaries/apgluxe-windows-x86_64.exe).
+It should be run from the Command Prompt so that you can provide options
+(see Example Usage above); otherwise, it will default to single-core
+searching anonymously with 10-million-soup hauls.
 
 Windows 10 users
 ----------------
