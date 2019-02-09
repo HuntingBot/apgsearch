@@ -80,6 +80,13 @@ int run_apgluxe(int argc, char *argv[]) {
 
     if ((argc == nullargs) && (argc > 1)) { return 0; }
 
+    #ifdef __CYGWIN__
+    if (parallelisation > 0) {
+        std::cout << "Warning: parallelisation disabled on Cygwin." << std::endl;
+        parallelisation = 0;
+    }
+    #endif
+
     // Disable verification by default if running on a HPC;
     // otherwise verify three hauls per uploaded haul:
     if (verifications < 0) {

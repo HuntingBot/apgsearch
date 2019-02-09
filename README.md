@@ -73,7 +73,8 @@ separate instances, then use the -p command to parallelise:
     ./apgluxe -n 20000000 -k mykey -p 4
 
 This will use C++11 multithreading to parallelise across 4 threads, thus
-producing and uploading soups approximately four times more quickly.
+producing and uploading soups approximately four times more quickly. Note
+that this does not work on Cygwin.
 
 Installation
 ============
