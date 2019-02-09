@@ -88,6 +88,22 @@ int run_apgluxe(int argc, char *argv[]) {
 
     if ((argc == nullargs) && (argc > 1)) { return 0; }
 
+    if (argc == 1) {
+        std::cout << "Please enter number of soups per haul (minimum 10000000): ";
+        std::cin >> soups_per_haul;
+        if (soups_per_haul < 10000000) { soups_per_haul = 10000000; }
+        std::cout << "Please enter payosha256 key (e.g. '#anon'): ";
+        std::cin >> payoshaKey;
+        while ((payoshaKey.substr(0, 1) == "'") || (payoshaKey[0] == '"')) {
+            payoshaKey = payoshaKey.substr(1);
+            payoshaKey = payoshaKey.substr(0, payoshaKey.length() - 1);
+        }
+        #ifndef __CYGWIN__
+        std::cout << "Please enter number of CPU threads to use (e.g. 4): ";
+        std::cin >> parallelisation;
+        #endif
+    }
+
     #ifdef __CYGWIN__
     if (parallelisation > 0) {
         std::cout << "Warning: parallelisation disabled on Cygwin." << std::endl;
