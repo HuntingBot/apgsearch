@@ -146,7 +146,7 @@ const char* GetWinsockErrorString( int err )
 	}
 
 	return "unknown";
-};
+}
 
 #endif // WIN32
 

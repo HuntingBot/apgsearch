@@ -7,7 +7,6 @@
 #include <ctime>
 #include <cmath>
 #include <unistd.h>
-#include <termios.h>
 
 #include "lifelib/upattern.h"
 #include "lifelib/classifier.h"
