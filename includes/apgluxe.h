@@ -1,3 +1,6 @@
+#ifdef _WIN32
+#include <winsock.h>
+#endif
 
 int run_apgluxe(int argc, char *argv[]) {
 
@@ -5,6 +8,11 @@ int run_apgluxe(int argc, char *argv[]) {
         std::cerr << "Abort: apgsearch rule does not match lifelib rule" << std::endl;
         return 1;
     }
+
+    #ifdef _WIN32
+    WSAData wsaData;
+    WSAStartup(MAKEWORD(1, 1), &wsaData);
+    #endif
 
     // Default values:
     int64_t soups_per_haul = 10000000;
