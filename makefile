@@ -1,12 +1,27 @@
+
+COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3 -pthread
+LD_FLAGS=-pthread
+
+ifdef USE_MINGW
+ifeq "$(shell uname -s | grep -o CYGWIN)" "CYGWIN"
+CPP_COMPILER=x86_64-w64-mingw32-g++
+C_COMPILER=x86_64-w64-mingw32-gcc
+else
+CPP_COMPILER=x86_64-w64-mingw32-g++-posix
+C_COMPILER=x86_64-w64-mingw32-gcc-posix
+endif
+EXTRA_LIBS=-static -lwinpthread -lwsock32 -lws2_32 -static-libstdc++
+else
+COMPILER_FLAGS += -flto -march=native
+LD_FLAGS += -flto
 CPP_COMPILER=g++
 C_COMPILER=gcc
-LINKER=g++
+endif
 
-COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3 -flto -march=native
+LINKER=$(CPP_COMPILER)
 
 CPP_FLAGS=$(COMPILER_FLAGS) --std=c++11
 C_FLAGS=$(COMPILER_FLAGS) -fomit-frame-pointer
-LD_FLAGS=-flto -pthread
 
 THREADS=4
 CPP_SOURCES=main.cpp includes/md5.cpp includes/happyhttp.cpp
@@ -51,7 +66,7 @@ clean:
 	echo Clean done
 
 $(EXECUTABLE): $(OBJECTS)
-	$(LINKER) $(LD_FLAGS) $(PROFILE_ARGS) $(OBJECTS) -o $@
+	$(LINKER) $(LD_FLAGS) $(PROFILE_ARGS) $(OBJECTS) $(EXTRA_LIBS) -o $@
 
 .cpp.o:
 	$(CPP_COMPILER) $(CPP_FLAGS) $(PROFILE_ARGS) $< -o $@

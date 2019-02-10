@@ -2,7 +2,6 @@
 
 #include <iomanip>
 #include <stdio.h>
-#include <sys/select.h>
 
 #include <atomic>
 #include <thread>
@@ -11,6 +10,9 @@
 #include <omp.h>
 #endif
 
+#ifndef _WIN32
+#include <sys/select.h>
+#include <termios.h>
 // determine whether there's a keystroke waiting
 int keyWaiting() {
     struct timeval tv;
@@ -26,6 +28,7 @@ int keyWaiting() {
 
     return FD_ISSET(STDIN_FILENO, &fds);
 }
+#endif
 
 void populateLuts() {
 
@@ -157,6 +160,7 @@ bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
 bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
 
+    #ifndef _WIN32
     #ifndef STDIN_SYM
     struct termios ttystate;
 
@@ -165,6 +169,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     ttystate.c_lflag &= ~ICANON;
     ttystate.c_cc[VMIN] = 1;
     tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    #endif
     #endif
 
     SoupSearcher soup;
@@ -225,12 +230,14 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
                 lasti = i;
                 start = clock();
 
+                #ifndef _WIN32
                 #ifndef STDIN_SYM
                 if(keyWaiting()) {
                     char c = fgetc(stdin);
                     if ((c == 'q') || (c == 'Q'))
                         quitByUser = true;
                 }
+                #endif
                 #endif
                 
             }
@@ -261,11 +268,13 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
 
     }
     
+    #ifndef _WIN32
     #ifndef STDIN_SYM
     // turn on blocking reads
     tcgetattr(STDIN_FILENO, &ttystate);
     ttystate.c_lflag |= ICANON;
     tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    #endif
     #endif
 
     return quitByUser;

@@ -7,13 +7,12 @@
 #include <ctime>
 #include <cmath>
 #include <unistd.h>
-#include <termios.h>
 
 #include "lifelib/upattern.h"
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.94-" LIFELIB_VERSION
+#define APG_VERSION "v4.95-" LIFELIB_VERSION
 
 #include "includes/params.h"
 #include "includes/md5.h"

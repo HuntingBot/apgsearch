@@ -13,6 +13,11 @@ rm -f "includes/params.h" | true
 
 updatearg=`echo "$@" | grep -o "\\-\\-update" | sed "s/\\-\\-update/u/"`
 profilearg=`echo "$@" | grep -o "\\-\\-profile" | sed "s/\\-\\-profile/u/"`
+mingwarg=`echo "$@" | grep -o "\\-\\-mingw" | sed "s/\\-\\-mingw/u/"`
+
+if ((${#mingwarg} != 0)); then
+export USE_MINGW=1
+fi
 
 if ((${#profilearg} != 0)); then
 export PROFILE_APGLUXE=1
