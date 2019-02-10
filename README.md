@@ -2,7 +2,7 @@ This program searches random initial configurations in Conway's Game
 of Life and periodically uploads results to a remote server. You can
 read more information about the distributed search at the following URL:
 
-- http://catagolue.appspot.com/
+- https://catagolue.appspot.com/
 
 An automatic live Twitter feed of new discoveries found by the search
 was established by Ivan Fomichev:
@@ -12,7 +12,7 @@ was established by Ivan Fomichev:
 There is also an automatically-updated summary page, with animations
 of interesting objects and various charts:
 
-- http://catagolue.appspot.com/statistics
+- https://catagolue.appspot.com/statistics
 
 The search was originally performed by people running instances of
 a Python script; this repository contains the source code for a C++
@@ -64,7 +64,7 @@ provide a valid payosha256 key. The correct syntax is as follows:
     ./apgluxe -n 20000000 -k mykey
 
 where 'mykey' is replaced with your payosha256 key (available from
-http://catagolue.appspot.com/payosha256 -- note the case-sensitivity).
+https://catagolue.appspot.com/payosha256 -- note the case-sensitivity).
 Omitting this parameter will cause soups to be uploaded anonymously.
 
 If you have a quad-core computer and would prefer not to run four
@@ -112,13 +112,13 @@ of the options mentioned in the Example Usage above.
 Windows users (pre-Windows 10, Cygwin)
 --------------------------------------
 
-Install Cygwin64 (from http://cygwin.com), ensuring that the following
+Install Cygwin64 (from https://cygwin.com), ensuring that the following
 are checked in the list of plugins to install:
 
  - git
  - make
  - gcc-g++
- - python2
+ - python (2 or 3)
 
 Open a Cygwin terminal, which will behave identically to a Linux terminal
 but run inside Windows. This reduces your problem to the above case.
