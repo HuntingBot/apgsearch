@@ -16,7 +16,7 @@ of interesting objects and various charts:
 
 The search was originally performed by people running instances of
 a Python script; this repository contains the source code for a C++
-program which is 10 times faster. The prefix 'apg-' stands for _Ash
+program which is 20 times faster. The prefix 'apg-' stands for _Ash
 Pattern Generator_ and the suffix '-luxe' refers to the capabilities
 vis-a-vis previous versions (apgmera, apgnano, and apgsearch).
 
@@ -99,6 +99,16 @@ copy in-place by running:
 
 in the repository directory.
 
+Windows users (precompiled)
+---------------------------
+
+There is a precompiled Windows binary, only for `b3s23/C1`, available from
+[here](https://catagolue.appspot.com/binaries/apgluxe-windows-x86_64.exe).
+When executed, it will prompt you for the haul size, number of CPUs to use,
+and your [payosha256 key](https://catagolue.appspot.com/payosha256). For
+finer control, it can be run from the Command Prompt with any combination
+of the options mentioned in the Example Usage above.
+
 Windows users (pre-Windows 10, Cygwin)
 --------------------------------------
 
@@ -118,15 +128,6 @@ old version of GCC. Run the Cygwin setup program to ensure that gcc-g++ is
 updated.
 
 Note that the `-p` option for parallelisation does not work in Cygwin.
-
-Windows users (precompiled)
----------------------------
-
-There is a precompiled Windows binary, only for `b3s23/C1`, available from
-[here](https://catagolue.appspot.com/binaries/apgluxe-windows-x86_64.exe).
-It should be run from the Command Prompt so that you can provide options
-(see Example Usage above); otherwise, it will default to single-core
-searching anonymously with 10-million-soup hauls.
 
 Windows 10 users
 ----------------
