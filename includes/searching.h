@@ -80,11 +80,13 @@ void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
 
 void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
                     int local_log, std::atomic<bool> &running, difficul_t difficulty,
-                    std::atomic<uint64_t> *bestSoup, std::map<std::string, difficul_t> *dtab) {
+                    std::atomic<uint64_t> *bestSoup, apg::DifficultyHolder *dtab) {
 
     SoupSearcher globalSoup;
 
-    if (dtab != 0) { globalSoup.difficulties = (*dtab); }
+    if (dtab != 0) {
+        globalSoup.difficulties = *dtab;
+    }
 
     populateLuts();
 

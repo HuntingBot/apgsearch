@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
     } else if (modus_operandi == "difficulty") {
         std::cerr << "Enter apgcodes line-by-line, with Ctrl+D to exit" << std::endl;
         std::string apgcode;
-        SoupSearcher ss;
+        apg::DifficultyHolder ss;
         while (std::getline(std::cin, apgcode)) {
             std::string rep = ss.representative(apgcode);
             auto difficulty = ss.get_difficulty(apgcode);
