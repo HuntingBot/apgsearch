@@ -6,6 +6,8 @@
 #include "cryptography.h"
 #include "blob256.h"
 
+#include "../includes/hashsoup2.h"
+
 // We impose the minimum = initial difficulty to be 7 CPU-hours per block.
 // This is the equilibrium difficulty if there are 42 cores mining (as we
 // target a block rate of one block per 10 minutes).
@@ -121,14 +123,25 @@ namespace cgold {
 
         uint32_t include_tail(std::string &addr) {
             /*
-            * Populates the extranonce with 32 bytes from /dev/urandom so
-            * that multiple instances of the searcher will use different
-            * seedroots and therefore not repeat any territory.
+            * Populates the extranonce with 32 random bytes so that
+            * multiple instances of the searcher will use different
+            * seedroots and therefore not repeat any territory. This
+            * random number generator does not need to be
+            * cryptographically secure.
             */
+
             blob256 xn;
+
+            // This uses apgsearch's internal random number generation:
+            std::string reseeded = reseed(addr);
+            sha3((void*) reseeded.c_str(), reseeded.size(), (void*) xn.data, 32);
+
+            // If on POSIX, use the operating system's more secure RNG:
+            #ifndef _WIN32
             std::ifstream ur("/dev/urandom", std::ios::in | std::ios::binary);
-            ur.read((char*) xn.data, 32);
+            ur.read((char*) xn.data, 24);
             ur.close();
+            #endif
 
             return include_tail(xn, addr);
         }
