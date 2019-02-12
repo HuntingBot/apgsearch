@@ -1,14 +1,28 @@
 #pragma once
-
 #include "../lifelib/soup/hashsoup.h"
 
-/*
- * Produce a new seed based on the original seed, current time and PID:
- */
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <ctime>
+#include <unistd.h>
+
 std::string reseed(std::string seed) {
 
     std::ostringstream ss;
-    ss << seed << " " << clock() << " " << time(NULL) << " " << getpid();
+    ss << seed;
+
+    // Stack pointer:
+    uint64_t sp; asm( "mov %%rsp, %0" : "=rm" ( sp )); ss << " " << sp;
+
+    // Clock:
+    ss << " " << clock();
+
+    // Current time:
+    ss << " " << time(NULL);
+
+    // Process ID:
+    ss << " " << getpid();
 
     std::string prehash = ss.str();
 
