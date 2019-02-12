@@ -2,7 +2,7 @@ This program searches random initial configurations in Conway's Game
 of Life and periodically uploads results to a remote server. You can
 read more information about the distributed search at the following URL:
 
-- http://catagolue.appspot.com/
+- https://catagolue.appspot.com/
 
 An automatic live Twitter feed of new discoveries found by the search
 was established by Ivan Fomichev:
@@ -12,11 +12,11 @@ was established by Ivan Fomichev:
 There is also an automatically-updated summary page, with animations
 of interesting objects and various charts:
 
-- http://catagolue.appspot.com/statistics
+- https://catagolue.appspot.com/statistics
 
 The search was originally performed by people running instances of
 a Python script; this repository contains the source code for a C++
-program which is 10 times faster. The prefix 'apg-' stands for _Ash
+program which is 20 times faster. The prefix 'apg-' stands for _Ash
 Pattern Generator_ and the suffix '-luxe' refers to the capabilities
 vis-a-vis previous versions (apgmera, apgnano, and apgsearch).
 
@@ -64,7 +64,7 @@ provide a valid payosha256 key. The correct syntax is as follows:
     ./apgluxe -n 20000000 -k mykey
 
 where 'mykey' is replaced with your payosha256 key (available from
-http://catagolue.appspot.com/payosha256 -- note the case-sensitivity).
+https://catagolue.appspot.com/payosha256 -- note the case-sensitivity).
 Omitting this parameter will cause soups to be uploaded anonymously.
 
 If you have a quad-core computer and would prefer not to run four
@@ -99,16 +99,26 @@ copy in-place by running:
 
 in the repository directory.
 
+Windows users (precompiled)
+---------------------------
+
+There is a precompiled Windows binary, only for `b3s23/C1`, available from
+[here](https://catagolue.appspot.com/binaries/apgluxe-windows-x86_64.exe).
+When executed, it will prompt you for the haul size, number of CPUs to use,
+and your [payosha256 key](https://catagolue.appspot.com/payosha256). For
+finer control, it can be run from the Command Prompt with any combination
+of the options mentioned in the Example Usage above.
+
 Windows users (pre-Windows 10, Cygwin)
 --------------------------------------
 
-Install Cygwin64 (from http://cygwin.com), ensuring that the following
+Install Cygwin64 (from https://cygwin.com), ensuring that the following
 are checked in the list of plugins to install:
 
  - git
  - make
  - gcc-g++
- - python2
+ - python (2 or 3)
 
 Open a Cygwin terminal, which will behave identically to a Linux terminal
 but run inside Windows. This reduces your problem to the above case.
@@ -118,15 +128,6 @@ old version of GCC. Run the Cygwin setup program to ensure that gcc-g++ is
 updated.
 
 Note that the `-p` option for parallelisation does not work in Cygwin.
-
-Windows users (precompiled)
----------------------------
-
-There is a precompiled Windows binary, only for `b3s23/C1`, available from
-[here](https://catagolue.appspot.com/binaries/apgluxe-windows-x86_64.exe).
-It should be run from the Command Prompt so that you can provide options
-(see Example Usage above); otherwise, it will default to single-core
-searching anonymously with 10-million-soup hauls.
 
 Windows 10 users
 ----------------
