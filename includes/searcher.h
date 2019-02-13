@@ -91,7 +91,7 @@ public:
 
     bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
 
-        bool proceedNonetheless = (attempt >= 5);
+        bool proceedNonetheless = (attempt >= 10);
         std::map<std::string, int64_t> cm;
         cfier.gmax = (1024 << (attempt * 2));
 
@@ -241,6 +241,7 @@ public:
         int attempt = 0;
 
         // Repeat until there are no pathological objects, or until five attempts have elapsed:
+        int step = 64;
         while (failure) {
 
             failure = false;
@@ -263,11 +264,13 @@ public:
                 #else
                 pat.clearHistory();
                 pat.decache();
-                pat.advance(0, 0, 10000);
+                pat.advance(0, 0, step);
+                step *= 2;
                 #endif
                 duration = 6000;
             }
         }
+
     }
 
 
