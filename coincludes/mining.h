@@ -33,7 +33,7 @@ cgold::Blockheader parallelMine(int m, std::string payoshaKey,
 
     std::atomic<uint64_t> bestSoup(invalid_soup);
 
-    threadSearch(0, m, payoshaKey, seedroot, 0, running, difficulty, &bestSoup, 0);
+    threadSearch(0, m, payoshaKey, seedroot, 0, running, 0, difficulty, &bestSoup, 0);
 
     cgold::Blockheader new_bh;
     new_bh.clear();
