@@ -151,7 +151,7 @@ int run_apgluxe(int argc, char *argv[]) {
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
         if (parallelisation > 0) {
-            quitByUser = parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log);
+            quitByUser = parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, testing);
         } else {
             quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
         }

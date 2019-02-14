@@ -32,6 +32,7 @@ int keyWaiting() {
 
 void populateLuts() {
 
+    apg::best_instruction_set();
     std::vector<apg::bitworld> vbw = apg::hashsoup("", SYMMETRY);
 
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
@@ -78,7 +79,7 @@ void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
 }
 
 void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
-                    int local_log, std::atomic<bool> &running) {
+                    int local_log, std::atomic<bool> &running, bool testing) {
 
     SoupSearcher globalSoup;
 
@@ -126,7 +127,7 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
         std::cout << "----------------------------------------------------------------------" << std::endl;
         std::cout << totalSoups << " soups completed." << std::endl;
         std::cout << "Attempting to contact payosha256." << std::endl;
-        std::string payoshaResponse = globalSoup.submitResults(payoshaKey, seed, totalSoups, local_log, 0);
+        std::string payoshaResponse = globalSoup.submitResults(payoshaKey, seed, totalSoups, local_log, testing);
 
         if (payoshaResponse.length() == 0) {
             std::cout << "Connection was unsuccessful." << std::endl;
@@ -140,11 +141,11 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
 }
 
-bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed, int local_log) {
+bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed, int local_log, bool testing) {
 
     std::atomic<bool> running(true);
 
-    threadSearch(n, m, payoshaKey, seed, local_log, running);
+    threadSearch(n, m, payoshaKey, seed, local_log, running, testing);
 
     bool was_running = running;
 
