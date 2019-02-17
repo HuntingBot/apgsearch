@@ -9,6 +9,7 @@ public:
 
     std::map<std::string, long long> census;
     std::map<std::string, std::vector<std::string> > alloccur;
+    uint64_t tilesProcessed;
 
     void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
@@ -271,6 +272,10 @@ public:
                 if (duration > 7680) { duration = 7680; }
             }
         }
+
+        #ifndef HASHLIFE_ONLY
+        tilesProcessed += pat.tilesProcessed;
+        #endif
 
     }
 

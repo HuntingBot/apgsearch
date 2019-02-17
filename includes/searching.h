@@ -168,6 +168,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     #endif
 
     SoupSearcher soup;
+    soup.tilesProcessed = 0;
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
@@ -262,6 +263,8 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
         }
 
     }
+
+    std::cerr << "Tiles processed: " << soup.tilesProcessed << std::endl;
     
     #ifndef _WIN32
     #ifndef STDIN_SYM
