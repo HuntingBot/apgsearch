@@ -27,7 +27,7 @@ def main():
 
     print("Valid symmetry: \033[1;32m"+symmetry+"\033[0m")
 
-    reset_tree(rulestring)
+    reset_tree(rulestring, throw_error=True)
 
     m = re.match('b1?2?3?4?5?6?7?8?s0?1?2?3?4?5?6?7?8?$', rulestring)
 
