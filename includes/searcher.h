@@ -17,6 +17,7 @@ public:
 
     std::map<std::string, long long> census;
     std::map<std::string, std::vector<std::string> > alloccur;
+    uint64_t tilesProcessed;
 
     apg::DifficultyHolder difficulties;
 
@@ -290,6 +291,10 @@ public:
                 if (duration > 7680) { duration = 7680; }
             }
         }
+
+        #ifndef HASHLIFE_ONLY
+        tilesProcessed += pat.tilesProcessed;
+        #endif
 
         return retval;
     }

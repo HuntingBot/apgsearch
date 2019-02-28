@@ -9,24 +9,18 @@ int naivestab_awesome(UPATTERN &pat) {
     int depth = 0;
     int prevpop = 0;
     int currpop = 0;
-    int period = 8;
+    int period = 12;
     int security = 15;
+
     for (int i = 0; i < 1000; i++) {
 
-        if (i == 25)
-            security = 20;
+        if (i == 40) { security = 20; }
+        if (i == 60) { security = 25; }
+        if (i == 80) { security = 30; }
 
-        if (i == 50)
-            security = 25;
-
-        if (i == 75)
-            security = 30;
-
-        if (i == 200)
-            period = 12;
-
-        if (i == 400)
-            period = 30;
+        if (i == 400) { period = 18; }
+        if (i == 500) { period = 24; }
+        if (i == 600) { period = 30; }
 
         pat.advance(0, 0, period);
         #ifndef HASHLIFE_ONLY
@@ -38,6 +32,7 @@ int naivestab_awesome(UPATTERN &pat) {
             depth += 1;
         } else {
             depth = 0;
+            period ^= 4;
         }
         prevpop = currpop;
         if (depth == security) {
