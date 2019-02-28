@@ -16,6 +16,15 @@ test:
         - cat *.test_seed.txt | tr ' ' '\n' | grep xq6 | sort | uniq > sortedships.txt
         - sha256sum sortedships.txt | grep b0a11c658
 
+cgold:
+    stage: cgold
+    script:
+        - bash recompile.sh lifecoin
+        - cd test
+        - tar xzvf blockchain.tar.gz
+        - cd -
+        - find test/blockchain/ -type f | sort -V | xargs ./lifecoin verify
+
 staging:
     stage: staging
     script:

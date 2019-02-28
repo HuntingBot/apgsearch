@@ -2,6 +2,7 @@
 #include "mining.h"
 #include "cvm.h"
 
+
 void print_testing_info() {
 
     std::string genesis_seed = cgold::Blockheader(0).prevblock_seed();
@@ -41,6 +42,8 @@ int main(int argc, char* argv[]) {
         return run_apgluxe(argc - 1, argv + 1);
     } else if (modus_operandi == "mine") {
         return greedy_mine(argc - 1, argv + 1);
+    } else if (modus_operandi == "verify") {
+        return verify_blocks(argc - 1, argv + 1);
     } else if (modus_operandi == "cpucount") {
         std::cout << nprocessors_onln() << std::endl;
         return 0;

@@ -112,3 +112,60 @@ int greedy_mine(int argc, char *argv[]) {
         currentBlock = parallelMine(parallelisation, payoshaKey, currentBlock, running);
     }
 }
+
+dsentry get_block_difficulty(cgold::Blockheader &block, SoupSearcher &ss, apg::classifier &cfier) {
+
+    std::string seed = block.prevblock_seed();
+    dsentry p = ss.censusSoup(seed, "", cfier);
+    return p;
+
+}
+
+bool verify_is_successor(cgold::Blockheader &prevblock, cgold::Blockheader &currblock, SoupSearcher &ss, apg::classifier &cfier) {
+
+    // Verify cryptography:
+    cgold::Blockheader alt_currblock(prevblock, currblock.prevblock_nonce, currblock.prevblock_time);
+    auto comparator = memcmp((void*) &currblock, (void*) &alt_currblock, 96);
+    if (comparator != 0) {
+        std::cerr << "Warning: blocks do not chain" << std::endl;
+        return false;
+    }
+
+    // Verify proof-of-work:
+    dsentry p = get_block_difficulty(currblock, ss, cfier);
+    difficul_t target_difficulty = prevblock.get_difficulty();
+    if (p.first < target_difficulty) {
+        std::cerr << "Warning: Object " << p.second << " has a difficulty of " << p.first;
+        std::cerr << " which falls short of " << target_difficulty << std::endl;
+        return false;
+    }
+
+    return true;
+
+}
+
+int verify_blocks(int argc, char* argv[]) {
+
+    SoupSearcher ss;
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
+    apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
+    cgold::Blockheader last_block;
+
+    int errors = 0;
+
+    for (int i = 1; i < argc; i++) {
+        std::string filename = argv[i];
+        cgold::Blockheader this_block;
+        this_block.load_block(filename);
+        if (i > 1) {
+            bool good = verify_is_successor(last_block, this_block, ss, cfier);
+            if (!good) {
+                errors += 1;
+                std::cerr << "Block " << filename << " is a non-sequitur." << std::endl;
+            }
+        }
+        last_block = this_block;
+    }
+
+    return errors;
+}

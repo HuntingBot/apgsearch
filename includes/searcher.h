@@ -192,12 +192,12 @@ public:
                 }
             }
 
-            if (census[apgcode] > 50) { continue; }
-
             #ifdef STANDARD_LIFE
 
             difficul_t difficulty = difficulties.get_difficulty(apgcode);
             if (difficulty > max_difficulty) { max_difficulty = difficulty; rarest_object = apgcode; }
+
+            if (census[apgcode] > 50) { continue; }
 
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
                 if ((apgcode[2] != '2') || (apgcode[3] != '_')) {
