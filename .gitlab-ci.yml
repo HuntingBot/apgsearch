@@ -1,5 +1,6 @@
 stages:
     - test
+    - cgold
     - staging
 
 before_script:
