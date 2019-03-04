@@ -8,6 +8,11 @@
 #include <cmath>
 #include <unistd.h>
 
+#ifdef _POSIX_SOURCE
+#include <signal.h>
+#define handle_error_en(en, msg) do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
+#endif
+
 #include "lifelib/upattern.h"
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"

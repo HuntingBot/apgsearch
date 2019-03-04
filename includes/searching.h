@@ -139,25 +139,17 @@ void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
         if (payoshaResponse.length() == 0) {
             std::cout << "Connection was unsuccessful." << std::endl;
+            std::cout << "Continuing search..." << std::endl;
         } else {
             std::cout << "Connection was successful." << std::endl;
-            running = false;
+            break;
         }
-
-        if (running) { std::cout << "Continuing search..." << std::endl; }
     }
-
 }
 
-bool parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed, int local_log, bool testing) {
-
-    std::atomic<bool> running(true);
+void parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed, int local_log, std::atomic<bool> &running, bool testing) {
 
     threadSearch(n, m, payoshaKey, seed, local_log, running, testing, 0, 0, 0);
-
-    bool was_running = running;
-
-    return was_running;
 
 }
 
