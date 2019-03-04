@@ -87,6 +87,9 @@ echo "Configuring rule $rulearg; symmetry $symmarg"
 
 python mkparams.py $rulearg $symmarg
 make
+if ((${#mingwarg} != 0)); then
+exit 0
+fi
 
 newrule="$( grep 'RULESTRING' 'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 

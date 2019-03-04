@@ -1,6 +1,7 @@
 stages:
     - test
     - cgold
+    - mingw
     - staging
 
 before_script:
@@ -25,6 +26,12 @@ cgold:
         - tar xzvf blockchain.tar.gz
         - cd -
         - find test/blockchain/ -type f | sort -V | xargs ./lifecoin verify
+
+mingw:
+    stage: mingw
+    script:
+        - apt-get install -y mingw-w64 mingw-w64-x86-64-dev
+        - bash recompile.sh --mingw
 
 staging:
     stage: staging
