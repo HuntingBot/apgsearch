@@ -8,12 +8,32 @@
 #ifdef _POSIX_SOURCE
 void sigwaiter(const sigset_t *set, std::atomic<bool> *running)
 {
-    int s, sig;
+    int s;
 
-    s = sigwait(set, &sig);
-    if (s != 0)
-        handle_error_en(s, "sigwait");
-    std::cout << "Got signal " << sig << ", will attempt to submit results before exiting" << std::endl;
+    timespec ts;
+    ts.tv_sec = 0L;
+    ts.tv_nsec = 1000000000L / 4;
+
+    while (1)
+    {
+        s = sigtimedwait(set, NULL, &ts);
+        if (s > 0)
+        {
+            std::cout << "Got signal " << s << ", will attempt to submit results before exiting" << std::endl;
+            break;
+        }
+        else if (s < 0)
+        {
+            if (errno == EAGAIN)
+            {
+                if (! *running)
+                    break;
+            }
+            else
+            {   handle_error_en(s, "sigtimedwait"); }
+        }
+    }
+
     *running = false;
 }
 #endif
@@ -163,8 +183,8 @@ int run_apgluxe(int argc, char *argv[]) {
         sigaddset(&set, SIGHUP);
         sigaddset(&set, SIGINT);
         sigaddset(&set, SIGTERM);
-	pthread_sigmask(SIG_BLOCK, &set, NULL);
-	waiter = std::thread(sigwaiter, &set, &running);
+        pthread_sigmask(SIG_BLOCK, &set, NULL);
+        waiter = std::thread(sigwaiter, &set, &running);
     }
 #endif
 
@@ -182,7 +202,7 @@ int run_apgluxe(int argc, char *argv[]) {
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
         if (parallelisation > 0) {
-	    parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, running, testing);
+            parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, running, testing);
             quitByUser = ! running;
         } else {
             quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
@@ -196,7 +216,8 @@ int run_apgluxe(int argc, char *argv[]) {
 
 #ifdef _POSIX_SOURCE
     if (parallelisation > 0) {
-      waiter.join();
+        running = false;
+        waiter.join();
     }
 #endif
 
