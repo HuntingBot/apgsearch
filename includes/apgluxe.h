@@ -18,20 +18,20 @@ void sigwaiter(const sigset_t *set, std::atomic<bool> *running)
     {
         s = sigtimedwait(set, NULL, &ts);
         if (s > 0)
-	{
-	    std::cout << "Got signal " << s << ", will attempt to submit results before exiting" << std::endl;
-	    break;
-	}
-	else if (s < 0)
-	{
-	    if (errno == EAGAIN)
-	    {
-	        if (! *running)
-		    break;
-	    }
-	    else
-	    {   handle_error_en(s, "sigtimedwait"); }
-	}
+        {
+            std::cout << "Got signal " << s << ", will attempt to submit results before exiting" << std::endl;
+            break;
+        }
+        else if (s < 0)
+        {
+            if (errno == EAGAIN)
+            {
+                if (! *running)
+                    break;
+            }
+            else
+            {   handle_error_en(s, "sigtimedwait"); }
+        }
     }
 
     *running = false;
@@ -183,8 +183,8 @@ int run_apgluxe(int argc, char *argv[]) {
         sigaddset(&set, SIGHUP);
         sigaddset(&set, SIGINT);
         sigaddset(&set, SIGTERM);
-	pthread_sigmask(SIG_BLOCK, &set, NULL);
-	waiter = std::thread(sigwaiter, &set, &running);
+        pthread_sigmask(SIG_BLOCK, &set, NULL);
+        waiter = std::thread(sigwaiter, &set, &running);
     }
 #endif
 
@@ -202,7 +202,7 @@ int run_apgluxe(int argc, char *argv[]) {
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
         if (parallelisation > 0) {
-	    parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, running, testing);
+            parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, running, testing);
             quitByUser = ! running;
         } else {
             quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
@@ -216,8 +216,8 @@ int run_apgluxe(int argc, char *argv[]) {
 
 #ifdef _POSIX_SOURCE
     if (parallelisation > 0) {
-      running = false;
-      waiter.join();
+        running = false;
+        waiter.join();
     }
 #endif
 
