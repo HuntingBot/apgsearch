@@ -1,5 +1,6 @@
 stages:
     - test
+    - mingw
     - staging
 
 before_script:
@@ -15,6 +16,12 @@ test:
         - cat test/minstrels.rle | ./apgluxe -L 1 -t 1 -s 'test_seed'
         - cat *.test_seed.txt | tr ' ' '\n' | grep xq6 | sort | uniq > sortedships.txt
         - sha256sum sortedships.txt | grep b0a11c658
+
+mingw:
+    stage: mingw
+    script:
+        - apt-get install -y mingw-w64 mingw-w64-x86-64-dev
+        - bash recompile.sh --mingw
 
 staging:
     stage: staging
