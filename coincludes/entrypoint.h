@@ -18,12 +18,6 @@ void print_testing_info() {
 
 }
 
-#ifdef FULLNODE
-
-
-
-#else
-
 int main(int argc, char* argv[]) {
 
     if (apg::rule2int(RULESTRING) != 0) {
@@ -70,5 +64,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
-#endif
