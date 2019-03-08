@@ -31,10 +31,19 @@ EXECUTABLE=apgluxe
 EXECUTABLE_PROFILE=$(EXECUTABLE)-profile
 THREADS=4
 
+PROF_MERGER=true
+
 ifdef PROFILE_APGLUXE
-CPP_FLAGS += -funsafe-loop-optimizations -Wunsafe-loop-optimizations
 PROFILE_DEPENDENCIES=$(EXECUTABLE_PROFILE)
 PROFILE_ARGS=-fprofile-use -fprofile-correction
+ifeq "$(shell $(CPP_COMPILER) --version | grep -o clang)" "clang"
+PROF_MERGER=$(shell bash -c 'compgen -c' | grep 'llvm-profdata' | sort -V | tail -n 1)
+else
+CPP_FLAGS += -funsafe-loop-optimizations -Wunsafe-loop-optimizations
+endif
+ifeq "$(PROF_MERGER)" ""
+PROF_MERGER=xcrun llvm-profdata
+endif
 endif
 
 .SUFFIXES: .cpp .o .op
@@ -53,7 +62,7 @@ all: $(CPP_SOURCES) $(PROFILE_DEPENDENCIES) $(EXECUTABLE)
 
 # Clean the build environment by deleting any object files:
 clean: 
-	rm -f *.o */*.o *.op */*.op *.gdca */*.gcda $(EXECUTABLE)
+	rm -f *.o */*.o *.op */*.op *.gdca */*.gcda *.profraw *.profdata $(EXECUTABLE)
 	echo Clean done
 
 $(EXECUTABLE): $(OBJECTS)
@@ -65,9 +74,11 @@ $(EXECUTABLE): $(OBJECTS)
 # Making profiler executable to do further optimization:
 
 $(EXECUTABLE_PROFILE): $(OBJECTS_PROFILE)
+	true        Using merger $(PROF_MERGER)
 	$(LINKER) $(LD_FLAGS) -fprofile-generate $(OBJECTS_PROFILE) -o $@
 	true        Generating optimization profile, this may take some time...
 	./$@ -n 100000 -t 1 -s l_kEwHfF3ArtPb -p $(THREADS) -i 1 -v 0
+	$(PROF_MERGER) merge -o default.profdata *.profraw
 	true        done!
 
 .cpp.op:
