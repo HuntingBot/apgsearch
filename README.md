@@ -36,8 +36,8 @@ simple as running:
 in the repository directory. If compilation succeeded, the last two
 lines should resemble the following:
 
-    apgluxe v4.2-ll1.2: Rule b3s23 is correctly configured.
-    apgluxe v4.2-ll1.2: Symmetry C1 is correctly configured.
+    apgluxe v4.984-ll2.1.21: Rule b3s23 is correctly configured.
+    apgluxe v4.984-ll2.1.21: Symmetry C1 is correctly configured.
 
 which means you are ready to run the program like so:
 
@@ -108,6 +108,11 @@ When executed, it will prompt you for the haul size, number of CPUs to use,
 and your [payosha256 key](https://catagolue.appspot.com/payosha256). For
 finer control, it can be run from the Command Prompt with any combination
 of the options mentioned in the Example Usage above.
+
+Compiling from source has the advantage of allowing other rules and
+symmetries to be explored. Moreover, it allows certain optimisations to
+be applied to specifically target the machine you're using, conferring
+a marginal speed boost.
 
 Windows users (pre-Windows 10, Cygwin)
 --------------------------------------
