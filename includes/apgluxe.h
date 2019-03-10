@@ -156,15 +156,15 @@ int run_apgluxe(int argc, char *argv[]) {
     std::atomic<bool> running(true);
 
 #ifdef _POSIX_SOURCE
-    std::thread waiter;
     if (parallelisation > 0) {
         sigset_t set;
         sigemptyset(&set);
         sigaddset(&set, SIGHUP);
         sigaddset(&set, SIGINT);
         sigaddset(&set, SIGTERM);
-	pthread_sigmask(SIG_BLOCK, &set, NULL);
-	waiter = std::thread(sigwaiter, &set, &running);
+        pthread_sigmask(SIG_BLOCK, &set, NULL);
+        std::thread waiter = std::thread(sigwaiter, &set, &running);
+        waiter.detach();
     }
 #endif
 
@@ -182,7 +182,7 @@ int run_apgluxe(int argc, char *argv[]) {
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
         if (parallelisation > 0) {
-	    parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, running, testing);
+            parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, running, testing);
             quitByUser = ! running;
         } else {
             quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
@@ -193,12 +193,6 @@ int run_apgluxe(int argc, char *argv[]) {
         iterations -= 1;
         if (iterations == 0) { break; }
     }
-
-#ifdef _POSIX_SOURCE
-    if (parallelisation > 0) {
-      waiter.join();
-    }
-#endif
 
     std::cout << "Terminating..." << std::endl;
 
