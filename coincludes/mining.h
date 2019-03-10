@@ -27,13 +27,17 @@ cgold::Blockheader parallelMine(int m, std::string payoshaKey,
                                 std::atomic<bool> &running) {
 
     difficul_t difficulty = bh.get_difficulty();
-    std::string seedroot = bh.seedroot();
 
     const uint64_t invalid_soup = -1;
 
     std::atomic<uint64_t> bestSoup(invalid_soup);
 
-    threadSearch(0, m, payoshaKey, seedroot, 0, running, 0, difficulty, &bestSoup, 0);
+    while (running) {
+        uint64_t new_xn = bh.increment_nonce();
+        std::cerr << "First 16 bytes of xn: " << new_xn << std::endl;
+        std::string seedroot = bh.seedroot();
+        threadSearch(0, m, payoshaKey, seedroot, 0, running, 0, difficulty, &bestSoup, 0);
+    }
 
     cgold::Blockheader new_bh;
     new_bh.clear();
@@ -105,11 +109,13 @@ int greedy_mine(int argc, char *argv[]) {
 
         std::cerr << "Current difficulty: " << currentBlock.get_difficulty() << std::endl;
 
-        currentBlock.save_block();
-
         std::atomic<bool> running(true);
 
-        currentBlock = parallelMine(parallelisation, payoshaKey, currentBlock, running);
+        auto newBlock = parallelMine(parallelisation, payoshaKey, currentBlock, running);
+        currentBlock.save_block();
+        currentBlock = newBlock;
+        currentBlock.save_block();
+
     }
 }
 

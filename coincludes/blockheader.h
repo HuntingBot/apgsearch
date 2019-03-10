@@ -114,6 +114,16 @@ namespace cgold {
 
         }
 
+        uint64_t increment_nonce() {
+
+            uint64_t x = 0;
+            std::memcpy(&x, extranonce, 8);
+            x += 1;
+            std::memcpy(extranonce, &x, 8);
+            return x;
+
+        }
+
         uint32_t include_tail(const blob256 &xn, std::string &addr) {
 
             std::memcpy(extranonce, xn.data, 32);
