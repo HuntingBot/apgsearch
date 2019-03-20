@@ -36,8 +36,8 @@ simple as running:
 in the repository directory. If compilation succeeded, the last two
 lines should resemble the following:
 
-    apgluxe v4.984-ll2.1.21: Rule b3s23 is correctly configured.
-    apgluxe v4.984-ll2.1.21: Symmetry C1 is correctly configured.
+    apgluxe v5.0-ll2.2.0: Rule b3s23 is correctly configured.
+    apgluxe v5.0-ll2.2.0: Symmetry C1 is correctly configured.
 
 which means you are ready to run the program like so:
 
