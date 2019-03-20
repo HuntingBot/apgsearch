@@ -1,4 +1,7 @@
 
+CU_COMPILER=nvcc
+
+CU_FLAGS=-c
 COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3 -pthread
 LD_FLAGS=-pthread
 
@@ -25,7 +28,13 @@ C_FLAGS=$(COMPILER_FLAGS) -fomit-frame-pointer
 
 CPP_SOURCES=main.cpp includes/md5.cpp includes/happyhttp.cpp
 
-OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o)
+ifdef USE_GPU
+LD_FLAGS=
+CU_SOURCES=includes/gpusrc.cu
+LINKER=$(CU_COMPILER)
+endif
+
+OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o) $(CU_SOURCES:.cu=.o)
 OBJECTS_PROFILE=$(OBJECTS:.o=.op)
 EXECUTABLE=apgluxe
 EXECUTABLE_PROFILE=$(EXECUTABLE)-profile
@@ -46,7 +55,7 @@ PROF_MERGER=xcrun llvm-profdata
 endif
 endif
 
-.SUFFIXES: .cpp .o .op
+.SUFFIXES: .cpp .cu .o .op
 
 # Compile:
 all: $(CPP_SOURCES) $(PROFILE_DEPENDENCIES) $(EXECUTABLE)
@@ -70,6 +79,9 @@ $(EXECUTABLE): $(OBJECTS)
 
 .cpp.o:
 	$(CPP_COMPILER) $(CPP_FLAGS) $(PROFILE_ARGS) $< -o $@
+
+.cu.o:
+	$(CU_COMPILER) $(CU_FLAGS) $< -o $@
 
 # Making profiler executable to do further optimization:
 

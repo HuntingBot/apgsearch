@@ -152,6 +152,22 @@ Moreover, these comparisons were performed with the old threading model
 (OpenMP threads), whereas apgluxe has subsequently migrated to pure C++11
 threads for increased cross-platform support.
 
+Speed boosts
+============
+
+There are several compilation flags that can be used for accelerated
+searching. Profile-guided optimisation can be enabled with:
+
+    ./recompile.sh --profile
+
+If you have an NVIDIA GPU with at least 1.5 GB of memory, then it can be
+used as a 'preprocessor' which discards uninteresting soups and delegates
+the interesting soups to the CPU search program. Compilation uses:
+
+    ./recompile.sh --cuda
+
+On a V100 Volta GPU, this churns through 385 000 soups per second.
+
 Credits and licences
 ====================
 
