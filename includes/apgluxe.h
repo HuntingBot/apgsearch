@@ -31,7 +31,12 @@ int run_apgluxe(int argc, char *argv[]) {
     #endif
 
     // Default values:
+    #ifdef USING_GPU
+    int64_t soups_per_haul = 200000000;
+    #else
     int64_t soups_per_haul = 10000000;
+    #endif
+
     std::string payoshaKey = "#anon";
     std::string seed = reseed("original seed");
     int parallelisation = 0;
@@ -148,10 +153,17 @@ int run_apgluxe(int argc, char *argv[]) {
         return 1;
     }
 
-    if (soups_per_haul > 100000000000ll) {
-        std::cout << "Soups per haul reduced to maximum of 10^11" << std::endl;
-        soups_per_haul = 100000000000ll;
+    if (soups_per_haul > 40000000000ll) {
+        std::cout << "Soups per haul reduced to maximum of 40 * 10^9" << std::endl;
+        soups_per_haul = 40000000000ll;
     }
+
+    #ifdef USING_GPU
+    if (soups_per_haul % 1000000) {
+        soups_per_haul -= (soups_per_haul % 1000000);
+        soups_per_haul += 1000000;
+    }
+    #endif
 
     std::atomic<bool> running(true);
 

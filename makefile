@@ -1,4 +1,7 @@
 
+CU_COMPILER=nvcc
+
+CU_FLAGS=-c
 COMPILER_FLAGS=-c -Wall -Wextra -pedantic -O3 -pthread
 LD_FLAGS=-pthread
 
@@ -36,11 +39,17 @@ else
     PROFILE_PARAMS=-n 100000 -t 1 -s l_kEwHfF3ArtPb -p $(THREADS) -i 1 -v 0
 endif
 
-OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o)
+ifdef USE_GPU
+LD_FLAGS=
+CU_SOURCES=includes/gpusrc.cu
+LINKER=$(CU_COMPILER)
+endif
+
+OBJECTS=$(CPP_SOURCES:.cpp=.o) $(C_SOURCES:.c=.o) $(CU_SOURCES:.cu=.o)
 OBJECTS_PROFILE=$(OBJECTS:.o=.op)
 EXECUTABLE_PROFILE=$(EXECUTABLE)-profile
 
-.SUFFIXES: .c .cpp .o .op
+.SUFFIXES: .c .cpp .cu .o .op
 
 PROF_MERGER=true
 
@@ -82,6 +91,9 @@ $(EXECUTABLE): $(OBJECTS)
 
 .c.o:
 	$(C_COMPILER) $(C_FLAGS) $(PROFILE_ARGS) $< -o $@
+
+.cu.o:
+	$(CU_COMPILER) $(CU_FLAGS) $< -o $@
 
 # Making profiler executable to do further optimization:
 
