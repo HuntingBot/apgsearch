@@ -190,7 +190,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     int64_t lasti = 0;
 
     #ifdef USING_GPU
-    apg::GpuSearcher gs(0);
+    apg::GpuSearcher gs(0, 8192);
     std::vector<uint64_t> vec = gs.pump(seed, 0);
     #endif
 
