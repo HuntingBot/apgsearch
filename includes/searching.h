@@ -160,17 +160,19 @@ void parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
 
 
-bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
+bool runSearch(int64_t n, int desired_m, std::string payoshaKey, std::string seed, int local_log, int unicount, bool testing) {
 
     #ifndef _WIN32
     #ifndef STDIN_SYM
     struct termios ttystate;
 
-    // turn on non-blocking reads
-    tcgetattr(STDIN_FILENO, &ttystate);
-    ttystate.c_lflag &= ~ICANON;
-    ttystate.c_cc[VMIN] = 1;
-    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    if (desired_m == 0) {
+        // turn on non-blocking reads
+        tcgetattr(STDIN_FILENO, &ttystate);
+        ttystate.c_lflag &= ~ICANON;
+        ttystate.c_cc[VMIN] = 1;
+        tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    }
     #endif
     #endif
 
@@ -190,7 +192,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     int64_t lasti = 0;
 
     #ifdef USING_GPU
-    apg::GpuSearcher gs(0, 8192);
+    apg::GpuSearcher gs(0, unicount);
     std::vector<uint64_t> vec = gs.pump(seed, 0);
     #endif
 
@@ -228,7 +230,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
 
             #ifdef USING_GPU
 
-            int m = 6;
+            int m = (desired_m == 0) ? 4 : desired_m;
 
             std::vector<std::vector<uint64_t> > subvecs(m);
 
@@ -305,9 +307,11 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     #ifndef _WIN32
     #ifndef STDIN_SYM
     // turn on blocking reads
-    tcgetattr(STDIN_FILENO, &ttystate);
-    ttystate.c_lflag |= ICANON;
-    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    if (desired_m == 0) {
+        tcgetattr(STDIN_FILENO, &ttystate);
+        ttystate.c_lflag |= ICANON;
+        tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    }
     #endif
     #endif
 
