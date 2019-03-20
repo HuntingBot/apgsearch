@@ -31,7 +31,12 @@ int run_apgluxe(int argc, char *argv[]) {
     #endif
 
     // Default values:
+    #ifdef USING_GPU
+    int64_t soups_per_haul = 200000000;
+    #else
     int64_t soups_per_haul = 10000000;
+    #endif
+
     std::string payoshaKey = "#anon";
     std::string seed = reseed("original seed");
     int parallelisation = 0;
