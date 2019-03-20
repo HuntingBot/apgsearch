@@ -17,9 +17,14 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v4.984-" LIFELIB_VERSION
+#define APG_VERSION "v5.0-" LIFELIB_VERSION
 
 #include "includes/params.h"
+
+#ifdef USING_GPU
+#include "lifelib/cuda/gs_def.h"
+#endif
+
 #include "includes/md5.h"
 #include "includes/payosha256.h"
 #include "includes/hashsoup2.h"

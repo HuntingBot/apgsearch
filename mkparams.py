@@ -51,6 +51,9 @@ def main():
 
         if (symmetry == 'C1'):
             g.write('#define C1_SYMMETRY 1\n')
+        elif (symmetry == 'G1'):
+            g.write('#define C1_SYMMETRY 1\n')
+            g.write('#define USING_GPU 1\n')
         elif 'stdin' in symmetry:
             g.write('#define STDIN_SYM 1\n')
 

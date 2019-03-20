@@ -18,10 +18,6 @@ profilearg=`echo "$@" | grep -o "\\-\\-profile" | sed "s/\\-\\-profile/u/"`
 mingwarg=`echo "$@" | grep -o "\\-\\-mingw" | sed "s/\\-\\-mingw/u/"`
 gpuarg=`echo "$@" | grep -o "\\-\\-cuda" | sed "s/\\-\\-cuda/u/"`
 
-if ((${#gpuarg} != 0)); then
-export USE_GPU=1
-fi
-
 if ((${#mingwarg} != 0)); then
 export USE_MINGW=1
 fi
@@ -69,6 +65,12 @@ symmarg="C1"
 echo "Symmetry unspecified; assuming C1."
 else
 launch=1
+fi
+
+if ((${#gpuarg} != 0)); then
+export USE_GPU=1
+echo "Using GPU-based symmetry G1."
+symmarg="G1"
 fi
 
 echo "Configuring rule $rulearg; symmetry $symmarg"
