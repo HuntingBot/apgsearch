@@ -42,6 +42,19 @@ void populateLuts() {
 
 }
 
+void partialGPUSearch(std::vector<uint64_t> *vec, std::string seed, SoupSearcher *localSoup) {
+
+    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
+    apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
+
+    for (auto it = vec->begin(); it != vec->end(); ++it) {
+        std::ostringstream ss;
+        ss << (*it);
+        localSoup->censusSoup(seed, ss.str(), cfier);
+    }
+
+} 
+
 void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
     SoupSearcher *localSoup, uint64_t *j, std::atomic<bool> *running) {
 
@@ -144,6 +157,8 @@ void parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
     threadSearch(n, m, payoshaKey, seed, local_log, running, testing);
 }
 
+
+
 bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
 
     #ifndef _WIN32
@@ -163,21 +178,32 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
+    #ifdef USING_GPU
+    auto start = std::chrono::system_clock::now();
+    #else
     clock_t start = clock();
-    clock_t overall_start = start;
-    clock_t current = start;
-    clock_t last_current = start;
+    #endif
+
+    auto overall_start = start;
+    auto current = start;
+    auto last_current = start;
 
     std::cout << "Running " << n << " soups per haul:" << std::endl;
 
     int64_t i = 0;
     int64_t lasti = 0;
 
+    #ifdef USING_GPU
+    apg::GpuSearcher gs(0);
+    std::vector<uint64_t> vec = gs.pump(seed, 0);
+    #endif
+
     bool finishedSearch = false;
     bool quitByUser = false;
 
     while ((finishedSearch == false) && (quitByUser == false)) {
 
+        #ifndef USING_GPU
         std::ostringstream ss;
 
         #ifndef STDIN_SYM
@@ -200,22 +226,61 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
         if (readingrle == false) { quitByUser = true; }
         #endif
 
+        #endif
+
         if (quitByUser == false) {
 
-            soup.censusSoup(seed, ss.str(), cfier);
+            #ifdef USING_GPU
 
+            int m = 6;
+
+            std::vector<std::vector<uint64_t> > subvecs(m);
+
+            for (unsigned int j = 0; j < vec.size(); j++) {
+                subvecs[j % m].push_back(vec[j]);
+            }
+
+            std::vector<SoupSearcher> localSoups(m);
+            std::vector<std::thread> lsthreads(m);
+            for (int j = 0; j < m; j++) {
+                lsthreads[j] = std::thread(partialGPUSearch, &(subvecs[j]), seed, &(localSoups[j]));
+            }
+
+            i += 1000000;
+            vec = gs.pump(seed, i / 1000000);
+
+            for (int j = 0; j < m; j++) {
+                lsthreads[j].join();
+                soup.aggregate(&(localSoups[j].census), &(localSoups[j].alloccur));
+            }
+
+            #else
+            soup.censusSoup(seed, ss.str(), cfier);
             i += 1;
+            #endif
 
             last_current = current;
+            #ifdef USING_GPU
+            current = std::chrono::system_clock::now();
+            double elapsed =         0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - start).count();
+            double current_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - last_current).count();
+            double overall_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - overall_start).count();
+            #else
             current = clock();
             double elapsed = ((double) (current - start)) / CLOCKS_PER_SEC;
             double current_elapsed = ((double) (current - last_current)) / CLOCKS_PER_SEC;
             double overall_elapsed = ((double) (current - overall_start)) / CLOCKS_PER_SEC;
+            #endif
 
             if ((elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1)))) {
                 std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
                 lasti = i;
+
+                #ifdef USING_GPU
+                start = std::chrono::system_clock::now();
+                #else
                 start = clock();
+                #endif
 
                 #ifndef _WIN32
                 #ifndef STDIN_SYM
@@ -232,12 +297,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
         }
 
         if ((i % n == 0) || quitByUser) {
-            last_current = current;
-            current = clock();
-            double elapsed = ((double) (current - start)) / CLOCKS_PER_SEC;
-            double overall_elapsed = ((double) (current - overall_start)) / CLOCKS_PER_SEC;
 
-            std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
             std::cout << "----------------------------------------------------------------------" << std::endl;
             std::cout << i << " soups completed." << std::endl;
             std::cout << "Attempting to contact payosha256." << std::endl;

@@ -153,6 +153,13 @@ int run_apgluxe(int argc, char *argv[]) {
         soups_per_haul = 100000000000ll;
     }
 
+    #ifdef USING_GPU
+    if (soups_per_haul % 1000000) {
+        soups_per_haul -= (soups_per_haul % 1000000);
+        soups_per_haul += 1000000;
+    }
+    #endif
+
     std::atomic<bool> running(true);
 
 #ifdef _POSIX_SOURCE
