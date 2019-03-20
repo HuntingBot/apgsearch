@@ -58,6 +58,8 @@ int run_apgluxe(int argc, char *argv[]) {
 
     bool consumed_rule = false;
     
+    int unicount = 8192;
+
     // Extract options:
     for (int i = 1; i < argc - 1; i++) {
         if (strcmp(argv[i], "-k") == 0) {
@@ -72,6 +74,8 @@ int run_apgluxe(int argc, char *argv[]) {
             iterations = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-L") == 0) {
             local_log = atoi(argv[i+1]);
+        } else if (strcmp(argv[i], "-u") == 0) {
+            unicount = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-t") == 0) {
             testing = atoi(argv[i+1]);
             if (testing) { iterations = 1; }
@@ -148,6 +152,11 @@ int run_apgluxe(int argc, char *argv[]) {
 
     std::cout << std::endl;
 
+    if ((unicount != 4096) && (unicount != 8192)) {
+        std::cout << "Universe count, " << unicount << ", must be 4096 or 8192." << std::endl;
+        return 1;
+    }
+
     if (soups_per_haul <= 0) {
         std::cout << "Soups per haul, " << soups_per_haul << ", must be positive." << std::endl;
         return 1;
@@ -158,16 +167,15 @@ int run_apgluxe(int argc, char *argv[]) {
         soups_per_haul = 40000000000ll;
     }
 
+    std::atomic<bool> running(true);
+
     #ifdef USING_GPU
     if (soups_per_haul % 1000000) {
         soups_per_haul -= (soups_per_haul % 1000000);
         soups_per_haul += 1000000;
     }
-    #endif
-
-    std::atomic<bool> running(true);
-
-#ifdef _POSIX_SOURCE
+    #else
+    #ifdef _POSIX_SOURCE
     if (parallelisation > 0) {
         sigset_t set;
         sigemptyset(&set);
@@ -178,7 +186,8 @@ int run_apgluxe(int argc, char *argv[]) {
         std::thread waiter = std::thread(sigwaiter, &set, &running);
         waiter.detach();
     }
-#endif
+    #endif
+    #endif
 
     while (!quitByUser) {
         if (verifications > 0) {
@@ -193,11 +202,14 @@ int run_apgluxe(int argc, char *argv[]) {
 
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
+        #ifndef USING_GPU
         if (parallelisation > 0) {
             parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, running, testing);
             quitByUser = ! running;
-        } else {
-            quitByUser = runSearch(soups_per_haul, payoshaKey, seed, local_log, testing);
+        } else
+        #endif
+        {
+            quitByUser = runSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, unicount, testing);
         }
         seed = reseed(seed);
         std::cout << "New seed: " << seed << "; iterations = " << iterations << "; quitByUser = " << quitByUser << std::endl;

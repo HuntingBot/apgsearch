@@ -36,8 +36,8 @@ simple as running:
 in the repository directory. If compilation succeeded, the last two
 lines should resemble the following:
 
-    apgluxe v4.984-ll2.1.21: Rule b3s23 is correctly configured.
-    apgluxe v4.984-ll2.1.21: Symmetry C1 is correctly configured.
+    apgluxe v5.0-ll2.2.0: Rule b3s23 is correctly configured.
+    apgluxe v5.0-ll2.2.0: Symmetry C1 is correctly configured.
 
 which means you are ready to run the program like so:
 
@@ -151,6 +151,22 @@ WSL, VirtualBox, and Cygwin64 (in descending order of speed).
 Moreover, these comparisons were performed with the old threading model
 (OpenMP threads), whereas apgluxe has subsequently migrated to pure C++11
 threads for increased cross-platform support.
+
+Speed boosts
+============
+
+There are several compilation flags that can be used for accelerated
+searching. Profile-guided optimisation can be enabled with:
+
+    ./recompile.sh --profile
+
+If you have an NVIDIA GPU with at least 1.5 GB of memory, then it can be
+used as a 'preprocessor' which discards uninteresting soups and delegates
+the interesting soups to the CPU search program. Compilation uses:
+
+    ./recompile.sh --cuda
+
+On a V100 Volta GPU, this churns through 385 000 soups per second.
 
 Credits and licences
 ====================

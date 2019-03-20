@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <thread>
+#include <chrono>
 
 #ifdef USE_OPEN_MP
 #include <omp.h>
@@ -168,17 +169,19 @@ void parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
 
 
 
-bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_log, bool testing) {
+bool runSearch(int64_t n, int desired_m, std::string payoshaKey, std::string seed, int local_log, int unicount, bool testing) {
 
     #ifndef _WIN32
     #ifndef STDIN_SYM
     struct termios ttystate;
 
-    // turn on non-blocking reads
-    tcgetattr(STDIN_FILENO, &ttystate);
-    ttystate.c_lflag &= ~ICANON;
-    ttystate.c_cc[VMIN] = 1;
-    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    if (desired_m == 0) {
+        // turn on non-blocking reads
+        tcgetattr(STDIN_FILENO, &ttystate);
+        ttystate.c_lflag &= ~ICANON;
+        ttystate.c_cc[VMIN] = 1;
+        tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    }
     #endif
     #endif
 
@@ -187,12 +190,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
-    #ifdef USING_GPU
     auto start = std::chrono::system_clock::now();
-    #else
-    clock_t start = clock();
-    #endif
-
     auto overall_start = start;
     auto current = start;
     auto last_current = start;
@@ -203,7 +201,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     int64_t lasti = 0;
 
     #ifdef USING_GPU
-    apg::GpuSearcher gs(0);
+    apg::GpuSearcher gs(0, unicount);
     std::vector<uint64_t> vec = gs.pump(seed, 0);
     #endif
 
@@ -241,7 +239,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
 
             #ifdef USING_GPU
 
-            int m = 6;
+            int m = (desired_m == 0) ? 4 : desired_m;
 
             std::vector<std::vector<uint64_t> > subvecs(m);
 
@@ -269,27 +267,16 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
             #endif
 
             last_current = current;
-            #ifdef USING_GPU
             current = std::chrono::system_clock::now();
             double elapsed =         0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - start).count();
             double current_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - last_current).count();
             double overall_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - overall_start).count();
-            #else
-            current = clock();
-            double elapsed = ((double) (current - start)) / CLOCKS_PER_SEC;
-            double current_elapsed = ((double) (current - last_current)) / CLOCKS_PER_SEC;
-            double overall_elapsed = ((double) (current - overall_start)) / CLOCKS_PER_SEC;
-            #endif
 
-            if ((elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1)))) {
+            if ((elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1))) || (i - lasti >= 1000000)) {
                 std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
                 lasti = i;
 
-                #ifdef USING_GPU
                 start = std::chrono::system_clock::now();
-                #else
-                start = clock();
-                #endif
 
                 #ifndef _WIN32
                 #ifndef STDIN_SYM
@@ -329,9 +316,11 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     #ifndef _WIN32
     #ifndef STDIN_SYM
     // turn on blocking reads
-    tcgetattr(STDIN_FILENO, &ttystate);
-    ttystate.c_lflag |= ICANON;
-    tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    if (desired_m == 0) {
+        tcgetattr(STDIN_FILENO, &ttystate);
+        ttystate.c_lflag |= ICANON;
+        tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
+    }
     #endif
     #endif
 
