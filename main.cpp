@@ -23,7 +23,6 @@
 
 #ifdef USING_GPU
 #include "lifelib/cuda/gs_def.h"
-#include <chrono>
 #endif
 
 #include "includes/md5.h"

@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <thread>
+#include <chrono>
 
 #ifdef USE_OPEN_MP
 #include <omp.h>
@@ -178,12 +179,7 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
-    #ifdef USING_GPU
     auto start = std::chrono::system_clock::now();
-    #else
-    clock_t start = clock();
-    #endif
-
     auto overall_start = start;
     auto current = start;
     auto last_current = start;
@@ -260,27 +256,16 @@ bool runSearch(int64_t n, std::string payoshaKey, std::string seed, int local_lo
             #endif
 
             last_current = current;
-            #ifdef USING_GPU
             current = std::chrono::system_clock::now();
             double elapsed =         0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - start).count();
             double current_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - last_current).count();
             double overall_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - overall_start).count();
-            #else
-            current = clock();
-            double elapsed = ((double) (current - start)) / CLOCKS_PER_SEC;
-            double current_elapsed = ((double) (current - last_current)) / CLOCKS_PER_SEC;
-            double overall_elapsed = ((double) (current - overall_start)) / CLOCKS_PER_SEC;
-            #endif
 
             if ((elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1)))) {
                 std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
                 lasti = i;
 
-                #ifdef USING_GPU
                 start = std::chrono::system_clock::now();
-                #else
-                start = clock();
-                #endif
 
                 #ifndef _WIN32
                 #ifndef STDIN_SYM
