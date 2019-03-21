@@ -230,7 +230,7 @@ bool runSearch(int64_t n, int desired_m, std::string payoshaKey, std::string see
 
             #ifdef USING_GPU
 
-            int m = (desired_m == 0) ? 4 : desired_m;
+            int m = (desired_m == 0) ? 5 : desired_m;
 
             std::vector<std::vector<uint64_t> > subvecs(m);
 
