@@ -181,11 +181,6 @@ bool runSearch(int64_t n, int desired_m, std::string payoshaKey, std::string see
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
-    auto start = std::chrono::system_clock::now();
-    auto overall_start = start;
-    auto current = start;
-    auto last_current = start;
-
     std::cout << "Running " << n << " soups per haul:" << std::endl;
 
     int64_t i = 0;
@@ -195,6 +190,11 @@ bool runSearch(int64_t n, int desired_m, std::string payoshaKey, std::string see
     apg::GpuSearcher gs(0, unicount);
     std::vector<uint64_t> vec = gs.pump(seed, 0);
     #endif
+
+    auto start = std::chrono::system_clock::now();
+    auto overall_start = start;
+    auto current = start;
+    auto last_current = start;
 
     bool finishedSearch = false;
     bool quitByUser = false;
