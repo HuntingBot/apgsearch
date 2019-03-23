@@ -247,7 +247,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
             #ifndef _WIN32
             if (interactive && keyWaiting()) {
                 char c = fgetc(stdin);
-                if ((c == 'q') || (c == 'Q')) { running = false; }
+                if ((c == 'q') || (c == 'Q')) { running = false; finished = true; }
             }
             #endif
         }
