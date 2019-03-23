@@ -260,6 +260,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
             if (payoshaResponse.length() == 0) {
                 std::cout << "Connection was unsuccessful." << std::endl;
+                if (bestSoup != 0) { break; }
             } else {
                 std::cout << "Connection was successful." << std::endl;
                 break;
