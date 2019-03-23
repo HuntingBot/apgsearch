@@ -169,14 +169,22 @@ int run_apgluxe(int argc, char *argv[]) {
 
     std::atomic<bool> running(true);
 
+    #ifdef STDIN_SYM
+    bool interactive = false;
+    #else
+    bool interactive = (parallelisation == 0);
+    #endif
+
     #ifdef USING_GPU
     if (soups_per_haul % 1000000) {
         soups_per_haul -= (soups_per_haul % 1000000);
         soups_per_haul += 1000000;
     }
-    #else
+    if (parallelisation == 0) { parallelisation = 5; }
+    #endif
+
     #ifdef _POSIX_SOURCE
-    if (parallelisation > 0) {
+    if (!interactive) {
         sigset_t set;
         sigemptyset(&set);
         sigaddset(&set, SIGHUP);
@@ -186,7 +194,6 @@ int run_apgluxe(int argc, char *argv[]) {
         std::thread waiter = std::thread(sigwaiter, &set, &running);
         waiter.detach();
     }
-    #endif
     #endif
 
     while (!quitByUser) {
@@ -202,15 +209,11 @@ int run_apgluxe(int argc, char *argv[]) {
 
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
-        #ifndef USING_GPU
-        if (parallelisation > 0) {
-            parallelSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, running, testing);
-            quitByUser = ! running;
-        } else
-        #endif
-        {
-            quitByUser = runSearch(soups_per_haul, parallelisation, payoshaKey, seed, local_log, unicount, testing);
-        }
+
+        perpetualSearch(soups_per_haul, parallelisation, interactive, payoshaKey, seed, unicount, local_log, running, testing);
+
+        quitByUser = ! running;
+
         seed = reseed(seed);
         std::cout << "New seed: " << seed << "; iterations = " << iterations << "; quitByUser = " << quitByUser << std::endl;
 

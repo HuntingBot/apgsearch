@@ -43,139 +43,102 @@ void populateLuts() {
 
 }
 
-void partialGPUSearch(std::vector<uint64_t> *vec, std::string seed, SoupSearcher *localSoup) {
+void partialBalancedSearch(std::vector<uint64_t> *vec, std::string seed, SoupSearcher *localSoup,
+                            std::atomic<bool> *running, std::atomic<uint64_t> *idx, std::atomic<uint64_t> *ts) {
 
-    apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
-    apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
-
-    for (auto it = vec->begin(); it != vec->end(); ++it) {
-        std::ostringstream ss;
-        ss << (*it);
-        localSoup->censusSoup(seed, ss.str(), cfier);
-    }
-
-} 
-
-void partialSearch(uint64_t n, int m, int threadNumber, std::string seedroot,
-    SoupSearcher *localSoup, uint64_t *j, std::atomic<bool> *running,
-    difficul_t difficulty, std::atomic<uint64_t> *bestSoup) {
+    uint64_t maxidx = vec->size();
 
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
     while (*running) {
 
-        uint64_t i = threadNumber + m * ((*j));
+        uint64_t curridx = ((*idx)++); // atomic increment
+        if (curridx >= maxidx) { break; }
 
-        if ((n > 0) && (i >= n)) { break; }
+        uint64_t suffix = (*vec)[curridx];
 
         std::ostringstream ss;
-        ss << i;
-        dsentry dp = localSoup->censusSoup(seedroot, ss.str(), cfier);
+        ss << suffix;
+        localSoup->censusSoup(seed, ss.str(), cfier);
+        (*ts)++;
 
-        if (i % 100000 == 0)
-        {
-            std::cout << i << " soups processed..." << std::endl;
-        }
-
-        (*j)++;
-
-        if (bestSoup != 0) {
-            if (dp.first >= difficulty) {
-                (*bestSoup) = i; // this transcends the difficulty target
-                (*running) = false; // we can now exit
-                std::cerr << "Block won: " << seedroot << i << " contains a " << dp.second << std::endl;
-                std::cerr << "Target: " << difficulty << "; attained: " << dp.first << std::endl;
-            }
-        }
-
-    }
-
-}
-
-void threadSearch(uint64_t n, int m, std::string payoshaKey, std::string seed,
-                    int local_log, std::atomic<bool> &running, bool testing,
-                    difficul_t difficulty, std::atomic<uint64_t> *bestSoup, apg::DifficultyHolder *dtab) {
-
-    SoupSearcher globalSoup;
-
-    if (dtab != 0) {
-        globalSoup.difficulties = *dtab;
-    }
-
-    populateLuts();
-
-    std::vector<uint64_t> completed(m, 0);
-
-    uint64_t maxcount = 0;
-
-    while (running) {
-
-        maxcount += n;
-
-        #ifdef USE_OPEN_MP
-        #pragma omp parallel num_threads(m)
-        {
-            int i = omp_get_thread_num();
-            SoupSearcher localSoup;
-            partialSearch(maxcount, m, i, seed, &localSoup, &(completed[i]), &running);
-            #pragma omp critical
-            {
-                globalSoup.aggregate(&(localSoup.census), &(localSoup.alloccur));
-            }
-        }
-
-        #else
-
-        std::vector<SoupSearcher> localSoups(m);
-        std::vector<std::thread> lsthreads(m);
-        for (int i = 0; i < m; i++) {
-            localSoups[i].difficulties = globalSoup.difficulties;
-            lsthreads[i] = std::thread(partialSearch, maxcount, m, i, seed, &(localSoups[i]),
-                                        &(completed[i]), &running, difficulty, bestSoup);
-        }
-
-        for (int i = 0; i < m; i++) {
-            lsthreads[i].join();
-            globalSoup.aggregate(&(localSoups[i].census), &(localSoups[i].alloccur));
-        }
-
-        #endif
-
-        uint64_t totalSoups = 0;
-
-        for (int i = 0; i < m; i++) { totalSoups += completed[i]; }
-
-        std::cout << "----------------------------------------------------------------------" << std::endl;
-        std::cout << totalSoups << " soups completed." << std::endl;
-        std::cout << "Attempting to contact payosha256." << std::endl;
-        std::string payoshaResponse = globalSoup.submitResults(payoshaKey, seed, totalSoups, local_log, testing);
-
-        if (payoshaResponse.length() == 0) {
-            std::cout << "Connection was unsuccessful." << std::endl;
-            std::cout << "Continuing search..." << std::endl;
-        } else {
-            std::cout << "Connection was successful." << std::endl;
-            break;
-        }
     }
 }
 
-void parallelSearch(uint64_t n, int m, std::string payoshaKey, std::string seed, int local_log, std::atomic<bool> &running, bool testing) {
+struct CpuSearcher {
 
-    threadSearch(n, m, payoshaKey, seed, local_log, running, testing, 0, 0, 0);
+    std::vector<uint64_t> pump(std::string seed, uint64_t j) {
+
+        (void) seed;
+
+        std::vector<uint64_t> vec;
+
+        for (uint64_t i = 0; i < 100000; i++) {
+            vec.push_back(j * 100000 + i);
+        }
+
+        return vec;
+    }
+
+};
+
+std::vector<uint64_t> narrow(std::vector<uint64_t> orig, uint64_t lb, uint64_t ub) {
+
+    std::vector<uint64_t> narrowed;
+
+    for (auto it = orig.begin(); it != orig.end(); ++it) {
+
+        uint64_t x = *it;
+
+        if ((lb <= x) && (x < ub)) { narrowed.push_back(x); }
+
+    }
+
+    return narrowed;
 
 }
 
+std::string retrieveSeed(uint64_t i, std::atomic<bool> *running) {
 
+    std::ostringstream ss;
 
-bool runSearch(int64_t n, int desired_m, std::string payoshaKey, std::string seed, int local_log, int unicount, bool testing) {
+    #ifndef STDIN_SYM
+    ss << i;
+    (void) running;
+    #else
+    (void) i;
+    bool readingrle = false;
+    std::string stdin_line;
+    while (std::getline(std::cin, stdin_line)) {
+
+        if (stdin_line.length() == 0) { continue; }
+
+        if (readingrle) { ss << "-" << stdin_line; }
+
+        if ((stdin_line[0] == 'x') && (readingrle == false)) {
+            readingrle = true;
+        }
+
+        if (stdin_line.find('!') != std::string::npos) { break; }
+    }
+    if (readingrle == false) { (*running) = false; }
+    #endif
+
+    return ss.str();
+
+}
+
+void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey, std::string seed,
+                        int unicount, int local_log, std::atomic<bool> &running, bool testing) {
+    /*
+    Unifies several similar functions into one simpler one.
+    */
 
     #ifndef _WIN32
-    #ifndef STDIN_SYM
     struct termios ttystate;
 
-    if (desired_m == 0) {
+    if (interactive) {
         // turn on non-blocking reads
         tcgetattr(STDIN_FILENO, &ttystate);
         ttystate.c_lflag &= ~ICANON;
@@ -183,149 +146,126 @@ bool runSearch(int64_t n, int desired_m, std::string payoshaKey, std::string see
         tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
     }
     #endif
-    #endif
 
-    SoupSearcher soup;
-    soup.tilesProcessed = 0;
+    uint64_t i = 0;
+    uint64_t lasti = 0;
+
+    SoupSearcher globalSoup;
+    globalSoup.tilesProcessed = 0;
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
+
+    populateLuts();
+
+    std::cout << "Running " << n << " soups per haul:" << std::endl;
+
+    #ifdef USING_GPU
+    uint64_t epoch_size = 1000000;
+    apg::GpuSearcher gs(0, unicount);
+    #else
+    uint64_t epoch_size = 100000;
+    CpuSearcher gs; (void) unicount;
+    #endif
+
+    std::vector<uint64_t> vec = gs.pump(seed, 0);
 
     auto start = std::chrono::system_clock::now();
     auto overall_start = start;
     auto current = start;
     auto last_current = start;
 
-    std::cout << "Running " << n << " soups per haul:" << std::endl;
+    uint64_t maxcount = n;
 
-    int64_t i = 0;
-    int64_t lasti = 0;
+    while (running) {
 
-    #ifdef USING_GPU
-    apg::GpuSearcher gs(0, unicount);
-    std::vector<uint64_t> vec = gs.pump(seed, 0);
-    #endif
+        std::vector<SoupSearcher> localSoups(m);
+        std::vector<std::thread> lsthreads(m);
 
-    bool finishedSearch = false;
-    bool quitByUser = false;
+        if (m == 0) {
+            std::string suffix = retrieveSeed(i, &running);
+            globalSoup.censusSoup(seed, suffix, cfier);
+            i += 1;
+        } else {
+            std::atomic<uint64_t> idx(0);
+            std::atomic<uint64_t> ts(0);
 
-    while ((finishedSearch == false) && (quitByUser == false)) {
+            auto nvec = narrow(vec, i, maxcount);
 
-        #ifndef USING_GPU
-        std::ostringstream ss;
-
-        #ifndef STDIN_SYM
-        ss << i;
-        #else
-        bool readingrle = false;
-        std::string stdin_line;
-        while (std::getline(std::cin, stdin_line)) {
-
-            if (stdin_line.length() == 0) { continue; }
-
-            if (readingrle) { ss << "-" << stdin_line; }
-
-            if ((stdin_line[0] == 'x') && (readingrle == false)) {
-                readingrle = true;
-            }
-
-            if (stdin_line.find('!') != std::string::npos) { break; }
-        }
-        if (readingrle == false) { quitByUser = true; }
-        #endif
-
-        #endif
-
-        if (quitByUser == false) {
-
-            #ifdef USING_GPU
-
-            int m = (desired_m == 0) ? 4 : desired_m;
-
-            std::vector<std::vector<uint64_t> > subvecs(m);
-
-            for (unsigned int j = 0; j < vec.size(); j++) {
-                subvecs[j % m].push_back(vec[j]);
-            }
-
-            std::vector<SoupSearcher> localSoups(m);
-            std::vector<std::thread> lsthreads(m);
             for (int j = 0; j < m; j++) {
-                lsthreads[j] = std::thread(partialGPUSearch, &(subvecs[j]), seed, &(localSoups[j]));
+                lsthreads[j] = std::thread(partialBalancedSearch, &(nvec), seed, &(localSoups[j]), &running, &idx, &ts);
             }
 
-            i += 1000000;
-            vec = gs.pump(seed, i / 1000000);
+            uint64_t newi = ((i / epoch_size) + 1) * epoch_size;
+            if (newi < maxcount) {
+                vec = gs.pump(seed, newi / epoch_size);
+            } else {
+                newi = maxcount;
+            }
 
             for (int j = 0; j < m; j++) {
                 lsthreads[j].join();
-                soup.aggregate(&(localSoups[j].census), &(localSoups[j].alloccur));
+                globalSoup.aggregate(&(localSoups[j].census), &(localSoups[j].alloccur));
             }
 
-            #else
-            soup.censusSoup(seed, ss.str(), cfier);
-            i += 1;
-            #endif
-
-            last_current = current;
-            current = std::chrono::system_clock::now();
-            double elapsed =         0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - start).count();
-            double current_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - last_current).count();
-            double overall_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - overall_start).count();
-
-            if ((elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1))) || (i - lasti >= 1000000)) {
-                std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
-                lasti = i;
-
-                start = std::chrono::system_clock::now();
-
-                #ifndef _WIN32
-                #ifndef STDIN_SYM
-                if(keyWaiting()) {
-                    char c = fgetc(stdin);
-                    if ((c == 'q') || (c == 'Q'))
-                        quitByUser = true;
-                }
-                #endif
-                #endif
-                
+            if (running || (ts == nvec.size())) {
+                i = newi;
+            } else {
+                double diff = newi - i;
+                uint64_t estim = (diff * ts) / nvec.size();
+                i += estim;
             }
-
         }
 
-        if ((i % n == 0) || quitByUser) {
+        last_current = current;
+        current = std::chrono::system_clock::now();
+        double elapsed =         0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - start).count();
+        double current_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - last_current).count();
+        double overall_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - overall_start).count();
 
+        bool finished = (!running) || (i == maxcount);
+
+        if (finished || (elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1))) || (i - lasti >= 1000000)) {
+            std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
+            lasti = i;
+
+            start = std::chrono::system_clock::now();
+
+            #ifndef _WIN32
+            if (interactive && keyWaiting()) {
+                char c = fgetc(stdin);
+                if ((c == 'q') || (c == 'Q')) { running = false; }
+            }
+            #endif
+        }
+
+        if (finished) {
             std::cout << "----------------------------------------------------------------------" << std::endl;
             std::cout << i << " soups completed." << std::endl;
             std::cout << "Attempting to contact payosha256." << std::endl;
-            std::string payoshaResponse = soup.submitResults(payoshaKey, seed, i, local_log, testing);
-            if (payoshaResponse.length() == 0) {
-                std::cout << "Connection was unsuccessful; continuing search..." << std::endl;
-            } else {
-                if (payoshaResponse == "testing") { std::cout << "testing mode" << std::endl; }
-                std::cout << "\033[31;1m" << payoshaResponse << "\033[0m" << std::endl;
-                std::cout << "Connection was successful; starting new search..." << std::endl;
-                finishedSearch = true;
-            }
-            std::cout << "----------------------------------------------------------------------" << std::endl;
-        }
+            std::string payoshaResponse = globalSoup.submitResults(payoshaKey, seed, i, local_log, testing);
 
+            if (payoshaResponse.length() == 0) {
+                std::cout << "Connection was unsuccessful." << std::endl;
+            } else {
+                std::cout << "Connection was successful." << std::endl;
+                break;
+            }
+
+            if (running) {
+                std::cout << "Continuing search..." << std::endl;
+                vec = gs.pump(seed, i / epoch_size);
+                maxcount += n;
+            }
+        }
     }
 
-    std::cerr << "Tiles processed: " << soup.tilesProcessed << std::endl;
-    
     #ifndef _WIN32
-    #ifndef STDIN_SYM
-    // turn on blocking reads
-    if (desired_m == 0) {
+    if (interactive) {
+        // turn on blocking reads
         tcgetattr(STDIN_FILENO, &ttystate);
         ttystate.c_lflag |= ICANON;
         tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
     }
     #endif
-    #endif
-
-    return quitByUser;
 
 }
-
-
