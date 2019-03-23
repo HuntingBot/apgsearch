@@ -44,7 +44,8 @@ void populateLuts() {
 }
 
 void partialBalancedSearch(std::vector<uint64_t> *vec, std::string seed, SoupSearcher *localSoup,
-                            std::atomic<bool> *running, std::atomic<uint64_t> *idx, std::atomic<uint64_t> *ts) {
+                            std::atomic<bool> *running, std::atomic<uint64_t> *idx, std::atomic<uint64_t> *ts,
+                            difficul_t difficulty, std::atomic<uint64_t> *bestSoup) {
 
     uint64_t maxidx = vec->size();
 
@@ -60,9 +61,17 @@ void partialBalancedSearch(std::vector<uint64_t> *vec, std::string seed, SoupSea
 
         std::ostringstream ss;
         ss << suffix;
-        localSoup->censusSoup(seed, ss.str(), cfier);
+        dsentry dp = localSoup->censusSoup(seed, ss.str(), cfier);
         (*ts)++;
 
+        if (bestSoup != 0) {
+            if (dp.first >= difficulty) {
+                (*bestSoup) = suffix; // this transcends the difficulty target
+                (*running) = false; // we can now exit
+                std::cerr << "Block won: " << seed << suffix << " contains a " << dp.second << std::endl;
+                std::cerr << "Target: " << difficulty << "; attained: " << dp.first << std::endl;
+            }
+        }
     }
 }
 
@@ -130,10 +139,15 @@ std::string retrieveSeed(uint64_t i, std::atomic<bool> *running) {
 }
 
 void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey, std::string seed,
-                        int unicount, int local_log, std::atomic<bool> &running, bool testing) {
+                        int unicount, int local_log, std::atomic<bool> &running, bool testing,
+                        difficul_t difficulty, std::atomic<uint64_t> *bestSoup, apg::DifficultyHolder *dtab) {
     /*
     Unifies several similar functions into one simpler one.
     */
+
+    SoupSearcher globalSoup;
+    globalSoup.tilesProcessed = 0;
+    if (dtab != 0) { globalSoup.difficulties = *dtab; }
 
     #ifndef _WIN32
     struct termios ttystate;
@@ -150,8 +164,6 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
     uint64_t i = 0;
     uint64_t lasti = 0;
 
-    SoupSearcher globalSoup;
-    globalSoup.tilesProcessed = 0;
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
@@ -192,7 +204,9 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
             auto nvec = narrow(vec, i, maxcount);
 
             for (int j = 0; j < m; j++) {
-                lsthreads[j] = std::thread(partialBalancedSearch, &(nvec), seed, &(localSoups[j]), &running, &idx, &ts);
+                localSoups[j].difficulties = globalSoup.difficulties;
+                lsthreads[j] = std::thread(partialBalancedSearch, &(nvec), seed, &(localSoups[j]),
+                                            &running, &idx, &ts, difficulty, bestSoup);
             }
 
             uint64_t newi = ((i / epoch_size) + 1) * epoch_size;
@@ -267,5 +281,12 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
         tcsetattr(STDIN_FILENO, TCSANOW, &ttystate);
     }
     #endif
+
+}
+
+void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey, std::string seed,
+                        int unicount, int local_log, std::atomic<bool> &running, bool testing) {
+
+    perpetualSearch(n, m, interactive, payoshaKey, seed, unicount, local_log, running, testing, 0, 0, 0);
 
 }

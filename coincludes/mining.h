@@ -29,6 +29,7 @@ cgold::Blockheader parallelMine(int m, std::string payoshaKey,
     difficul_t difficulty = bh.get_difficulty();
 
     const uint64_t invalid_soup = -1;
+    int unicount = 8192;
 
     std::atomic<uint64_t> bestSoup(invalid_soup);
 
@@ -36,7 +37,7 @@ cgold::Blockheader parallelMine(int m, std::string payoshaKey,
         uint64_t new_xn = bh.increment_nonce();
         std::cerr << "First 16 bytes of xn: " << new_xn << std::endl;
         std::string seedroot = bh.seedroot();
-        threadSearch(0, m, payoshaKey, seedroot, 0, running, 0, difficulty, &bestSoup, 0);
+        perpetualSearch(10000000, m, false, payoshaKey, seedroot, unicount, 0, running, 0, difficulty, &bestSoup, 0);
     }
 
     cgold::Blockheader new_bh;
