@@ -99,13 +99,15 @@ std::vector<uint64_t> narrow(std::vector<uint64_t> orig, uint64_t lb, uint64_t u
 
 }
 
-std::string retrieveSeed(uint64_t i) {
+std::string retrieveSeed(uint64_t i, std::atomic<bool> *running) {
 
     std::ostringstream ss;
 
     #ifndef STDIN_SYM
     ss << i;
+    (void) running;
     #else
+    (void) i;
     bool readingrle = false;
     std::string stdin_line;
     while (std::getline(std::cin, stdin_line)) {
@@ -120,7 +122,7 @@ std::string retrieveSeed(uint64_t i) {
 
         if (stdin_line.find('!') != std::string::npos) { break; }
     }
-    if (readingrle == false) { quitByUser = true; }
+    if (readingrle == false) { (*running) = false; }
     #endif
 
     return ss.str();
@@ -180,7 +182,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
         std::vector<std::thread> lsthreads(m);
 
         if (m == 0) {
-            std::string suffix = retrieveSeed(i);
+            std::string suffix = retrieveSeed(i, &running);
             globalSoup.censusSoup(seed, suffix, cfier);
             i += 1;
         } else {
