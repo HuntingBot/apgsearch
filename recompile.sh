@@ -76,7 +76,14 @@ fi
 
 echo "Configuring rule $rulearg; symmetry $symmarg"
 
-python mkparams.py $rulearg $symmarg
+if command -v "python3" &>/dev/null; then
+    echo "Using python3 to invoke lifelib..."
+    python3 mkparams.py $rulearg $symmarg
+else
+    echo "Using python to invoke lifelib..."
+    python mkparams.py $rulearg $symmarg
+fi
+
 make
 if ((${#mingwarg} != 0)); then
 exit 0
