@@ -164,7 +164,9 @@ public:
 
         for (auto it = cm.begin(); it != cm.end(); ++it) {
             if (it->first[0] == 'z') {
+                #ifdef STANDARD_LIFE
                 pathologicals += ((attempt <= 2) ? 1 : 0);
+                #endif
             } else if (it->first[0] == 'y') {
                 ignorePathologicals = true;
             } else if (it->first == "PATHOLOGICAL") {
