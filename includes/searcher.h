@@ -49,6 +49,18 @@ public:
 
     void methudetect(UPATTERN &pat, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
 
+        int fpop = pat.totalPopulation();
+
+        if (fpop >= 3000) {
+            std::cerr << "Soup " << (seedroot + suffix) << " has a final population of \033[1;34m";
+            std::cerr << fpop << "\033[0m cells." << std::endl;
+            std::ostringstream ss;
+            ss << "megasized_" << (fpop / 100) << "h";
+            std::string apgcode = ss.str();
+            census[apgcode] += 1;
+            alloccur[apgcode].push_back(suffix);
+        }
+
         bool nonempty = pat.nonempty();
 
         int estgen = pat.gensElapsed;
@@ -162,7 +174,9 @@ public:
 
         for (auto it = cm.begin(); it != cm.end(); ++it) {
             if (it->first[0] == 'z') {
+                #ifdef STANDARD_LIFE
                 pathologicals += ((attempt <= 2) ? 1 : 0);
+                #endif
             } else if (it->first[0] == 'y') {
                 ignorePathologicals = true;
             } else if (it->first == "PATHOLOGICAL") {

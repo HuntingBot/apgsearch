@@ -6,7 +6,7 @@
 #include "../lifelib/soup/sha256.h"
 #include "webclient.h"
 
-int __catagolue_retries = 0;
+int __catagolue_retries = 1;
 const char* __possible_catagolues[] = {"catagolue.appspot.com", "gol.hatsya.co.uk"};
 #define CATAGOLUE_NAME __possible_catagolues[__catagolue_retries % 2]
 #define INCREMENT_CATAGOLUE __catagolue_retries += 1
