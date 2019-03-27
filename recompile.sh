@@ -23,7 +23,11 @@ export USE_MINGW=1
 fi
 
 if ((${#profilearg} != 0)); then
+if ((${#gpuarg} != 0)); then
+printf "\033[31;1mWarning: --cuda and --profile are incompatible; omitting the latter.\033[0m\n"
+else
 export PROFILE_APGLUXE=1
+fi
 fi
 
 if ((${#updatearg} != 0)); then
