@@ -85,8 +85,7 @@ symmarg="G1"
 fi
 
 gpuarg2="true"
-rulearg="b3s23"
-echo "Overriding rule and symmetry with $rulearg/$symmarg."
+echo "Overriding symmetry with $symmarg."
 fi
 
 echo "Configuring rule $rulearg; symmetry $symmarg"
