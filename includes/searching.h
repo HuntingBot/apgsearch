@@ -173,7 +173,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
     #ifdef USING_GPU
     uint64_t epoch_size = 1000000;
-    apg::GpuSearcher gs(0, unicount);
+    apg::GpuSearcher gs(0, unicount, SYMMETRY);
     #else
     uint64_t epoch_size = 100000;
     CpuSearcher gs; (void) unicount;

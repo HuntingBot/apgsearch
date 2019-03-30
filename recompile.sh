@@ -21,7 +21,11 @@ export USE_MINGW=1
 fi
 
 if ((${#profilearg} != 0)); then
+if ((${#gpuarg} != 0)); then
+printf "\033[31;1mWarning: --cuda and --profile are incompatible; omitting the latter.\033[0m\n"
+else
 export PROFILE_APGLUXE=1
+fi
 fi
 
 if ((${#updatearg} != 0)); then
@@ -84,21 +88,32 @@ else
     fi
 fi
 
+gpuarg2="false"
+
 if ((${#gpuarg} != 0)); then
 export USE_GPU=1
-echo "Overriding rule and symmetry with b3s23/G1."
+
+if [ "$symmarg" = "D2_+1" ]; then
+symmarg="H2_+1"
+elif [ "$symmarg" = "D2_+2" ]; then
+symmarg="H2_+2"
+else
 symmarg="G1"
+fi
+
+gpuarg2="true"
 rulearg="b3s23"
+echo "Overriding rule and symmetry with $rulearg/$symmarg."
 fi
 
 echo "Configuring rule $rulearg; symmetry $symmarg"
 
 if command -v "python3" &>/dev/null; then
     echo "Using $(which python3) to configure lifelib..."
-    python3 mkparams.py $rulearg $symmarg
+    python3 mkparams.py $rulearg $symmarg $gpuarg2
 else
     echo "Using $(which python) to configure lifelib..."
-    python mkparams.py $rulearg $symmarg
+    python mkparams.py $rulearg $symmarg $gpuarg2
 fi
 
 make
@@ -106,7 +121,7 @@ if ((${#mingwarg} != 0)); then
 exit 0
 fi
 
-newrule="$( grep 'RULESTRING' 'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
+rulearg="$( grep 'RULESTRING' 'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 
 if [ "$1" = "lifecoin" ]; then
     executable="./lifecoin search"
@@ -115,9 +130,9 @@ else
 fi
 
 if [ "$launch" = "1" ]; then
-    $executable --rule $newrule "$@"
+    $executable --rule $rulearg --symmetry $symmarg "$@"
 else
-    $executable --rule $newrule --symmetry $symmarg
+    $executable --rule $rulearg --symmetry $symmarg
 fi
 
 exit 0
