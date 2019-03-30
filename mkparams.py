@@ -19,6 +19,13 @@ def main():
 
     using_gpu = (len(sys.argv) > 3) and (sys.argv[3] == 'true')
 
+    # Use GPU-specific symmetries
+    if using_gpu:
+        if symmetry[0] == 'C':
+            symmetry = 'G' + symmetry[1:]
+        elif symmetry[0] == 'D':
+            symmetry = 'H' + symmetry[1:]
+
     # Convert rulestrings such as 'B3/S23' into 'b3s23':
     newrule = sanirule(rulestring)
     if newrule != rulestring:
