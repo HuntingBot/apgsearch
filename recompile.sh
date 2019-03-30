@@ -93,17 +93,7 @@ gpuarg2="false"
 if ((${#gpuarg} != 0)); then
 export USE_GPU=1
 
-if [ "$symmarg" = "D2_+1" ]; then
-symmarg="H2_+1"
-elif [ "$symmarg" = "D2_+2" ]; then
-symmarg="H2_+2"
-else
-symmarg="G1"
-fi
-
 gpuarg2="true"
-rulearg="b3s23"
-echo "Overriding rule and symmetry with $rulearg/$symmarg."
 fi
 
 echo "Configuring rule $rulearg; symmetry $symmarg"
@@ -121,6 +111,7 @@ if ((${#mingwarg} != 0)); then
 exit 0
 fi
 
+symmarg="$( grep 'SYMMETRY'   'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 rulearg="$( grep 'RULESTRING' 'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 
 if [ "$1" = "lifecoin" ]; then
