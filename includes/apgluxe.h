@@ -57,6 +57,7 @@ int run_apgluxe(int argc, char *argv[]) {
     int iterations = 0;
 
     bool consumed_rule = false;
+    bool consumed_sym = false;
     
     int unicount = 8192;
 
@@ -94,21 +95,28 @@ int run_apgluxe(int argc, char *argv[]) {
                     return 1;
                 }
             }
-            nullargs += 2;
+            nullargs += 1;
             consumed_rule = true;
         } else if (strcmp(argv[i], "--symmetry") == 0) {
-            std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
-            std::string desired_symmetry = argv[i+1];
-            if (strcmp(SYMMETRY, argv[i+1]) == 0) {
-                std::cout << "Symmetry \033[1;34m" << SYMMETRY << "\033[0m is correctly configured." << std::endl;
-                nullargs += 2;
-            } else {
-                std::cout << "Symmetry \033[1;34m" << SYMMETRY << "\033[0m does not match desired symmetry \033[1;34m";
-                std::cout << desired_symmetry << "\033[0m." << std::endl;
-                execvp("./recompile.sh", argv);
-                return 1;
+            if (!consumed_sym) {
+                std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
+                std::string desired_symmetry = argv[i+1];
+                if (strcmp(SYMMETRY, argv[i+1]) == 0) {
+                    std::cout << "Symmetry \033[1;34m" << SYMMETRY << "\033[0m is correctly configured." << std::endl;
+                } else {
+                    std::cout << "Symmetry \033[1;34m" << SYMMETRY << "\033[0m does not match desired symmetry \033[1;34m";
+                    std::cout << desired_symmetry << "\033[0m." << std::endl;
+                    execvp("./recompile.sh", argv);
+                    return 1;
+                }
             }
+            nullargs += 1;
+            consumed_sym = true;
         }
+    }
+
+    for (int i = 1; i < argc; i++) {
+        if ((argv[i][0] == '-') && (argv[i][1] == '-')) { nullargs += 1; }
     }
 
     if ((argc == nullargs) && (argc > 1)) { return 0; }

@@ -17,6 +17,8 @@ def main():
     rulestring = sys.argv[1]
     symmetry = sys.argv[2]
 
+    using_gpu = (len(sys.argv) > 3) and (sys.argv[3] == 'true')
+
     # Convert rulestrings such as 'B3/S23' into 'b3s23':
     newrule = sanirule(rulestring)
     if newrule != rulestring:
@@ -49,13 +51,13 @@ def main():
         g.write('#define RULESTRING "%s"\n' % rulestring)
         g.write('#define CLASSIFIER apg::base_classifier<BITPLANES>\n')
 
-        if (symmetry == 'C1'):
+        if symmetry in ['C1', 'G1']:
             g.write('#define C1_SYMMETRY 1\n')
-        elif (symmetry == 'G1'):
-            g.write('#define C1_SYMMETRY 1\n')
-            g.write('#define USING_GPU 1\n')
         elif 'stdin' in symmetry:
             g.write('#define STDIN_SYM 1\n')
+
+        if using_gpu:
+            g.write('#define USING_GPU 1\n')
 
         if (family >= 6):
             g.write('#define HASHLIFE_ONLY 1\n')
