@@ -193,7 +193,7 @@ public:
                 }
             }
 
-            if (census[apgcode] > 50) { continue; }
+            if (census[apgcode] > 10) { continue; }
 
             #ifdef STANDARD_LIFE
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
