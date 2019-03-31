@@ -207,12 +207,13 @@ public:
             }
 
             #ifdef STANDARD_LIFE
-
             difficul_t difficulty = difficulties.get_difficulty(apgcode);
             if (difficulty > max_difficulty) { max_difficulty = difficulty; rarest_object = apgcode; }
+            #endif
 
-            if (census[apgcode] > 50) { continue; }
+            if (census[apgcode] > 10) { continue; }
 
+            #ifdef STANDARD_LIFE
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
                 if ((apgcode[2] != '2') || (apgcode[3] != '_')) {
                     if (apgcode.compare("xp3_co9nas0san9oczgoldlo0oldlogz1047210127401") != 0 && apgcode.compare("xp15_4r4z4r4") != 0) {
