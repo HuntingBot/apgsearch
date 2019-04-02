@@ -18,6 +18,14 @@ profilearg=`echo "$@" | grep -o "\\-\\-profile" | sed "s/\\-\\-profile/u/"`
 mingwarg=`echo "$@" | grep -o "\\-\\-mingw" | sed "s/\\-\\-mingw/u/"`
 gpuarg=`echo "$@" | grep -o "\\-\\-cuda" | sed "s/\\-\\-cuda/u/"`
 
+if ((${#symmarg} != 0)); then
+if [ "${symmarg:0:1}" = "G" ]; then
+gpuarg="true"
+elif [ "${symmarg:0:1}" = "H" ]; then
+gpuarg="true"
+fi
+fi
+
 if ((${#mingwarg} != 0)); then
 export USE_MINGW=1
 fi
