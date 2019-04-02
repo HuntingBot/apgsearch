@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-chmod 755 "recompile.sh"
+chmod 755 *.sh
 
 # Ensures 'make' works properly:
 rm -f ".depend" | true
@@ -15,6 +15,17 @@ updatearg=`echo "$@" | grep -o "\\-\\-update" | sed "s/\\-\\-update/u/"`
 profilearg=`echo "$@" | grep -o "\\-\\-profile" | sed "s/\\-\\-profile/u/"`
 mingwarg=`echo "$@" | grep -o "\\-\\-mingw" | sed "s/\\-\\-mingw/u/"`
 gpuarg=`echo "$@" | grep -o "\\-\\-cuda" | sed "s/\\-\\-cuda/u/"`
+immarg=`echo "$@" | grep -o "\\-\\-immediate" | sed "s/\\-\\-immediate/u/"`
+rulearg=`echo "$@" | grep -o "\\-\\-rule [^ ]*" | sed "s/\\-\\-rule\\ //"`
+symmarg=`echo "$@" | grep -o "\\-\\-symmetry [^ ]*" | sed "s/\\-\\-symmetry\\ //"`
+
+if ((${#symmarg} != 0)); then
+if [ "${symmarg:0:1}" = "G" ]; then
+gpuarg="true"
+elif [ "${symmarg:0:1}" = "H" ]; then
+gpuarg="true"
+fi
+fi
 
 if ((${#mingwarg} != 0)); then
 export USE_MINGW=1
@@ -53,39 +64,25 @@ fi
 bash update-lifelib.sh
 rm -rf "lifelib/avxlife/lifelogic" | true
 
-launch=0
-
 if [ "$1" = "lifecoin" ]; then
     rulearg="b3s23"
     symmarg="C1"
     export LIFECOIN=1
-    if [ "$2" = "server" ]; then
-        export FULLNODE=1
-        printf "Compiling full \033[32;1mlifecoin-server\033[0m executable...\n"
-    else
-        printf "Compiling lightweight \033[32;1mlifecoin\033[0m executable...\n"
-    fi
-    launch=2
+    printf "Compiling lightweight \033[32;1mlifecoin\033[0m executable...\n"
+    executable="./lifecoin search"
 else
     printf "Compiling \033[32;1mapgluxe\033[0m without lifecoin support...\n"
-    rulearg=`echo "$@" | grep -o "\\-\\-rule [^ ]*" | sed "s/\\-\\-rule\\ //"`
-    symmarg=`echo "$@" | grep -o "\\-\\-symmetry [^ ]*" | sed "s/\\-\\-symmetry\\ //"`
+    executable="./apgluxe"
+fi
 
-    if ((${#rulearg} == 0))
-    then
-    rulearg="b3s23"
-    echo "Rule unspecified; assuming b3s23."
-    else
-    launch=1
-    fi
+if ((${#rulearg} == 0)); then
+rulearg="b3s23"
+echo "Rule unspecified; assuming b3s23."
+fi
 
-    if ((${#symmarg} == 0))
-    then
-    symmarg="C1"
-    echo "Symmetry unspecified; assuming C1."
-    else
-    launch=1
-    fi
+if ((${#symmarg} == 0)); then
+symmarg="C1"
+echo "Symmetry unspecified; assuming C1."
 fi
 
 gpuarg2="false"
@@ -114,13 +111,7 @@ fi
 symmarg="$( grep 'SYMMETRY'   'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 rulearg="$( grep 'RULESTRING' 'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 
-if [ "$1" = "lifecoin" ]; then
-    executable="./lifecoin search"
-else
-    executable="./apgluxe"
-fi
-
-if [ "$launch" = "1" ]; then
+if ((${#immarg} != 0)); then
     $executable --rule $rulearg --symmetry $symmarg "$@"
 else
     $executable --rule $rulearg --symmetry $symmarg
