@@ -91,7 +91,7 @@ int run_apgluxe(int argc, char *argv[]) {
                 } else {
                     std::cout << "Rule \033[1;34m" << RULESTRING << "\033[0m does not match desired rule \033[1;34m";
                     std::cout << desired_rulestring << "\033[0m." << std::endl;
-                    execvp("./recompile.sh", argv);
+                    execvp("./immediate.sh", argv);
                     return 1;
                 }
             }
@@ -106,7 +106,7 @@ int run_apgluxe(int argc, char *argv[]) {
                 } else {
                     std::cout << "Symmetry \033[1;34m" << SYMMETRY << "\033[0m does not match desired symmetry \033[1;34m";
                     std::cout << desired_symmetry << "\033[0m." << std::endl;
-                    execvp("./recompile.sh", argv);
+                    execvp("./immediate.sh", argv);
                     return 1;
                 }
             }

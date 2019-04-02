@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-chmod 755 "recompile.sh"
+chmod 755 *.sh
 
 # Ensures 'make' works properly:
 rm -f ".depend" | true
@@ -17,6 +17,7 @@ updatearg=`echo "$@" | grep -o "\\-\\-update" | sed "s/\\-\\-update/u/"`
 profilearg=`echo "$@" | grep -o "\\-\\-profile" | sed "s/\\-\\-profile/u/"`
 mingwarg=`echo "$@" | grep -o "\\-\\-mingw" | sed "s/\\-\\-mingw/u/"`
 gpuarg=`echo "$@" | grep -o "\\-\\-cuda" | sed "s/\\-\\-cuda/u/"`
+immarg=`echo "$@" | grep -o "\\-\\-immediate" | sed "s/\\-\\-immediate/u/"`
 
 if ((${#symmarg} != 0)); then
 if [ "${symmarg:0:1}" = "G" ]; then
@@ -61,22 +62,14 @@ fi
 bash update-lifelib.sh
 rm -rf "lifelib/avxlife/lifelogic" | true
 
-launch=0
-
-if ((${#rulearg} == 0))
-then
+if ((${#rulearg} == 0)); then
 rulearg="b3s23"
 echo "Rule unspecified; assuming b3s23."
-else
-launch=1
 fi
 
-if ((${#symmarg} == 0))
-then
+if ((${#symmarg} == 0)); then
 symmarg="C1"
 echo "Symmetry unspecified; assuming C1."
-else
-launch=1
 fi
 
 gpuarg2="false"
@@ -105,7 +98,7 @@ fi
 symmarg="$( grep 'SYMMETRY'   'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 rulearg="$( grep 'RULESTRING' 'includes/params.h' | grep -o '".*"' | tr '\n' '"' | sed 's/"//g' )"
 
-if [ "$launch" = "1" ]; then
+if ((${#immarg} != 0)); then
     ./apgluxe --rule $rulearg --symmetry $symmarg "$@"
 else
     ./apgluxe --rule $rulearg --symmetry $symmarg
