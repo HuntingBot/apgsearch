@@ -381,7 +381,13 @@ public:
 
         if (testing) { return "testing"; }
 
-        return catagolueRequest(ss.str().c_str(), "/apgsearch");
+        std::string x = catagolueRequest(ss.str().c_str(), "/apgsearch");
+        if (x.length() < 90) {
+            std::cerr << "\033[32;1m" << x << "\033[0m" << std::endl;
+        } else {
+            std::cerr << "\033[31;1m" << x << "\033[0m" << std::endl;
+        }
+        return x;
 
     }
 
