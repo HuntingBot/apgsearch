@@ -178,7 +178,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
     while (running) {
 
-        std::vector<SoupSearcher> localSoups(m);
+        std::vector<SoupSearcher> localSoups(m, &globalSoup);
         std::vector<std::thread> lsthreads(m);
 
         if (m == 0) {

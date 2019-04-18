@@ -11,6 +11,16 @@ public:
     std::map<std::string, std::vector<std::string> > alloccur;
     uint64_t tilesProcessed;
 
+    SoupSearcher *parent;
+
+    SoupSearcher() {
+        parent = 0; tilesProcessed = 0;
+    }
+
+    SoupSearcher(SoupSearcher *parent) {
+        this->parent = parent; tilesProcessed = 0;
+    }
+
     void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
         std::map<std::string, long long>::iterator it;
@@ -194,6 +204,8 @@ public:
             }
 
             if (census[apgcode] > 10) { continue; }
+
+            if ((parent != 0) && (parent->census.count(apgcode)) && (parent->census[apgcode] > 10)) { continue; }
 
             #ifdef STANDARD_LIFE
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
