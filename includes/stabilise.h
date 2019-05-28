@@ -13,7 +13,7 @@ int naivestab_awesome(UPATTERN &pat) {
     int security = 15;
 
     #ifdef STDIN_SYM
-    pat.advance(0, 0, 1024);
+    pat.advance(0, 0, 256);
     #endif
 
     for (int i = 0; i < 1000; i++) {

@@ -58,7 +58,7 @@ public:
             ss << "megasized_" << (fpop / 100) << "h";
             std::string apgcode = ss.str();
             census[apgcode] += 1;
-            alloccur[apgcode].push_back(suffix);
+            if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
         }
 
         bool nonempty = pat.nonempty();
@@ -97,7 +97,7 @@ public:
                 ss << "messless_" << (estgen / 100) << "h";
                 std::string apgcode = ss.str();
                 census[apgcode] += 1;
-                alloccur[apgcode].push_back(suffix);
+                if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
 
             if (estgen >= 25000) {
@@ -105,7 +105,7 @@ public:
                 ss << "methuselah_" << (estgen / 1000) << "k";
                 std::string apgcode = ss.str();
                 census[apgcode] += 1;
-                alloccur[apgcode].push_back(suffix);
+                if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
         }
     }
