@@ -20,6 +20,15 @@ public:
     uint64_t tilesProcessed;
 
     apg::DifficultyHolder difficulties;
+    SoupSearcher *parent;
+
+    SoupSearcher() {
+        parent = 0; tilesProcessed = 0;
+    }
+
+    SoupSearcher(SoupSearcher *parent) {
+        this->parent = parent; tilesProcessed = 0;
+    }
 
     void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
@@ -58,7 +67,7 @@ public:
             ss << "megasized_" << (fpop / 100) << "h";
             std::string apgcode = ss.str();
             census[apgcode] += 1;
-            alloccur[apgcode].push_back(suffix);
+            if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
         }
 
         bool nonempty = pat.nonempty();
@@ -97,7 +106,7 @@ public:
                 ss << "messless_" << (estgen / 100) << "h";
                 std::string apgcode = ss.str();
                 census[apgcode] += 1;
-                alloccur[apgcode].push_back(suffix);
+                if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
 
             if (estgen >= 25000) {
@@ -105,7 +114,7 @@ public:
                 ss << "methuselah_" << (estgen / 1000) << "k";
                 std::string apgcode = ss.str();
                 census[apgcode] += 1;
-                alloccur[apgcode].push_back(suffix);
+                if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
         }
     }
@@ -212,6 +221,8 @@ public:
             #endif
 
             if (census[apgcode] > 10) { continue; }
+
+            if ((parent != 0) && (parent->census.count(apgcode)) && (parent->census[apgcode] > 10)) { continue; }
 
             #ifdef STANDARD_LIFE
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
@@ -402,7 +413,13 @@ public:
 
         if (testing) { return "testing"; }
 
-        return catagolueRequest(ss.str().c_str(), "/apgsearch");
+        std::string x = catagolueRequest(ss.str().c_str(), "/apgsearch");
+        if (x.length() < 90) {
+            std::cerr << "\033[32;1m" << x << "\033[0m" << std::endl;
+        } else {
+            std::cerr << "\033[31;1m" << x << "\033[0m" << std::endl;
+        }
+        return x;
 
     }
 

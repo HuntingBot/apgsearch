@@ -166,7 +166,11 @@ the interesting soups to the CPU search program. Compilation uses:
 
     ./recompile.sh --cuda
 
-On a V100 Volta GPU, this churns through 385 000 soups per second.
+On a V100 Volta GPU, this churns through 385 000 soups per second. Note
+that the program will upload to a different census (**b3s23/G1** instead
+of **b3s23/C1**) as the process of discarding uninteresting soups heavily
+distorts the census results. Work is in progress to allow the GPU to census
+soups itself, thereby allowing CUDA-accelerated searching of **b3s23/C1**.
 
 Credits and licences
 ====================

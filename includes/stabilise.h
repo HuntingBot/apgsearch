@@ -12,6 +12,10 @@ int naivestab_awesome(UPATTERN &pat) {
     int period = 12;
     int security = 15;
 
+    #ifdef STDIN_SYM
+    pat.advance(0, 0, 256);
+    #endif
+
     for (int i = 0; i < 1000; i++) {
 
         if (i == 40) { security = 20; }
