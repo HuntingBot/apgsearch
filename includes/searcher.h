@@ -51,6 +51,7 @@ public:
 
         int fpop = pat.totalPopulation();
 
+        #ifndef LARGE_SYMMETRY
         if (fpop >= 3000) {
             std::cerr << "Soup " << (seedroot + suffix) << " has a final population of \033[1;34m";
             std::cerr << fpop << "\033[0m cells." << std::endl;
@@ -60,8 +61,12 @@ public:
             census[apgcode] += 1;
             if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
         }
+        #endif
 
         bool nonempty = pat.nonempty();
+        #ifdef LARGE_SYMMETRY
+        if (nonempty) return;
+        #endif
 
         int estgen = pat.gensElapsed;
         if (estgen >= (nonempty ? 24000 : 500)) {
@@ -100,6 +105,7 @@ public:
                 if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
 
+            #ifndef LARGE_SYMMETRY
             if (estgen >= 25000) {
                 std::ostringstream ss;
                 ss << "methuselah_" << (estgen / 1000) << "k";
@@ -107,6 +113,7 @@ public:
                 census[apgcode] += 1;
                 if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
+            #endif
         }
     }
 

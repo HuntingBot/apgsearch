@@ -63,6 +63,9 @@ def main():
         elif 'stdin' in symmetry:
             g.write('#define STDIN_SYM 1\n')
 
+        if any(s in symmetry for s in ["64x64", "128x128", "256x256", "512x512", "_1k", "_2k", "_4k", "_8k"]):
+            g.write("#define LARGE_SYMMETRY\n")
+
         if using_gpu:
             g.write('#define USING_GPU 1\n')
 
