@@ -17,12 +17,16 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v5.09-" LIFELIB_VERSION
+#define APG_VERSION "v5.1-" LIFELIB_VERSION
 
-#include "includes/params.h"
+#include "includes/params2.h"
 
 #ifdef USING_GPU
+#ifdef NEW_GPU_ALGO
+#include "lifelib/cuda2/gs_def.h"
+#else
 #include "lifelib/cuda/gs_def.h"
+#endif
 #endif
 
 #include "includes/md5.h"
