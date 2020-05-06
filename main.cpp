@@ -17,7 +17,7 @@
 #include "lifelib/classifier.h"
 #include "lifelib/incubator.h"
 
-#define APG_VERSION "v5.1-" LIFELIB_VERSION
+#define APG_VERSION "v5.11-" LIFELIB_VERSION
 
 #include "includes/params2.h"
 
