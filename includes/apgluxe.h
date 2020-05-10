@@ -188,7 +188,7 @@ int run_apgluxe(int argc, char *argv[]) {
         soups_per_haul -= (soups_per_haul % 1000000);
         soups_per_haul += 1000000;
     }
-    if (parallelisation == 0) { parallelisation = 7; }
+    if (parallelisation == 0) { parallelisation = 8; }
     #endif
 
     #ifdef _POSIX_SOURCE

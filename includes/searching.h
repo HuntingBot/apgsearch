@@ -68,17 +68,13 @@ void partialBalancedSearch(std::vector<uint64_t> *vec, std::string seed, SoupSea
 
 struct CpuSearcher {
 
-    std::vector<uint64_t> pump(std::string seed, uint64_t j) {
+    void pump(std::string seed, uint64_t j, std::vector<uint64_t> &vec) {
 
         (void) seed;
-
-        std::vector<uint64_t> vec;
 
         for (uint64_t i = 0; i < 100000; i++) {
             vec.push_back(j * 100000 + i);
         }
-
-        return vec;
     }
 
 };
@@ -167,7 +163,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
     CpuSearcher gs; (void) unicount;
     #endif
 
-    std::vector<uint64_t> vec = gs.pump(seed, 0);
+    std::vector<uint64_t> vec; gs.pump(seed, 0, vec);
 
     auto start = std::chrono::system_clock::now();
     auto overall_start = start;
@@ -191,16 +187,22 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
             auto nvec = narrow(vec, i, maxcount);
 
+            vec.clear();
+
             for (int j = 0; j < m; j++) {
                 lsthreads[j] = std::thread(partialBalancedSearch, &(nvec), seed, &(localSoups[j]), &running, &idx, &ts);
             }
 
-            uint64_t newi = ((i / epoch_size) + 1) * epoch_size;
-            if (newi < maxcount) {
-                vec = gs.pump(seed, newi / epoch_size);
-            } else {
-                newi = maxcount;
-            }
+            uint64_t newi = i;
+
+            do {
+                newi = ((newi / epoch_size) + 1) * epoch_size;
+                if (newi < maxcount) {
+                    gs.pump(seed, newi / epoch_size, vec);
+                } else {
+                    newi = maxcount;
+                }
+            } while ((newi < maxcount) && (running) && (idx < nvec.size()));
 
             for (int j = 0; j < m; j++) {
                 lsthreads[j].join();
@@ -253,7 +255,8 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
             if (running) {
                 std::cout << "Continuing search..." << std::endl;
-                vec = gs.pump(seed, i / epoch_size);
+                vec.clear();
+                gs.pump(seed, i / epoch_size, vec);
                 maxcount += n;
             }
         }
