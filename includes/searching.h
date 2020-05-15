@@ -205,7 +205,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
                 } else {
                     newi = maxcount;
                 }
-            } while ((newi < maxcount) && (vec.size() < 20000) && (running) && (ts < nvec.size()));
+            } while ((newi < maxcount) && (vec.size() < 5000) && (running) && (ts < nvec.size()));
 
             for (int j = 0; j < m; j++) {
                 lsthreads[j].join();
