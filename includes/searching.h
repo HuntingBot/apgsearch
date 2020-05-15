@@ -172,6 +172,8 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
     uint64_t maxcount = n;
 
+    uint64_t lb = 0;
+
     while (running) {
 
         std::vector<SoupSearcher> localSoups(m, &globalSoup);
@@ -185,7 +187,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
             std::atomic<uint64_t> idx(0);
             std::atomic<uint64_t> ts(0);
 
-            auto nvec = narrow(vec, i, maxcount);
+            auto nvec = narrow(vec, lb, maxcount);
 
             vec.clear();
 
@@ -194,6 +196,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
             }
 
             uint64_t newi = i;
+            lb = ((newi / epoch_size) + 1) * epoch_size;
 
             do {
                 newi = ((newi / epoch_size) + 1) * epoch_size;
@@ -202,7 +205,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
                 } else {
                     newi = maxcount;
                 }
-            } while ((newi < maxcount) && (running) && (idx < nvec.size()));
+            } while ((newi < maxcount) && (vec.size() < 20000) && (running) && (ts < nvec.size()));
 
             for (int j = 0; j < m; j++) {
                 lsthreads[j].join();
@@ -224,7 +227,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
         double current_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - last_current).count();
         double overall_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - overall_start).count();
 
-        bool finished = (!running) || (i == maxcount);
+        bool finished = (!running) || ((i == maxcount) && (vec.size() == 0));
 
         if (finished || (elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1))) || (i - lasti >= 1000000)) {
             std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
