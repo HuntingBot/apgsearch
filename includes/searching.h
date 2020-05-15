@@ -163,7 +163,8 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
     CpuSearcher gs; (void) unicount;
     #endif
 
-    std::vector<uint64_t> vec; gs.pump(seed, 0, vec);
+    std::vector<uint64_t> vec;
+    if (m != 0) { gs.pump(seed, 0, vec); }
 
     auto start = std::chrono::system_clock::now();
     auto overall_start = start;
@@ -259,7 +260,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
             if (running) {
                 std::cout << "Continuing search..." << std::endl;
                 vec.clear();
-                gs.pump(seed, i / epoch_size, vec);
+                if (m != 0) { gs.pump(seed, i / epoch_size, vec); }
                 maxcount += n;
             }
         }
