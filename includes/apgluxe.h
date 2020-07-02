@@ -32,9 +32,9 @@ int run_apgluxe(int argc, char *argv[]) {
 
     // Default values:
     #ifdef USING_GPU
-    int64_t soups_per_haul = 200000000;
+    int64_t soupsPerHaul = 200000000;
     #else
-    int64_t soups_per_haul = 10000000;
+    int64_t soupsPerHaul = 10000000;
     #endif
 
     std::string payoshaKey = "#anon";
@@ -68,7 +68,7 @@ int run_apgluxe(int argc, char *argv[]) {
         } else if (strcmp(argv[i], "-s") == 0) {
             seed = argv[i+1];
         } else if (strcmp(argv[i], "-n") == 0) {
-            soups_per_haul = atoll(argv[i+1]);
+            soupsPerHaul = atoll(argv[i+1]);
         } else if (strcmp(argv[i], "-v") == 0) {
             verifications = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "-i") == 0) {
@@ -123,8 +123,8 @@ int run_apgluxe(int argc, char *argv[]) {
 
     if (argc == 1) {
         std::cout << "Please enter number of soups per haul (minimum 10000000): ";
-        std::cin >> soups_per_haul;
-        if (soups_per_haul < 10000000) { soups_per_haul = 10000000; }
+        std::cin >> soupsPerHaul;
+        if (soupsPerHaul < 10000000) { soupsPerHaul = 10000000; }
         std::cout << "Please enter payosha256 key (e.g. '#anon'): ";
         std::cin >> payoshaKey;
         while ((payoshaKey.substr(0, 1) == "'") || (payoshaKey[0] == '"')) {
@@ -165,14 +165,14 @@ int run_apgluxe(int argc, char *argv[]) {
         return 1;
     }
 
-    if (soups_per_haul <= 0) {
-        std::cout << "Soups per haul, " << soups_per_haul << ", must be positive." << std::endl;
+    if (soupsPerHaul <= 0) {
+        std::cout << "Soups per haul, " << soupsPerHaul << ", must be positive." << std::endl;
         return 1;
     }
 
-    if (soups_per_haul > 10000000000ll) {
+    if (soupsPerHaul > 10000000000ll) {
         std::cout << "Soups per haul reduced to maximum of 10^10" << std::endl;
-        soups_per_haul = 10000000000ll;
+        soupsPerHaul = 10000000000ll;
     }
 
     std::atomic<bool> running(true);
@@ -184,9 +184,9 @@ int run_apgluxe(int argc, char *argv[]) {
     #endif
 
     #ifdef USING_GPU
-    if (soups_per_haul % 1000000) {
-        soups_per_haul -= (soups_per_haul % 1000000);
-        soups_per_haul += 1000000;
+    if (soupsPerHaul % 1000000) {
+        soupsPerHaul -= (soupsPerHaul % 1000000);
+        soupsPerHaul += 1000000;
     }
     if (numThreads == 0) { numThreads = 8; }
     #endif
@@ -218,7 +218,7 @@ int run_apgluxe(int argc, char *argv[]) {
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
 
-        perpetualSearch(soups_per_haul, numThreads, interactive, payoshaKey, seed, unicount, local_log, running, testing);
+        perpetualSearch(soupsPerHaul, numThreads, interactive, payoshaKey, seed, unicount, local_log, running, testing);
 
         quitByUser = ! running;
 

@@ -125,7 +125,7 @@ std::string retrieveSeed(uint64_t i, std::atomic<bool> *running) {
 
 }
 
-void perpetualSearch(uint64_t n, int numThreads, bool interactive, std::string payoshaKey, std::string seed,
+void perpetualSearch(uint64_t soupsPerHaul, int numThreads, bool interactive, std::string payoshaKey, std::string seed,
                         int unicount, int local_log, std::atomic<bool> &running, bool testing) {
     /*
     Unifies several similar functions into one simpler one.
@@ -153,7 +153,7 @@ void perpetualSearch(uint64_t n, int numThreads, bool interactive, std::string p
 
     populateLuts();
 
-    std::cout << "Running " << n << " soups per haul:" << std::endl;
+    std::cout << "Running " << soupsPerHaul << " soups per haul:" << std::endl;
 
     #ifdef USING_GPU
     uint64_t epoch_size = 1000000;
@@ -171,7 +171,7 @@ void perpetualSearch(uint64_t n, int numThreads, bool interactive, std::string p
     auto current = start;
     auto last_current = start;
 
-    uint64_t maxcount = n;
+    uint64_t maxcount = soupsPerHaul;
 
     uint64_t lb = 0;
 
@@ -261,7 +261,7 @@ void perpetualSearch(uint64_t n, int numThreads, bool interactive, std::string p
                 std::cout << "Continuing search..." << std::endl;
                 vec.clear();
                 if (numThreads != 0) { gs.pump(seed, i / epoch_size, vec); }
-                maxcount += n;
+                maxcount += soupsPerHaul;
             }
         }
     }
