@@ -89,35 +89,32 @@ std::vector<uint64_t> narrow(const std::vector<uint64_t>& orig, uint64_t lb, uin
 
 }
 
-std::string retrieveSeed(uint64_t i, std::atomic<bool> *running) {
-
-    std::ostringstream ss;
-
-    #ifndef STDIN_SYM
-    ss << i;
-    (void) running;
-    #else
-    (void) i;
+#ifdef STDIN_SYM
+std::string retrieveSeed(std::atomic<bool> *running) {
+    std::string seed;
     bool readingrle = false;
     std::string stdin_line;
     while (std::getline(std::cin, stdin_line)) {
-
-        if (stdin_line.length() == 0) { continue; }
-
-        if (readingrle) { ss << "-" << stdin_line; }
-
-        if ((stdin_line[0] == 'x') && (readingrle == false)) {
+        if (stdin_line.empty()) {
+            continue;
+        }
+        if (readingrle) {
+            seed += '-';
+            seed += stdin_line;
+        }
+        if ((stdin_line[0] == 'x') && !readingrle) {
             readingrle = true;
         }
-
-        if (stdin_line.find('!') != std::string::npos) { break; }
+        if (stdin_line.find('!') != std::string::npos) {
+            break;
+        }
     }
-    if (readingrle == false) { (*running) = false; }
-    #endif
-
-    return ss.str();
-
+    if (!readingrle) {
+        *running = false;
+    }
+    return seed;
 }
+#endif
 
 void perpetualSearch(uint64_t soupsPerHaul, int numThreads, bool interactive, const std::string& payoshaKey, const std::string& seed,
                         int unicount, int local_log, std::atomic<bool> &running, bool testing) {
@@ -174,7 +171,11 @@ void perpetualSearch(uint64_t soupsPerHaul, int numThreads, bool interactive, co
         std::vector<std::thread> lsthreads(numThreads);
 
         if (numThreads == 0) {
-            std::string suffix = retrieveSeed(soupsCompletedSinceStart, &running);
+#ifdef STDIN_SYM
+           std::string suffix = retrieveSeed(&running);
+#else
+           std::string suffix = strConcat(soupsCompletedSinceStart);
+#endif
             globalSoup.censusSoup(seed, suffix, cfier);
             soupsCompletedSinceStart += 1;
         } else {
