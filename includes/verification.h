@@ -10,12 +10,8 @@ std::string obtainWork(const std::string& payoshakey) {
         return "";
     }
 
-    std::ostringstream ss;
-
-    ss << authstring;
-    ss << RULESTRING << "\n" << SYMMETRY << "\n";
-
-    return catagolueRequest(ss.str().c_str(), "/verify");
+    std::string payload = strConcat(authstring, RULESTRING, "\n", SYMMETRY, "\n");
+    return catagolueRequest(payload.c_str(), "/verify");
 
 }
 

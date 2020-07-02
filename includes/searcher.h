@@ -48,9 +48,7 @@ public:
         if (fpop >= 3000) {
             std::cerr << "Soup " << (seedroot + suffix) << " has a final population of \033[1;34m";
             std::cerr << fpop << "\033[0m cells." << std::endl;
-            std::ostringstream ss;
-            ss << "megasized_" << (fpop / 100) << "h";
-            std::string apgcode = ss.str();
+            std::string apgcode = strConcat("megasized_", (fpop / 100), "h");
             census[apgcode] += 1;
             if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
         }
@@ -91,18 +89,14 @@ public:
             }
 
             if ((!nonempty) && (estgen >= 500)) {
-                std::ostringstream ss;
-                ss << "messless_" << (estgen / 100) << "h";
-                std::string apgcode = ss.str();
+                std::string apgcode = strConcat("messless_", (estgen / 100), "h");
                 census[apgcode] += 1;
                 if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
 
             #ifndef LARGE_SYMMETRY
             if (estgen >= 25000) {
-                std::ostringstream ss;
-                ss << "methuselah_" << (estgen / 1000) << "k";
-                std::string apgcode = ss.str();
+                std::string apgcode = strConcat("methuselah_", (estgen / 1000), "k");
                 census[apgcode] += 1;
                 if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
@@ -378,16 +372,13 @@ public:
         }
 
         if(local_log) {
-            std::ofstream resultsFile;
-            std::ostringstream resultsFileName;
-
             std::time_t timestamp = std::time(NULL);
+            std::string resultsFileName = strConcat("log.", timestamp, ".", root, ".txt");
 
-            resultsFileName << "log." << timestamp << "." << root << ".txt";
+            std::cout << "Saving results to " << resultsFileName << std::endl;
 
-            std::cout << "Saving results to " << resultsFileName.str() << std::endl;
-
-            resultsFile.open(resultsFileName.str().c_str());
+            std::ofstream resultsFile;
+            resultsFile.open(resultsFileName.c_str());
             resultsFile << ss.str();
             resultsFile.close();
         }

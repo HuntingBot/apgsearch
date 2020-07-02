@@ -58,9 +58,7 @@ void partialBalancedSearch(std::vector<uint64_t> *vec, std::string seed, SoupSea
 
         uint64_t suffix = (*vec)[curridx];
 
-        std::ostringstream ss;
-        ss << suffix;
-        localSoup->censusSoup(seed, ss.str(), cfier);
+        localSoup->censusSoup(seed, strConcat(suffix), cfier);
         (*ts)++;
 
     }

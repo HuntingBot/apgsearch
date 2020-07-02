@@ -162,9 +162,7 @@ std::string authenticate(const char *payosha256_key, const char *operation_name)
 
         for (int nonce = 0; nonce < 244823040; nonce++) {
 
-            std::ostringstream ss;
-            ss << token << ":" << nonce;
-            std::string prehash = ss.str();
+            std::string prehash = strConcat(token, ':', nonce);
             std::string posthash = sha256(prehash);
 
             if (posthash.compare(target) < 0) {

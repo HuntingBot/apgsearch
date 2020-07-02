@@ -176,13 +176,8 @@ std::string linearlyse(const apg::pattern& ipat, int maxperiod, int stepsize) {
     if (moment0 == 0)
         return "PATHOLOGICAL";
 
-    std::ostringstream ss_prehash;
-    ss_prehash << moment1 << "#" << moment2;
-    std::string posthash = md5(ss_prehash.str());
-    std::ostringstream ss_repr;
-    ss_repr << "yl" << period << "_" << qeriod << "_" << moment0 << "_" << posthash;
-
-    std::string repr = ss_repr.str();
+    std::string posthash = md5(strConcat(moment1, '#', moment2));
+    std::string repr = strConcat("y1", period, "_", qeriod, "_", moment0, "_", posthash);
 
     // std::cout << "Linear-growth pattern identified: \033[1;32m" << repr << "\033[0m" << std::endl;
 
