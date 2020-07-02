@@ -125,7 +125,7 @@ std::string retrieveSeed(uint64_t i, std::atomic<bool> *running) {
 
 }
 
-void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey, std::string seed,
+void perpetualSearch(uint64_t n, int numThreads, bool interactive, std::string payoshaKey, std::string seed,
                         int unicount, int local_log, std::atomic<bool> &running, bool testing) {
     /*
     Unifies several similar functions into one simpler one.
@@ -164,7 +164,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
     #endif
 
     std::vector<uint64_t> vec;
-    if (m != 0) { gs.pump(seed, 0, vec); }
+    if (numThreads != 0) { gs.pump(seed, 0, vec); }
 
     auto start = std::chrono::system_clock::now();
     auto overall_start = start;
@@ -177,10 +177,10 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
     while (running) {
 
-        std::vector<SoupSearcher> localSoups(m, &globalSoup);
-        std::vector<std::thread> lsthreads(m);
+        std::vector<SoupSearcher> localSoups(numThreads, &globalSoup);
+        std::vector<std::thread> lsthreads(numThreads);
 
-        if (m == 0) {
+        if (numThreads == 0) {
             std::string suffix = retrieveSeed(i, &running);
             globalSoup.censusSoup(seed, suffix, cfier);
             i += 1;
@@ -192,7 +192,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
             vec.clear();
 
-            for (int j = 0; j < m; j++) {
+            for (int j = 0; j < numThreads; j++) {
                 lsthreads[j] = std::thread(partialBalancedSearch, &(nvec), seed, &(localSoups[j]), &running, &idx, &ts);
             }
 
@@ -208,7 +208,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
                 }
             } while ((newi < maxcount) && (vec.size() < 5000) && (running) && (ts < nvec.size()));
 
-            for (int j = 0; j < m; j++) {
+            for (int j = 0; j < numThreads; j++) {
                 lsthreads[j].join();
                 globalSoup.aggregate(&(localSoups[j].census), &(localSoups[j].alloccur));
             }
@@ -260,7 +260,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
             if (running) {
                 std::cout << "Continuing search..." << std::endl;
                 vec.clear();
-                if (m != 0) { gs.pump(seed, i / epoch_size, vec); }
+                if (numThreads != 0) { gs.pump(seed, i / epoch_size, vec); }
                 maxcount += n;
             }
         }

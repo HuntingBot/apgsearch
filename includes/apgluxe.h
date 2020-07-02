@@ -39,7 +39,7 @@ int run_apgluxe(int argc, char *argv[]) {
 
     std::string payoshaKey = "#anon";
     std::string seed = reseed("original seed");
-    int parallelisation = 0;
+    int numThreads = 0;
 
     #ifdef STDIN_SYM
     int local_log = 1;
@@ -81,7 +81,7 @@ int run_apgluxe(int argc, char *argv[]) {
             testing = atoi(argv[i+1]);
             if (testing) { iterations = 1; }
         } else if (strcmp(argv[i], "-p") == 0) {
-            parallelisation = atoi(argv[i+1]);
+            numThreads = atoi(argv[i+1]);
         } else if (strcmp(argv[i], "--rule") == 0) {
             if (!consumed_rule) {
                 std::cout << "\033[1;33mapgluxe " << APG_VERSION << "\033[0m: ";
@@ -133,21 +133,21 @@ int run_apgluxe(int argc, char *argv[]) {
         }
         #ifndef __CYGWIN__
         std::cout << "Please enter number of CPU threads to use (e.g. 4): ";
-        std::cin >> parallelisation;
+        std::cin >> numThreads;
         #endif
     }
 
     #ifdef __CYGWIN__
-    if (parallelisation > 0) {
+    if (numThreads > 0) {
         std::cout << "Warning: parallelisation disabled on Cygwin." << std::endl;
-        parallelisation = 0;
+        numThreads = 0;
     }
     #endif
 
     // Disable verification by default if running on a HPC;
     // otherwise verify three hauls per uploaded haul:
     if (verifications < 0) {
-        verifications = (parallelisation <= 4) ? 5 : 0;
+        verifications = (numThreads <= 4) ? 5 : 0;
     }
     
     std::cout << "\nGreetings, this is \033[1;33mapgluxe " << APG_VERSION;
@@ -180,7 +180,7 @@ int run_apgluxe(int argc, char *argv[]) {
     #ifdef STDIN_SYM
     bool interactive = false;
     #else
-    bool interactive = (parallelisation == 0);
+    bool interactive = (numThreads == 0);
     #endif
 
     #ifdef USING_GPU
@@ -188,7 +188,7 @@ int run_apgluxe(int argc, char *argv[]) {
         soups_per_haul -= (soups_per_haul % 1000000);
         soups_per_haul += 1000000;
     }
-    if (parallelisation == 0) { parallelisation = 8; }
+    if (numThreads == 0) { numThreads = 8; }
     #endif
 
     #ifdef _POSIX_SOURCE
@@ -218,7 +218,7 @@ int run_apgluxe(int argc, char *argv[]) {
         // Run the search:
         std::cout << "Using seed " << seed << std::endl;
 
-        perpetualSearch(soups_per_haul, parallelisation, interactive, payoshaKey, seed, unicount, local_log, running, testing);
+        perpetualSearch(soups_per_haul, numThreads, interactive, payoshaKey, seed, unicount, local_log, running, testing);
 
         quitByUser = ! running;
 
