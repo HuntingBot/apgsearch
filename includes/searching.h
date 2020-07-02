@@ -68,7 +68,7 @@ void partialBalancedSearch(std::vector<uint64_t> *vec, std::string seed, SoupSea
 
 struct CpuSearcher {
 
-    void pump(std::string seed, uint64_t j, std::vector<uint64_t> &vec) {
+    void pump(const std::string& seed, uint64_t j, std::vector<uint64_t> &vec) {
 
         (void) seed;
 
@@ -79,18 +79,14 @@ struct CpuSearcher {
 
 };
 
-std::vector<uint64_t> narrow(std::vector<uint64_t> orig, uint64_t lb, uint64_t ub) {
+std::vector<uint64_t> narrow(const std::vector<uint64_t>& orig, uint64_t lb, uint64_t ub) {
 
     std::vector<uint64_t> narrowed;
-
-    for (auto it = orig.begin(); it != orig.end(); ++it) {
-
-        uint64_t x = *it;
-
-        if ((lb <= x) && (x < ub)) { narrowed.push_back(x); }
-
+    for (uint64_t x : orig) {
+        if (lb <= x && x < ub) {
+            narrowed.push_back(x);
+        }
     }
-
     return narrowed;
 
 }
@@ -125,7 +121,7 @@ std::string retrieveSeed(uint64_t i, std::atomic<bool> *running) {
 
 }
 
-void perpetualSearch(uint64_t soupsPerHaul, int numThreads, bool interactive, std::string payoshaKey, std::string seed,
+void perpetualSearch(uint64_t soupsPerHaul, int numThreads, bool interactive, const std::string& payoshaKey, const std::string& seed,
                         int unicount, int local_log, std::atomic<bool> &running, bool testing) {
     /*
     Unifies several similar functions into one simpler one.

@@ -7,7 +7,7 @@
 #include <ctime>
 #include <unistd.h>
 
-std::string reseed(std::string seed) {
+std::string reseed(const std::string& seed) {
 
     std::ostringstream ss;
     ss << seed;

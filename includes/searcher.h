@@ -23,31 +23,24 @@ public:
 
     void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
-        std::map<std::string, long long>::iterator it;
-        for (it = newcensus->begin(); it != newcensus->end(); it++)
-        {
-            std::string apgcode = it->first;
-            long long quantity = it->second;
-            census[apgcode] += quantity;
-
+        for (const auto& kv : *newcensus) {
+            census[kv.first] += kv.second;
         }
-
-        std::map<std::string, std::vector<std::string> >::iterator it2;
-        for (it2 = newoccur->begin(); it2 != newoccur->end(); it2++)
-        {
-            std::string apgcode = it2->first;
-            std::vector<std::string> occurrences = it2->second;
-            for (unsigned int i = 0; i < occurrences.size(); i++) {
-                if (alloccur[apgcode].size() < 10) {
-                    alloccur[apgcode].push_back(occurrences[i]);
+        for (const auto& kv : *newoccur) {
+            auto& all_occurrences_of_this_apgcode = alloccur[kv.first];
+            for (const auto& occurrence : kv.second) {
+                if (all_occurrences_of_this_apgcode.size() >= 10) {
+                    break;
                 }
+                all_occurrences_of_this_apgcode.push_back(occurrence);
             }
         }
+
     }
 
     #ifdef STANDARD_LIFE
 
-    void methudetect(UPATTERN &pat, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
+    void methudetect(UPATTERN &pat, apg::base_classifier<BITPLANES> &cfier, const std::string& seedroot, std::string suffix) {
 
         int fpop = pat.totalPopulation();
 
@@ -119,7 +112,7 @@ public:
 
     #endif
 
-    bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
+    bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, const std::string& seedroot, const std::string& suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
         std::map<std::string, int64_t> cm;
@@ -255,7 +248,7 @@ public:
 
     }
 
-    void censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
+    void censusSoup(const std::string& seedroot, const std::string& suffix, apg::base_classifier<BITPLANES> &cfier) {
 
         std::vector<apg::bitworld> vbw = apg::hashsoup(seedroot + suffix, SYMMETRY);
 
@@ -331,7 +324,7 @@ public:
 
     }
 
-    std::string submitResults(std::string payoshakey, std::string root, long long numsoups, int local_log, bool testing) {
+    std::string submitResults(const std::string& payoshakey, const std::string& root, long long numsoups, int local_log, bool testing) {
 
         std::string authstring = "testing";
 
@@ -340,8 +333,9 @@ public:
         }
 
         // Authentication failed:
-        if (authstring.length() == 0)
+        if (authstring.empty()) {
             return "";
+        }
 
         long long totobjs = 0;
 
@@ -367,16 +361,16 @@ public:
         ss << "\n@SAMPLE_SOUPIDS\n";
 
         for (int i = censusList.size() - 1; i >= 0; i--) {
-            std::vector<std::string> occurrences = alloccur[censusList[i].second];
-            if (occurrences.size() == 0) { continue; }
+            const std::vector<std::string>& occurrences = alloccur[censusList[i].second];
+            if (occurrences.empty()) { continue; }
 
             ss << censusList[i].second;
 
             #ifdef STDIN_SYM
             ss << " " << occurrences[0];
             #else
-            for (unsigned int j = 0; j < occurrences.size(); j++) {
-                ss << " " << occurrences[j];
+            for (const std::string& s : occurrences) {
+                ss << " " << s;
             }
             #endif
 
