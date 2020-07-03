@@ -1,31 +1,29 @@
 #pragma once
 
-double regress(std::vector<std::pair<double, double> > pairlist) {
+double regress(const std::vector<std::pair<double, double>>& pairlist) {
 
     double cumx = 0.0;
     double cumy = 0.0;
     double cumvar = 0.0;
     double cumcov = 0.0;
 
-    std::vector<std::pair<double, double> >::iterator it;
-    for(it = pairlist.begin(); it < pairlist.end(); it++) {
-        cumx += it->first;
-        cumy += it->second;
+    for (const auto& xy : pairlist) {
+        cumx += xy.first;
+        cumy += xy.second;
     }
+    cumx /= pairlist.size();
+    cumy /= pairlist.size();
 
-    cumx = cumx / pairlist.size();
-    cumy = cumy / pairlist.size();
-
-    for(it = pairlist.begin(); it < pairlist.end(); it++) {
-        cumvar += (it->first - cumx) * (it->first - cumx);
-        cumcov += (it->first - cumx) * (it->second - cumy);
+    for (const auto& xy : pairlist) {
+        cumvar += (xy.first - cumx) * (xy.first - cumx);
+        cumcov += (xy.first - cumx) * (xy.second - cumy);
     }
 
     return (cumcov / cumvar);
 
 }
 
-std::string powerlyse(apg::pattern &ipat, int stepsize, int numsteps, int startgen) {
+std::string powerlyse(const apg::pattern& ipat, int stepsize, int numsteps, int startgen) {
 
     apg::pattern pat = ipat;
 
@@ -59,7 +57,7 @@ std::string powerlyse(apg::pattern &ipat, int stepsize, int numsteps, int startg
 
 #ifdef HASHLIFE_ONLY
 
-std::vector<int> get_popseq(apg::pattern ipat, int ngens, int stepsize) {
+std::vector<int> get_popseq(const apg::pattern& ipat, int ngens, int stepsize) {
 
     std::vector<int> poplist(ngens);
     apg::pattern pat = ipat;
@@ -109,7 +107,7 @@ std::vector<int> get_popseq(apg::pattern ipat, int ngens, int stepsize) {
 
 #endif
 
-std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize) {
+std::string linearlyse(const apg::pattern& ipat, int maxperiod, int stepsize) {
 
     std::vector<int> poplist = get_popseq(ipat, 3 * maxperiod, stepsize);
     std::vector<int> difflist(2 * maxperiod);
@@ -178,13 +176,8 @@ std::string linearlyse(apg::pattern ipat, int maxperiod, int stepsize) {
     if (moment0 == 0)
         return "PATHOLOGICAL";
 
-    std::ostringstream ss_prehash;
-    ss_prehash << moment1 << "#" << moment2;
-    std::string posthash = md5(ss_prehash.str());
-    std::ostringstream ss_repr;
-    ss_repr << "yl" << period << "_" << qeriod << "_" << moment0 << "_" << posthash;
-
-    std::string repr = ss_repr.str();
+    std::string posthash = md5(strConcat(moment1, '#', moment2));
+    std::string repr = strConcat("y1", period, "_", qeriod, "_", moment0, "_", posthash);
 
     // std::cout << "Linear-growth pattern identified: \033[1;32m" << repr << "\033[0m" << std::endl;
 

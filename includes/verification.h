@@ -1,6 +1,6 @@
 #pragma once
 
-std::string obtainWork(std::string payoshakey) {
+std::string obtainWork(const std::string& payoshakey) {
 
     std::string authstring = authenticate(payoshakey.c_str(), "verify_apgsearch_haul");
 
@@ -10,20 +10,16 @@ std::string obtainWork(std::string payoshakey) {
         return "";
     }
 
-    std::ostringstream ss;
-
-    ss << authstring;
-    ss << RULESTRING << "\n" << SYMMETRY << "\n";
-
-    return catagolueRequest(ss.str().c_str(), "/verify");
+    std::string payload = strConcat(authstring, RULESTRING, "\n", SYMMETRY, "\n");
+    return catagolueRequest(payload.c_str(), "/verify");
 
 }
 
-bool verifySearch(std::string payoshakey) {
+bool verifySearch(const std::string& payoshakey) {
 
     std::string response = obtainWork(payoshakey);
 
-    if (response.length() <= 3) {
+    if (response.size() <= 3) {
         std::cout << "Received no response from /verify." << std::endl;
         return 1;
     }
@@ -37,7 +33,7 @@ bool verifySearch(std::string payoshakey) {
         // std::cout << sub << std::endl;
     }
 
-    if ((stringlist.size() < 4)) {
+    if (stringlist.size() < 4) {
         std::cout << "No more hauls to verify." << std::endl;
         return 1;
     }
@@ -45,7 +41,7 @@ bool verifySearch(std::string payoshakey) {
     std::string authstring = authenticate(payoshakey.c_str(), "submit_verification");
 
     // Authentication failed:
-    if (authstring.length() == 0) {
+    if (authstring.empty()) {
         std::cout << "Authentication failed." << std::endl;
         return 1;
     }
@@ -61,13 +57,11 @@ bool verifySearch(std::string payoshakey) {
     apg::lifetree<uint32_t, BITPLANES> lt(LIFETREE_MEM);
     apg::base_classifier<BITPLANES> cfier(&lt, RULESTRING);
 
-    for (unsigned int i = 4; i < stringlist.size(); i++)
-    {
-
+    for (unsigned int i = 4; i < stringlist.size(); i++) {
         std::string symslash = SYMMETRY "/";
         std::string seed = stringlist[i];
-        if ((seed.length() >= 4) && (seed.substr(0,symslash.length()).compare(symslash) == 0)) {
-            soup.censusSoup(seed.substr(symslash.length()), "", cfier);
+        if ((seed.size() >= 4) && (seed.substr(0,symslash.length()).compare(symslash) == 0)) {
+            soup.censusSoup(seed.substr(symslash.size()), "", cfier);
         } else {
             std::cout << "[" << seed << "]" << std::endl;
         }

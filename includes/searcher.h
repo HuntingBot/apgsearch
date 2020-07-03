@@ -23,31 +23,24 @@ public:
 
     void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
-        std::map<std::string, long long>::iterator it;
-        for (it = newcensus->begin(); it != newcensus->end(); it++)
-        {
-            std::string apgcode = it->first;
-            long long quantity = it->second;
-            census[apgcode] += quantity;
-
+        for (const auto& kv : *newcensus) {
+            census[kv.first] += kv.second;
         }
-
-        std::map<std::string, std::vector<std::string> >::iterator it2;
-        for (it2 = newoccur->begin(); it2 != newoccur->end(); it2++)
-        {
-            std::string apgcode = it2->first;
-            std::vector<std::string> occurrences = it2->second;
-            for (unsigned int i = 0; i < occurrences.size(); i++) {
-                if (alloccur[apgcode].size() < 10) {
-                    alloccur[apgcode].push_back(occurrences[i]);
+        for (const auto& kv : *newoccur) {
+            auto& all_occurrences_of_this_apgcode = alloccur[kv.first];
+            for (const auto& occurrence : kv.second) {
+                if (all_occurrences_of_this_apgcode.size() >= 10) {
+                    break;
                 }
+                all_occurrences_of_this_apgcode.push_back(occurrence);
             }
         }
+
     }
 
     #ifdef STANDARD_LIFE
 
-    void methudetect(UPATTERN &pat, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
+    void methudetect(UPATTERN &pat, apg::base_classifier<BITPLANES> &cfier, const std::string& seedroot, std::string suffix) {
 
         int fpop = pat.totalPopulation();
 
@@ -55,9 +48,7 @@ public:
         if (fpop >= 3000) {
             std::cerr << "Soup " << (seedroot + suffix) << " has a final population of \033[1;34m";
             std::cerr << fpop << "\033[0m cells." << std::endl;
-            std::ostringstream ss;
-            ss << "megasized_" << (fpop / 100) << "h";
-            std::string apgcode = ss.str();
+            std::string apgcode = strConcat("megasized_", (fpop / 100), "h");
             census[apgcode] += 1;
             if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
         }
@@ -98,18 +89,14 @@ public:
             }
 
             if ((!nonempty) && (estgen >= 500)) {
-                std::ostringstream ss;
-                ss << "messless_" << (estgen / 100) << "h";
-                std::string apgcode = ss.str();
+                std::string apgcode = strConcat("messless_", (estgen / 100), "h");
                 census[apgcode] += 1;
                 if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
 
             #ifndef LARGE_SYMMETRY
             if (estgen >= 25000) {
-                std::ostringstream ss;
-                ss << "methuselah_" << (estgen / 1000) << "k";
-                std::string apgcode = ss.str();
+                std::string apgcode = strConcat("methuselah_", (estgen / 1000), "k");
                 census[apgcode] += 1;
                 if (alloccur[apgcode].size() < 10) { alloccur[apgcode].push_back(suffix); }
             }
@@ -119,7 +106,7 @@ public:
 
     #endif
 
-    bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, std::string seedroot, std::string suffix) {
+    bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, const std::string& seedroot, const std::string& suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
         std::map<std::string, int64_t> cm;
@@ -255,7 +242,7 @@ public:
 
     }
 
-    void censusSoup(std::string seedroot, std::string suffix, apg::base_classifier<BITPLANES> &cfier) {
+    void censusSoup(const std::string& seedroot, const std::string& suffix, apg::base_classifier<BITPLANES> &cfier) {
 
         std::vector<apg::bitworld> vbw = apg::hashsoup(seedroot + suffix, SYMMETRY);
 
@@ -331,7 +318,7 @@ public:
 
     }
 
-    std::string submitResults(std::string payoshakey, std::string root, long long numsoups, int local_log, bool testing) {
+    std::string submitResults(const std::string& payoshakey, const std::string& root, long long numsoups, int local_log, bool testing) {
 
         std::string authstring = "testing";
 
@@ -340,8 +327,9 @@ public:
         }
 
         // Authentication failed:
-        if (authstring.length() == 0)
+        if (authstring.empty()) {
             return "";
+        }
 
         long long totobjs = 0;
 
@@ -367,16 +355,16 @@ public:
         ss << "\n@SAMPLE_SOUPIDS\n";
 
         for (int i = censusList.size() - 1; i >= 0; i--) {
-            std::vector<std::string> occurrences = alloccur[censusList[i].second];
-            if (occurrences.size() == 0) { continue; }
+            const std::vector<std::string>& occurrences = alloccur[censusList[i].second];
+            if (occurrences.empty()) { continue; }
 
             ss << censusList[i].second;
 
             #ifdef STDIN_SYM
             ss << " " << occurrences[0];
             #else
-            for (unsigned int j = 0; j < occurrences.size(); j++) {
-                ss << " " << occurrences[j];
+            for (const std::string& s : occurrences) {
+                ss << " " << s;
             }
             #endif
 
@@ -384,16 +372,13 @@ public:
         }
 
         if(local_log) {
-            std::ofstream resultsFile;
-            std::ostringstream resultsFileName;
-
             std::time_t timestamp = std::time(NULL);
+            std::string resultsFileName = strConcat("log.", timestamp, ".", root, ".txt");
 
-            resultsFileName << "log." << timestamp << "." << root << ".txt";
+            std::cout << "Saving results to " << resultsFileName << std::endl;
 
-            std::cout << "Saving results to " << resultsFileName.str() << std::endl;
-
-            resultsFile.open(resultsFileName.str().c_str());
+            std::ofstream resultsFile;
+            resultsFile.open(resultsFileName.c_str());
             resultsFile << ss.str();
             resultsFile.close();
         }

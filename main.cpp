@@ -19,6 +19,7 @@
 
 #define APG_VERSION "v5.16-" LIFELIB_VERSION
 
+#include "includes/utilities.h"
 #include "includes/params2.h"
 
 #ifdef USING_GPU

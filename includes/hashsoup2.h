@@ -7,7 +7,7 @@
 #include <ctime>
 #include <unistd.h>
 
-std::string reseed(std::string seed) {
+std::string reseed(const std::string& seed) {
 
     std::ostringstream ss;
     ss << seed;
@@ -24,7 +24,7 @@ std::string reseed(std::string seed) {
     // Process ID:
     ss << " " << getpid();
 
-    std::string prehash = ss.str();
+    std::string prehash = std::move(ss).str();
 
     unsigned char digest[SHA256::DIGEST_SIZE];
     memset(digest,0,SHA256::DIGEST_SIZE);
@@ -35,14 +35,11 @@ std::string reseed(std::string seed) {
     ctx.final(digest);
 
     const char alphabet[] = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-
-    std::ostringstream newseed;
-    newseed << "k_";
+    std::string newseed = "k_123456789012";
     for (int i = 0; i < 12; i++) {
-        newseed << alphabet[digest[i] % 56];
+        newseed[i+2] = alphabet[digest[i] % 56];
     }
-
-    return newseed.str();
+    return newseed;
 
 }
 

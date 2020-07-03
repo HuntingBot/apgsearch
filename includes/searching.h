@@ -58,9 +58,7 @@ void partialBalancedSearch(std::vector<uint64_t> *vec, std::string seed, SoupSea
 
         uint64_t suffix = (*vec)[curridx];
 
-        std::ostringstream ss;
-        ss << suffix;
-        localSoup->censusSoup(seed, ss.str(), cfier);
+        localSoup->censusSoup(seed, strConcat(suffix), cfier);
         (*ts)++;
 
     }
@@ -68,7 +66,7 @@ void partialBalancedSearch(std::vector<uint64_t> *vec, std::string seed, SoupSea
 
 struct CpuSearcher {
 
-    void pump(std::string seed, uint64_t j, std::vector<uint64_t> &vec) {
+    void pump(const std::string& seed, uint64_t j, std::vector<uint64_t> &vec) {
 
         (void) seed;
 
@@ -79,53 +77,46 @@ struct CpuSearcher {
 
 };
 
-std::vector<uint64_t> narrow(std::vector<uint64_t> orig, uint64_t lb, uint64_t ub) {
+std::vector<uint64_t> narrow(const std::vector<uint64_t>& orig, uint64_t lb, uint64_t ub) {
 
     std::vector<uint64_t> narrowed;
-
-    for (auto it = orig.begin(); it != orig.end(); ++it) {
-
-        uint64_t x = *it;
-
-        if ((lb <= x) && (x < ub)) { narrowed.push_back(x); }
-
+    for (uint64_t x : orig) {
+        if (lb <= x && x < ub) {
+            narrowed.push_back(x);
+        }
     }
-
     return narrowed;
 
 }
 
-std::string retrieveSeed(uint64_t i, std::atomic<bool> *running) {
-
-    std::ostringstream ss;
-
-    #ifndef STDIN_SYM
-    ss << i;
-    (void) running;
-    #else
-    (void) i;
+#ifdef STDIN_SYM
+std::string retrieveSeed(std::atomic<bool> *running) {
+    std::string seed;
     bool readingrle = false;
     std::string stdin_line;
     while (std::getline(std::cin, stdin_line)) {
-
-        if (stdin_line.length() == 0) { continue; }
-
-        if (readingrle) { ss << "-" << stdin_line; }
-
-        if ((stdin_line[0] == 'x') && (readingrle == false)) {
+        if (stdin_line.empty()) {
+            continue;
+        }
+        if (readingrle) {
+            seed += '-';
+            seed += stdin_line;
+        }
+        if ((stdin_line[0] == 'x') && !readingrle) {
             readingrle = true;
         }
-
-        if (stdin_line.find('!') != std::string::npos) { break; }
+        if (stdin_line.find('!') != std::string::npos) {
+            break;
+        }
     }
-    if (readingrle == false) { (*running) = false; }
-    #endif
-
-    return ss.str();
-
+    if (!readingrle) {
+        *running = false;
+    }
+    return seed;
 }
+#endif
 
-void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey, std::string seed,
+void perpetualSearch(uint64_t soupsPerHaul, int numThreads, bool interactive, const std::string& payoshaKey, const std::string& seed,
                         int unicount, int local_log, std::atomic<bool> &running, bool testing) {
     /*
     Unifies several similar functions into one simpler one.
@@ -143,8 +134,8 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
     }
     #endif
 
-    uint64_t i = 0;
-    uint64_t lasti = 0;
+    uint64_t soupsCompletedSinceStart = 0;
+    uint64_t soupsCompletedBeforeLastMessage = 0;
 
     SoupSearcher globalSoup;
     globalSoup.tilesProcessed = 0;
@@ -153,7 +144,7 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
     populateLuts();
 
-    std::cout << "Running " << n << " soups per haul:" << std::endl;
+    std::cout << "Running " << soupsPerHaul << " soups per haul:" << std::endl;
 
     #ifdef USING_GPU
     uint64_t epoch_size = 1000000;
@@ -164,26 +155,29 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
     #endif
 
     std::vector<uint64_t> vec;
-    if (m != 0) { gs.pump(seed, 0, vec); }
+    if (numThreads != 0) { gs.pump(seed, 0, vec); }
 
-    auto start = std::chrono::system_clock::now();
-    auto overall_start = start;
-    auto current = start;
-    auto last_current = start;
+    auto timeOfStart = std::chrono::system_clock::now();
+    auto timeOfLastMessage = timeOfStart;
+    auto timeOfLastTimerCheck = timeOfStart;
 
-    uint64_t maxcount = n;
+    uint64_t maxcount = soupsPerHaul;
 
     uint64_t lb = 0;
 
     while (running) {
 
-        std::vector<SoupSearcher> localSoups(m, &globalSoup);
-        std::vector<std::thread> lsthreads(m);
+        std::vector<SoupSearcher> localSoups(numThreads, &globalSoup);
+        std::vector<std::thread> lsthreads(numThreads);
 
-        if (m == 0) {
-            std::string suffix = retrieveSeed(i, &running);
+        if (numThreads == 0) {
+#ifdef STDIN_SYM
+           std::string suffix = retrieveSeed(&running);
+#else
+           std::string suffix = strConcat(soupsCompletedSinceStart);
+#endif
             globalSoup.censusSoup(seed, suffix, cfier);
-            i += 1;
+            soupsCompletedSinceStart += 1;
         } else {
             std::atomic<uint64_t> idx(0);
             std::atomic<uint64_t> ts(0);
@@ -192,11 +186,11 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
             vec.clear();
 
-            for (int j = 0; j < m; j++) {
+            for (int j = 0; j < numThreads; j++) {
                 lsthreads[j] = std::thread(partialBalancedSearch, &(nvec), seed, &(localSoups[j]), &running, &idx, &ts);
             }
 
-            uint64_t newi = i;
+            uint64_t newi = soupsCompletedSinceStart;
             lb = ((newi / epoch_size) + 1) * epoch_size;
 
             do {
@@ -208,33 +202,37 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
                 }
             } while ((newi < maxcount) && (vec.size() < 5000) && (running) && (ts < nvec.size()));
 
-            for (int j = 0; j < m; j++) {
+            for (int j = 0; j < numThreads; j++) {
                 lsthreads[j].join();
                 globalSoup.aggregate(&(localSoups[j].census), &(localSoups[j].alloccur));
             }
 
             if (running || (ts == nvec.size())) {
-                i = newi;
+                soupsCompletedSinceStart = newi;
             } else {
-                double diff = newi - i;
+                double diff = newi - soupsCompletedSinceStart;
                 uint64_t estim = (diff * ts) / nvec.size();
-                i += estim;
+                soupsCompletedSinceStart += estim;
             }
         }
 
-        last_current = current;
-        current = std::chrono::system_clock::now();
-        double elapsed =         0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - start).count();
-        double current_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - last_current).count();
-        double overall_elapsed = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(current - overall_start).count();
+        auto now = std::chrono::system_clock::now();
+        double secondsSinceLastMessage = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(now - timeOfLastMessage).count();
+        double secondsSinceLastTimerCheck = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(now - timeOfLastTimerCheck).count();
+        double secondsSinceStart = 0.001 * std::chrono::duration_cast<std::chrono::milliseconds>(now - timeOfStart).count();
 
-        bool finished = (!running) || ((i == maxcount) && (vec.size() == 0));
+        timeOfLastTimerCheck = now;
 
-        if (finished || (elapsed >= 10.0) || ((current_elapsed >= 1.0) && (i == (lasti + 1))) || (i - lasti >= 1000000)) {
-            std::cout << RULESTRING << "/" << SYMMETRY << ": " << i << " soups completed (" << std::fixed << std::setprecision(3) << ((i - lasti) / elapsed) << " soups/second current, " << (i / overall_elapsed) << " overall)." << std::endl;
-            lasti = i;
+        bool finished = (!running) || ((soupsCompletedSinceStart == maxcount) && vec.empty());
+        uint64_t soupsCompletedSinceLastMessage = soupsCompletedSinceStart - soupsCompletedBeforeLastMessage;
 
-            start = std::chrono::system_clock::now();
+        if (finished || (secondsSinceLastMessage >= 10.0) || ((secondsSinceLastTimerCheck >= 1.0) && (soupsCompletedSinceLastMessage == 1)) || (soupsCompletedSinceLastMessage >= 1000000)) {
+            std::cout << RULESTRING << "/" << SYMMETRY << ": " << soupsCompletedSinceStart << " soups completed ("
+                      << std::fixed << std::setprecision(3) << (soupsCompletedSinceLastMessage / secondsSinceLastMessage) << " soups/second current, "
+                      << (soupsCompletedSinceStart / secondsSinceStart) << " overall)." << std::endl;
+
+            soupsCompletedBeforeLastMessage = soupsCompletedSinceStart;
+            timeOfLastMessage = now;
 
             #ifndef _WIN32
             if (interactive && keyWaiting()) {
@@ -246,9 +244,9 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
 
         if (finished) {
             std::cout << "----------------------------------------------------------------------" << std::endl;
-            std::cout << i << " soups completed." << std::endl;
+            std::cout << soupsCompletedSinceStart << " soups completed." << std::endl;
             std::cout << "Attempting to contact payosha256." << std::endl;
-            std::string payoshaResponse = globalSoup.submitResults(payoshaKey, seed, i, local_log, testing);
+            std::string payoshaResponse = globalSoup.submitResults(payoshaKey, seed, soupsCompletedSinceStart, local_log, testing);
 
             if (payoshaResponse.length() == 0) {
                 std::cout << "Connection was unsuccessful." << std::endl;
@@ -260,8 +258,8 @@ void perpetualSearch(uint64_t n, int m, bool interactive, std::string payoshaKey
             if (running) {
                 std::cout << "Continuing search..." << std::endl;
                 vec.clear();
-                if (m != 0) { gs.pump(seed, i / epoch_size, vec); }
-                maxcount += n;
+                if (numThreads != 0) { gs.pump(seed, soupsCompletedSinceStart / epoch_size, vec); }
+                maxcount += soupsPerHaul;
             }
         }
     }
