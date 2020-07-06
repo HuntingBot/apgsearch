@@ -9,17 +9,12 @@ public:
 
     std::map<std::string, int64_t> census;
     std::map<std::string, std::vector<std::string> > alloccur;
-    uint64_t tilesProcessed;
+    uint64_t tilesProcessed = 0;
 
-    SoupSearcher *parent;
+    SoupSearcher *parent = nullptr;
 
-    SoupSearcher() {
-        parent = 0; tilesProcessed = 0;
-    }
-
-    SoupSearcher(SoupSearcher *parent) {
-        this->parent = parent; tilesProcessed = 0;
-    }
+    explicit SoupSearcher() = default;
+    explicit SoupSearcher(SoupSearcher *parent) : parent(parent) {}
 
     void aggregate(std::map<std::string, int64_t> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
