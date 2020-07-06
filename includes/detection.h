@@ -177,7 +177,7 @@ std::string linearlyse(const apg::pattern& ipat, int maxperiod, int stepsize) {
         return "PATHOLOGICAL";
 
     std::string posthash = md5(strConcat(moment1, '#', moment2));
-    std::string repr = strConcat("y1", period, "_", qeriod, "_", moment0, "_", posthash);
+    std::string repr = strConcat("yl", period, "_", qeriod, "_", moment0, "_", posthash);
 
     // std::cout << "Linear-growth pattern identified: \033[1;32m" << repr << "\033[0m" << std::endl;
 
