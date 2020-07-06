@@ -7,7 +7,7 @@ class SoupSearcher {
 
 public:
 
-    std::map<std::string, long long> census;
+    std::map<std::string, int64_t> census;
     std::map<std::string, std::vector<std::string> > alloccur;
     uint64_t tilesProcessed;
 
@@ -21,7 +21,7 @@ public:
         this->parent = parent; tilesProcessed = 0;
     }
 
-    void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
+    void aggregate(std::map<std::string, int64_t> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
         for (const auto& kv : *newcensus) {
             census[kv.first] += kv.second;
@@ -300,25 +300,20 @@ public:
     }
 
 
-    std::vector<std::pair<long long, std::string> > getSortedList(long long &totobjs) {
+    std::vector<std::pair<int64_t, std::string>> getCensusListSortedByFrequency() const {
 
-        std::vector<std::pair<long long, std::string> > censusList;
-
-        std::map<std::string, long long>::iterator it;
-        for (it = census.begin(); it != census.end(); it++)
-        {
-            if ((it->second != 0) && (it->first != "xs0_0")) {
-                censusList.push_back(std::make_pair(it->second, it->first));
-                totobjs += it->second;
+        std::vector<std::pair<int64_t, std::string>> result;
+        for (const auto& kv : census) {
+            if ((kv.second != 0) && (kv.first != "xs0_0")) {
+                result.emplace_back(kv.second, kv.first);
             }
         }
-        std::sort(censusList.begin(), censusList.end());
-
-        return censusList;
+        std::sort(result.begin(), result.end(), std::greater<std::pair<int64_t, std::string>>());
+        return result;
 
     }
 
-    std::string submitResults(const std::string& payoshakey, const std::string& root, long long numsoups, int local_log, bool testing) {
+    std::string submitResults(const std::string& payoshakey, const std::string& root, uint64_t numsoups, int local_log, bool testing) {
 
         std::string authstring = "testing";
 
@@ -331,9 +326,12 @@ public:
             return "";
         }
 
-        long long totobjs = 0;
+        std::vector<std::pair<int64_t, std::string>> censusList = getCensusListSortedByFrequency();
 
-        std::vector<std::pair<long long, std::string> > censusList = getSortedList(totobjs);
+        int64_t numObjects = 0;
+        for (const auto& kv : censusList) {
+            numObjects += kv.first;
+        }
 
         std::ostringstream ss;
 
@@ -344,21 +342,21 @@ public:
         ss << "@RULE " << RULESTRING << "\n";
         ss << "@SYMMETRY " << SYMMETRY << "\n";
         ss << "@NUM_SOUPS " << numsoups << "\n";
-        ss << "@NUM_OBJECTS " << totobjs << "\n";
+        ss << "@NUM_OBJECTS " << numObjects << "\n";
 
         ss << "\n@CENSUS TABLE\n";
 
-        for (int i = censusList.size() - 1; i >= 0; i--) {
-            ss << censusList[i].second << " " << censusList[i].first << "\n";
+        for (const auto& kv : censusList) {
+            ss << kv.second << " " << kv.first << "\n";
         }
 
         ss << "\n@SAMPLE_SOUPIDS\n";
 
-        for (int i = censusList.size() - 1; i >= 0; i--) {
-            const std::vector<std::string>& occurrences = alloccur[censusList[i].second];
+        for (const auto& kv : censusList) {
+            const auto& occurrences = alloccur[kv.second];
             if (occurrences.empty()) { continue; }
 
-            ss << censusList[i].second;
+            ss << kv.second;
 
             #ifdef STDIN_SYM
             ss << " " << occurrences[0];
@@ -371,7 +369,7 @@ public:
             ss << "\n";
         }
 
-        if(local_log) {
+        if (local_log) {
             std::time_t timestamp = std::time(NULL);
             std::string resultsFileName = strConcat("log.", timestamp, ".", root, ".txt");
 

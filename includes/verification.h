@@ -67,11 +67,8 @@ bool verifySearch(const std::string& payoshakey) {
         }
     }
 
-    long long totobjs;
-    std::vector<std::pair<long long, std::string> > censusList = soup.getSortedList(totobjs);
-
-    for (int i = censusList.size() - 1; i >= 0; i--) {
-        ss << censusList[i].second << " " << censusList[i].first << "\n";
+    for (const auto& kv : soup.getCensusListSortedByFrequency()) {
+        ss << kv.second << " " << kv.first << "\n";
     }
 
     catagolueRequest(ss.str().c_str(), "/verify");
