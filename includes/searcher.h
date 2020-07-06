@@ -109,12 +109,12 @@ public:
     bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, const std::string& seedroot, const std::string& suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
-        std::map<std::string, int64_t> cm;
+        std::map<std::string, int64_t> tally;
         cfier.gmax = (1024 << (attempt * 2));
 
         #ifdef HASHLIFE_ONLY
 
-        cm = cfier.census(pat, duration, &classifyAperiodic);
+        tally = cfier.census(pat, duration, &classifyAperiodic);
 
         #else
 
@@ -137,7 +137,7 @@ public:
         bool remove_annoyances = false;
         #endif
 
-        cfier.deeppurge(cm, icb, &classifyAperiodic, remove_annoyances, remove_gliders);
+        cfier.deeppurge(tally, icb, &classifyAperiodic, remove_annoyances, remove_gliders);
 
         apg::bitworld bwv0;
         icb.to_bitworld(bwv0, 0);
@@ -149,13 +149,13 @@ public:
         #endif
 
         if (n_gliders > 0) {
-            cm["xq4_153"] += n_gliders;
+            tally["xq4_153"] += n_gliders;
         }
 
         #else
         std::vector<apg::bitworld> bwv(BITPLANES + 1);
         pat.extractPattern(bwv);
-        cfier.census(cm, bwv, &classifyAperiodic, true);
+        cfier.census(tally, bwv, &classifyAperiodic, true);
         #endif
 
         #endif
@@ -166,14 +166,15 @@ public:
         bool ignorePathologicals = false;
         int pathologicals = 0;
 
-        for (auto it = cm.begin(); it != cm.end(); ++it) {
-            if (it->first[0] == 'z') {
+        for (const auto& kv : tally) {
+            const auto& apgcode = kv.first;
+            if (apgcode[0] == 'z') {
                 #ifdef STANDARD_LIFE
                 pathologicals += ((attempt <= 2) ? 1 : 0);
                 #endif
-            } else if (it->first[0] == 'y') {
+            } else if (apgcode[0] == 'y') {
                 ignorePathologicals = true;
-            } else if (it->first == "PATHOLOGICAL") {
+            } else if (apgcode == "PATHOLOGICAL") {
                 pathologicals += 1;
             }
         }
@@ -186,10 +187,10 @@ public:
             }
         }
 
-        for (auto it = cm.begin(); it != cm.end(); ++it) {
-            std::string apgcode = it->first;
+        for (const auto& kv : tally) {
+            const auto& apgcode = kv.first;
             if ((ignorePathologicals == false) || (apgcode.compare("PATHOLOGICAL") != 0)) {
-                census[apgcode] += it->second;
+                census[apgcode] += kv.second;
                 if (alloccur[apgcode].size() == 0 || alloccur[apgcode].back().compare(suffix) != 0) {
                     if ((suffix.length() < 1920) && (alloccur[apgcode].size() < 10)) {
                         alloccur[apgcode].push_back(suffix);
@@ -226,7 +227,6 @@ public:
                 std::cout << "Chaotic-growth pattern detected: \033[1;32m" << apgcode << "\033[0m" << std::endl;
             }
             #endif
-
 
         }
 
