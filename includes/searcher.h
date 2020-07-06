@@ -7,21 +7,16 @@ class SoupSearcher {
 
 public:
 
-    std::map<std::string, long long> census;
+    std::map<std::string, int64_t> census;
     std::map<std::string, std::vector<std::string> > alloccur;
-    uint64_t tilesProcessed;
+    uint64_t tilesProcessed = 0;
 
-    SoupSearcher *parent;
+    SoupSearcher *parent = nullptr;
 
-    SoupSearcher() {
-        parent = 0; tilesProcessed = 0;
-    }
+    explicit SoupSearcher() = default;
+    explicit SoupSearcher(SoupSearcher *parent) : parent(parent) {}
 
-    SoupSearcher(SoupSearcher *parent) {
-        this->parent = parent; tilesProcessed = 0;
-    }
-
-    void aggregate(std::map<std::string, long long> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
+    void aggregate(std::map<std::string, int64_t> *newcensus, std::map<std::string, std::vector<std::string> > *newoccur) {
 
         for (const auto& kv : *newcensus) {
             census[kv.first] += kv.second;
@@ -109,12 +104,12 @@ public:
     bool separate(UPATTERN &pat, int duration, int attempt, apg::base_classifier<BITPLANES> &cfier, const std::string& seedroot, const std::string& suffix) {
 
         bool proceedNonetheless = (attempt >= 5);
-        std::map<std::string, int64_t> cm;
+        std::map<std::string, int64_t> tally;
         cfier.gmax = (1024 << (attempt * 2));
 
         #ifdef HASHLIFE_ONLY
 
-        cm = cfier.census(pat, duration, &classifyAperiodic);
+        tally = cfier.census(pat, duration, &classifyAperiodic);
 
         #else
 
@@ -137,7 +132,7 @@ public:
         bool remove_annoyances = false;
         #endif
 
-        cfier.deeppurge(cm, icb, &classifyAperiodic, remove_annoyances, remove_gliders);
+        cfier.deeppurge(tally, icb, &classifyAperiodic, remove_annoyances, remove_gliders);
 
         apg::bitworld bwv0;
         icb.to_bitworld(bwv0, 0);
@@ -149,13 +144,13 @@ public:
         #endif
 
         if (n_gliders > 0) {
-            cm["xq4_153"] += n_gliders;
+            tally["xq4_153"] += n_gliders;
         }
 
         #else
         std::vector<apg::bitworld> bwv(BITPLANES + 1);
         pat.extractPattern(bwv);
-        cfier.census(cm, bwv, &classifyAperiodic, true);
+        cfier.census(tally, bwv, &classifyAperiodic, true);
         #endif
 
         #endif
@@ -166,14 +161,15 @@ public:
         bool ignorePathologicals = false;
         int pathologicals = 0;
 
-        for (auto it = cm.begin(); it != cm.end(); ++it) {
-            if (it->first[0] == 'z') {
+        for (const auto& kv : tally) {
+            const auto& apgcode = kv.first;
+            if (apgcode[0] == 'z') {
                 #ifdef STANDARD_LIFE
                 pathologicals += ((attempt <= 2) ? 1 : 0);
                 #endif
-            } else if (it->first[0] == 'y') {
+            } else if (apgcode[0] == 'y') {
                 ignorePathologicals = true;
-            } else if (it->first == "PATHOLOGICAL") {
+            } else if (apgcode == "PATHOLOGICAL") {
                 pathologicals += 1;
             }
         }
@@ -186,11 +182,11 @@ public:
             }
         }
 
-        for (auto it = cm.begin(); it != cm.end(); ++it) {
-            std::string apgcode = it->first;
-            if ((ignorePathologicals == false) || (apgcode.compare("PATHOLOGICAL") != 0)) {
-                census[apgcode] += it->second;
-                if (alloccur[apgcode].size() == 0 || alloccur[apgcode].back().compare(suffix) != 0) {
+        for (const auto& kv : tally) {
+            const auto& apgcode = kv.first;
+            if ((ignorePathologicals == false) || (apgcode != "PATHOLOGICAL")) {
+                census[apgcode] += kv.second;
+                if (alloccur[apgcode].empty() || alloccur[apgcode].back() != suffix) {
                     if ((suffix.length() < 1920) && (alloccur[apgcode].size() < 10)) {
                         alloccur[apgcode].push_back(suffix);
                     }
@@ -199,18 +195,18 @@ public:
 
             if (census[apgcode] > 10) { continue; }
 
-            if ((parent != 0) && (parent->census.count(apgcode)) && (parent->census[apgcode] > 10)) { continue; }
+            if ((parent != nullptr) && (parent->census.count(apgcode)) && (parent->census[apgcode] > 10)) { continue; }
 
             #ifdef STANDARD_LIFE
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
                 if ((apgcode[2] != '2') || (apgcode[3] != '_')) {
-                    if (apgcode.compare("xp3_co9nas0san9oczgoldlo0oldlogz1047210127401") != 0 && apgcode.compare("xp15_4r4z4r4") != 0) {
+                    if (apgcode != "xp3_co9nas0san9oczgoldlo0oldlogz1047210127401" && apgcode != "xp15_4r4z4r4") {
                         // Interesting oscillator:
                         std::cout << "Rare oscillator detected: \033[1;31m" << apgcode << "\033[0m" << std::endl;
                     }
                 }
             } else if ((apgcode[0] == 'x') && (apgcode[1] == 'q')) {
-                if (apgcode.compare("xq4_153") != 0 && apgcode.compare("xq4_6frc") != 0 && apgcode.compare("xq4_27dee6") != 0 && apgcode.compare("xq4_27deee6") != 0) {
+                if (apgcode != "xq4_153" && apgcode != "xq4_6frc" && apgcode != "xq4_27dee6" && apgcode != "xq4_27deee6") {
                     std::cout << "Rare spaceship detected: \033[1;34m" << apgcode << "\033[0m" << std::endl;
                 }
             } else if ((apgcode[0] == 'y') && (apgcode[1] == 'l')) {
@@ -226,7 +222,6 @@ public:
                 std::cout << "Chaotic-growth pattern detected: \033[1;32m" << apgcode << "\033[0m" << std::endl;
             }
             #endif
-
 
         }
 
@@ -300,25 +295,20 @@ public:
     }
 
 
-    std::vector<std::pair<long long, std::string> > getSortedList(long long &totobjs) {
+    std::vector<std::pair<int64_t, std::string>> getCensusListSortedByFrequency() const {
 
-        std::vector<std::pair<long long, std::string> > censusList;
-
-        std::map<std::string, long long>::iterator it;
-        for (it = census.begin(); it != census.end(); it++)
-        {
-            if ((it->second != 0) && (it->first != "xs0_0")) {
-                censusList.push_back(std::make_pair(it->second, it->first));
-                totobjs += it->second;
+        std::vector<std::pair<int64_t, std::string>> result;
+        for (const auto& kv : census) {
+            if ((kv.second != 0) && (kv.first != "xs0_0")) {
+                result.emplace_back(kv.second, kv.first);
             }
         }
-        std::sort(censusList.begin(), censusList.end());
-
-        return censusList;
+        std::sort(result.begin(), result.end(), std::greater<std::pair<int64_t, std::string>>());
+        return result;
 
     }
 
-    std::string submitResults(const std::string& payoshakey, const std::string& root, long long numsoups, int local_log, bool testing) {
+    std::string submitResults(const std::string& payoshakey, const std::string& root, uint64_t numsoups, int local_log, bool testing) {
 
         std::string authstring = "testing";
 
@@ -331,9 +321,12 @@ public:
             return "";
         }
 
-        long long totobjs = 0;
+        std::vector<std::pair<int64_t, std::string>> censusList = getCensusListSortedByFrequency();
 
-        std::vector<std::pair<long long, std::string> > censusList = getSortedList(totobjs);
+        int64_t numObjects = 0;
+        for (const auto& kv : censusList) {
+            numObjects += kv.first;
+        }
 
         std::ostringstream ss;
 
@@ -344,21 +337,21 @@ public:
         ss << "@RULE " << RULESTRING << "\n";
         ss << "@SYMMETRY " << SYMMETRY << "\n";
         ss << "@NUM_SOUPS " << numsoups << "\n";
-        ss << "@NUM_OBJECTS " << totobjs << "\n";
+        ss << "@NUM_OBJECTS " << numObjects << "\n";
 
         ss << "\n@CENSUS TABLE\n";
 
-        for (int i = censusList.size() - 1; i >= 0; i--) {
-            ss << censusList[i].second << " " << censusList[i].first << "\n";
+        for (const auto& kv : censusList) {
+            ss << kv.second << " " << kv.first << "\n";
         }
 
         ss << "\n@SAMPLE_SOUPIDS\n";
 
-        for (int i = censusList.size() - 1; i >= 0; i--) {
-            const std::vector<std::string>& occurrences = alloccur[censusList[i].second];
+        for (const auto& kv : censusList) {
+            const auto& occurrences = alloccur[kv.second];
             if (occurrences.empty()) { continue; }
 
-            ss << censusList[i].second;
+            ss << kv.second;
 
             #ifdef STDIN_SYM
             ss << " " << occurrences[0];
@@ -371,7 +364,7 @@ public:
             ss << "\n";
         }
 
-        if(local_log) {
+        if (local_log) {
             std::time_t timestamp = std::time(NULL);
             std::string resultsFileName = strConcat("log.", timestamp, ".", root, ".txt");
 

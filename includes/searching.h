@@ -167,9 +167,6 @@ void perpetualSearch(uint64_t soupsPerHaul, int numThreads, bool interactive, co
 
     while (running) {
 
-        std::vector<SoupSearcher> localSoups(numThreads, &globalSoup);
-        std::vector<std::thread> lsthreads(numThreads);
-
         if (numThreads == 0) {
 #ifdef STDIN_SYM
            std::string suffix = retrieveSeed(&running);
@@ -179,6 +176,9 @@ void perpetualSearch(uint64_t soupsPerHaul, int numThreads, bool interactive, co
             globalSoup.censusSoup(seed, suffix, cfier);
             soupsCompletedSinceStart += 1;
         } else {
+            std::vector<SoupSearcher> localSoups(numThreads, SoupSearcher(&globalSoup));
+            std::vector<std::thread> lsthreads(numThreads);
+
             std::atomic<uint64_t> idx(0);
             std::atomic<uint64_t> ts(0);
 

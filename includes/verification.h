@@ -60,18 +60,15 @@ bool verifySearch(const std::string& payoshakey) {
     for (unsigned int i = 4; i < stringlist.size(); i++) {
         std::string symslash = SYMMETRY "/";
         std::string seed = stringlist[i];
-        if ((seed.size() >= 4) && (seed.substr(0,symslash.length()).compare(symslash) == 0)) {
+        if (seed.size() >= 4 && seed.substr(0, symslash.size()) == symslash) {
             soup.censusSoup(seed.substr(symslash.size()), "", cfier);
         } else {
             std::cout << "[" << seed << "]" << std::endl;
         }
     }
 
-    long long totobjs;
-    std::vector<std::pair<long long, std::string> > censusList = soup.getSortedList(totobjs);
-
-    for (int i = censusList.size() - 1; i >= 0; i--) {
-        ss << censusList[i].second << " " << censusList[i].first << "\n";
+    for (const auto& kv : soup.getCensusListSortedByFrequency()) {
+        ss << kv.second << " " << kv.first << "\n";
     }
 
     catagolueRequest(ss.str().c_str(), "/verify");
