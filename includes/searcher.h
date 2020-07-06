@@ -184,9 +184,9 @@ public:
 
         for (const auto& kv : tally) {
             const auto& apgcode = kv.first;
-            if ((ignorePathologicals == false) || (apgcode.compare("PATHOLOGICAL") != 0)) {
+            if ((ignorePathologicals == false) || (apgcode != "PATHOLOGICAL")) {
                 census[apgcode] += kv.second;
-                if (alloccur[apgcode].size() == 0 || alloccur[apgcode].back().compare(suffix) != 0) {
+                if (alloccur[apgcode].empty() || alloccur[apgcode].back() != suffix) {
                     if ((suffix.length() < 1920) && (alloccur[apgcode].size() < 10)) {
                         alloccur[apgcode].push_back(suffix);
                     }
@@ -195,18 +195,18 @@ public:
 
             if (census[apgcode] > 10) { continue; }
 
-            if ((parent != 0) && (parent->census.count(apgcode)) && (parent->census[apgcode] > 10)) { continue; }
+            if ((parent != nullptr) && (parent->census.count(apgcode)) && (parent->census[apgcode] > 10)) { continue; }
 
             #ifdef STANDARD_LIFE
             if ((apgcode[0] == 'x') && (apgcode[1] == 'p')) {
                 if ((apgcode[2] != '2') || (apgcode[3] != '_')) {
-                    if (apgcode.compare("xp3_co9nas0san9oczgoldlo0oldlogz1047210127401") != 0 && apgcode.compare("xp15_4r4z4r4") != 0) {
+                    if (apgcode != "xp3_co9nas0san9oczgoldlo0oldlogz1047210127401" && apgcode != "xp15_4r4z4r4") {
                         // Interesting oscillator:
                         std::cout << "Rare oscillator detected: \033[1;31m" << apgcode << "\033[0m" << std::endl;
                     }
                 }
             } else if ((apgcode[0] == 'x') && (apgcode[1] == 'q')) {
-                if (apgcode.compare("xq4_153") != 0 && apgcode.compare("xq4_6frc") != 0 && apgcode.compare("xq4_27dee6") != 0 && apgcode.compare("xq4_27deee6") != 0) {
+                if (apgcode != "xq4_153" && apgcode != "xq4_6frc" && apgcode != "xq4_27dee6" && apgcode != "xq4_27deee6") {
                     std::cout << "Rare spaceship detected: \033[1;34m" << apgcode << "\033[0m" << std::endl;
                 }
             } else if ((apgcode[0] == 'y') && (apgcode[1] == 'l')) {

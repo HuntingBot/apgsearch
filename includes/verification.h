@@ -60,7 +60,7 @@ bool verifySearch(const std::string& payoshakey) {
     for (unsigned int i = 4; i < stringlist.size(); i++) {
         std::string symslash = SYMMETRY "/";
         std::string seed = stringlist[i];
-        if ((seed.size() >= 4) && (seed.substr(0,symslash.length()).compare(symslash) == 0)) {
+        if (seed.size() >= 4 && seed.substr(0, symslash.size()) == symslash) {
             soup.censusSoup(seed.substr(symslash.size()), "", cfier);
         } else {
             std::cout << "[" << seed << "]" << std::endl;

@@ -140,7 +140,7 @@ std::string authenticate(const char *payosha256_key, const char *operation_name)
 
         if (std::getline(ss2, item2, ':')) {
             if (std::getline(ss2, item2, ':')) {
-                if (item2.compare("good") == 0) {
+                if (item2 == "good") {
                     if (std::getline(ss2, target, ':')) {
                         std::getline(ss2, token, ':');
                     }
@@ -165,7 +165,7 @@ std::string authenticate(const char *payosha256_key, const char *operation_name)
             std::string prehash = strConcat(token, ':', nonce);
             std::string posthash = sha256(prehash);
 
-            if (posthash.compare(target) < 0) {
+            if (posthash < target) {
                 // std::cout << "...finished proof of work after " << nonce << " iterations!" << std::endl;
 
                 return "payosha256:pay_token:"+prehash+"\n";
