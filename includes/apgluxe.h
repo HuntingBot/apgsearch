@@ -43,14 +43,13 @@ int run_apgluxe(int argc, char *argv[]) {
 
     #ifdef STDIN_SYM
     int local_log = 1;
-    bool testing = true;
     int verifications = 0;
     #else
     int local_log = 0;
-    bool testing = false;
     int verifications = -1;
     #endif
 
+    bool testing = false;
     int nullargs = 1;
     bool quitByUser = false;
 
