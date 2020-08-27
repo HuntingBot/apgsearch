@@ -44,6 +44,7 @@ int run_apgluxe(int argc, char *argv[]) {
     #ifdef STDIN_SYM
     int local_log = 1;
     int verifications = 0;
+    soupsPerHaul = 100000;
     #else
     int local_log = 0;
     int verifications = -1;
