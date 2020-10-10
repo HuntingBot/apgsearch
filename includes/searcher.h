@@ -237,9 +237,7 @@ public:
 
     }
 
-    void censusSoup(const std::string& seedroot, const std::string& suffix, apg::base_classifier<BITPLANES> &cfier) {
-
-        std::vector<apg::bitworld> vbw = apg::hashsoup(seedroot + suffix, SYMMETRY);
+    void censusSoup(const std::string& seedroot, const std::string& suffix, apg::base_classifier<BITPLANES> &cfier, std::vector<apg::bitworld> &vbw) {
 
         #ifdef HASHLIFE_ONLY
         apg::pattern pat(cfier.lab, cfier.lab->fromplanes(vbw), RULESTRING);
@@ -294,6 +292,12 @@ public:
 
     }
 
+    void censusSoup(const std::string& seedroot, const std::string& suffix, apg::base_classifier<BITPLANES> &cfier) {
+
+        std::vector<apg::bitworld> vbw = apg::hashsoup(seedroot + suffix, SYMMETRY);
+        censusSoup(seedroot, suffix, cfier, vbw);
+
+    }
 
     std::vector<std::pair<int64_t, std::string>> getCensusListSortedByFrequency() const {
 
