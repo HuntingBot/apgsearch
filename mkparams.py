@@ -3,7 +3,7 @@
 import sys
 import re
 
-from lifelib.genera import rule_property
+from lifelib.genera import rule_property, genus_list
 from lifelib.autocompile import set_rules, sanirule
 from lifelib.pythlib.samples import validate_symmetry
 
@@ -33,8 +33,15 @@ def main():
         rulestring = newrule
 
     validate_symmetry(rulestring, symmetry)
-
     print("Valid symmetry: \033[1;32m"+symmetry+"\033[0m")
+
+    if 'ikpx2' in symmetry:
+        # Check isotropic:
+        g = [x for x in genus_list if x['fullname'] == 'isotropic']
+        assert(len(g) == 1)
+        g = g[0]
+        if not re.match(g['regex'], rulestring):
+            raise ValueError("Error: rule %s is not an isotropic 2-state Moore-neighbourhood rule" % rulestring)
 
     set_rules(rulestring)
 

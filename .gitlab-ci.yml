@@ -28,4 +28,4 @@ staging:
     script:
         - bash recompile.sh --profile
         - getconf _NPROCESSORS_ONLN
-        - ./apgluxe -v 50 -k '#gitlab' -i 1 -n 5000000
+        - ./apgluxe -v 50 -k '#gitlab' -i 1 -n 1000000
