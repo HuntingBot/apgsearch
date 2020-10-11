@@ -2,7 +2,7 @@ This program searches random initial configurations in Conway's Game
 of Life and periodically uploads results to a remote server. You can
 read more information about the distributed search at the following URL:
 
-- https://catagolue.appspot.com/
+- https://catagolue.hatsya.com/
 
 An automatic live Twitter feed of new discoveries found by the search
 was established by Ivan Fomichev:
@@ -98,7 +98,7 @@ Then you can enter the directory and compile the search program using:
 If the online repository is updated at all, you can update your local
 copy in-place by running:
 
-    ./recompile.sh --update
+    git pull
 
 in the repository directory.
 

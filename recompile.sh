@@ -13,7 +13,6 @@ rm -f "includes/params.h" | true
 
 rulearg=`echo "$@" | grep -o "\\-\\-rule [^ ]*" | sed "s/\\-\\-rule\\ //"`
 symmarg=`echo "$@" | grep -o "\\-\\-symmetry [^ ]*" | sed "s/\\-\\-symmetry\\ //"`
-updatearg=`echo "$@" | grep -o "\\-\\-update" | sed "s/\\-\\-update/u/"`
 profilearg=`echo "$@" | grep -o "\\-\\-profile" | sed "s/\\-\\-profile/u/"`
 mingwarg=`echo "$@" | grep -o "\\-\\-mingw" | sed "s/\\-\\-mingw/u/"`
 gpuarg=`echo "$@" | grep -o "\\-\\-cuda" | sed "s/\\-\\-cuda/u/"`
@@ -37,25 +36,6 @@ printf "\033[31;1mWarning: --cuda and --profile are incompatible; omitting the l
 else
 export PROFILE_APGLUXE=1
 fi
-fi
-
-if ((${#updatearg} != 0)); then
-
-printf "Checking for updates from repository...\033[30m\n"
-newversion=`curl "https://gitlab.com/apgoucher/apgmera/raw/master/main.cpp" | grep "define APG_VERSION" | sed "s/#define APG_VERSION //"`
-oldversion=`cat main.cpp | grep "define APG_VERSION" | sed "s/#define APG_VERSION //"`
-if [ "$newversion" != "$oldversion" ]
-then
-printf "\033[0m...your copy of apgluxe does not match the repository.\n"
-echo "New version: $newversion"
-echo "Old version: $oldversion"
-bash update-lifelib.sh
-git pull
-else
-printf "\033[0m...your copy of apgluxe is already up-to-date.\n"
-fi
-else
-echo "Skipping updates; use --update to update apgluxe automatically."
 fi
 
 # Ensure lifelib matches the version in the repository:
