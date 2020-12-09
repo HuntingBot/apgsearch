@@ -12,7 +12,7 @@ was established by Ivan Fomichev:
 There is also an automatically-updated summary page, with animations
 of interesting objects and various charts:
 
-- https://catagolue.appspot.com/statistics
+- https://catagolue.hatsya.com/statistics
 
 The search was originally performed by people running instances of
 a Python script; this repository contains the source code for a C++
@@ -67,7 +67,7 @@ provide a valid payosha256 key. The correct syntax is as follows:
     ./apgluxe -n 20000000 -k mykey
 
 where 'mykey' is replaced with your payosha256 key (available from
-https://catagolue.appspot.com/payosha256 -- note the case-sensitivity).
+https://catagolue.hatsya.com/payosha256 -- note the case-sensitivity).
 Omitting this parameter will cause soups to be uploaded anonymously.
 
 If you have a quad-core computer and would prefer not to run four
@@ -106,9 +106,9 @@ Windows users (precompiled)
 ---------------------------
 
 There is a precompiled Windows binary, only for `b3s23/C1`, available from
-[here](https://catagolue.appspot.com/binaries/apgluxe-windows-x86_64.exe).
+[here](https://catagolue.hatsya.com/binaries/apgluxe-windows-x86_64.exe).
 When executed, it will prompt you for the haul size, number of CPUs to use,
-and your [payosha256 key](https://catagolue.appspot.com/payosha256). For
+and your [payosha256 key](https://catagolue.hatsya.com/payosha256). For
 finer control, it can be run from the Command Prompt with any combination
 of the options mentioned in the Example Usage above.
 
@@ -159,9 +159,10 @@ Speed boosts
 ============
 
 There are several compilation flags that can be used for accelerated
-searching. Profile-guided optimisation can be enabled with:
+searching.
 
-    ./recompile.sh --profile
+GPU searching
+-------------
 
 If you have an NVIDIA GPU with at least 1.5 GB of memory, then it can be
 used as a 'preprocessor' which discards uninteresting soups and delegates
@@ -169,11 +170,75 @@ the interesting soups to the CPU search program. Compilation uses:
 
     ./recompile.sh --cuda
 
-On a V100 Volta GPU, this churns through 1 040 000 soups per second. Note
-that the program will upload to a different census (**b3s23/G1** instead
+Note that the program will upload to a different census (**b3s23/G1** instead
 of **b3s23/C1**) as the process of discarding uninteresting soups heavily
 distorts the census results. Work is in progress to allow the GPU to census
 soups itself, thereby allowing CUDA-accelerated searching of **b3s23/C1**.
+
+It will default to using the whole GPU (device 0, unless you explicitly
+change `CUDA_VISIBLE_DEVICES` as explained in the next section) as a soup
+preprocessor and 8 CPU threads to census the interesting soups. If you
+have a very powerful GPU and it is under-utilised, you may want to increase
+the number of CPU threads using the `-p` flag:
+
+    ./apgluxe -n 1000000000 -p 12 -k mykey
+
+This is particularly pertinent for the NVIDIA Volta V100 and RTX 2080 Ti
+GPUs, which can each manage 1 080 000 soups per second if sufficiently many
+CPU threads are being used. The Ampere A100 should theoretically be able to
+manage considerably more than that, provided the number of threads is high
+enough.
+
+You can see the CPU usage using `htop` and the GPU usage using:
+
+    watch -n 0.1 nvidia-smi
+
+If the GPU utilisation is significantly below 100% for a significant amount
+of time, then increasing the number of threads is recommended.
+
+Multi-GPU searching
+-------------------
+
+Each process can only utilise a single GPU. The `CUDA_VISIBLE_DEVICES`
+environment variable allows you to select the GPU to use (this is a standard
+part of the CUDA runtime, and not a feature of apgsearch specifically). For
+example, to run a process on GPU 3, use:
+
+    CUDA_VISIBLE_DEVICES=3 ./apgluxe [OPTIONS]
+
+This requires you to have firstly compiled with `./recompile.sh --cuda` as
+described in the previous section.
+
+To search on multiple GPUs, run one process on each GPU. You might want to
+create a Bash script resembling the following (with one line per device) so
+that you can conveniently run a process per GPU:
+
+    #!/bin/bash
+    KEY="insert_your_key_here"
+    CPU_THREADS=8
+    CUDA_VISIBLE_DEVICES=0 ./apgluxe -p "$CPU_THREADS" -n 1000000000 -k "$KEY" &
+    CUDA_VISIBLE_DEVICES=1 ./apgluxe -p "$CPU_THREADS" -n 1100000000 -k "$KEY" &
+    CUDA_VISIBLE_DEVICES=2 ./apgluxe -p "$CPU_THREADS" -n 1200000000 -k "$KEY" &
+    CUDA_VISIBLE_DEVICES=3 ./apgluxe -p "$CPU_THREADS" -n 1300000000 -k "$KEY" &
+    CUDA_VISIBLE_DEVICES=4 ./apgluxe -p "$CPU_THREADS" -n 1400000000 -k "$KEY" &
+    CUDA_VISIBLE_DEVICES=5 ./apgluxe -p "$CPU_THREADS" -n 1500000000 -k "$KEY" &
+    CUDA_VISIBLE_DEVICES=6 ./apgluxe -p "$CPU_THREADS" -n 1600000000 -k "$KEY" &
+    CUDA_VISIBLE_DEVICES=7 ./apgluxe -p "$CPU_THREADS" -n 1700000000 -k "$KEY" &
+    wait
+
+**Warning:** The output to the terminal may look confusing and bizarre
+because it contains the interleaved output from all of these processes.
+This is to be expected and is no cause for concern.
+
+Profile-guided optimisation (CPU only)
+--------------------------------------
+
+Profile-guided optimisation can be enabled with:
+
+    ./recompile.sh --profile
+
+This is only supported for the compilers GCC and Clang, rather than nvcc,
+so is specific to CPU searching. The benefits are relatively mild.
 
 Credits and licences
 ====================
