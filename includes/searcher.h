@@ -184,25 +184,32 @@ public:
 
         for (const auto& kv : tally) {
             const auto& apgcode = kv.first;
-            if ((ignorePathologicals == false) || (apgcode != "PATHOLOGICAL")) {
-                census[apgcode] += kv.second;
-                if (alloccur[apgcode].empty() || alloccur[apgcode].back() != suffix) {
-                    if (alloccur[apgcode].size() < 10) {
 
-                        int penalty = suffix.length();
+            if (ignorePathologicals && (apgcode == "PATHOLOGICAL")) {
+                continue;
+            }
 
-                        for (const auto& x : alloccur[apgcode]) {
-                            penalty += 4 * x.size();
-                        }
+            int64_t& ca = census[apgcode];
+            ca += kv.second;
+            if (ca > 1000) { continue; }
 
-                        if (penalty <= 5760) {
-                            alloccur[apgcode].push_back(suffix);
-                        }
+            std::vector<std::string>& aa = alloccur[apgcode];
+
+            if (aa.empty() || aa.back() != suffix) {
+                if (aa.size() < 10) {
+                    int penalty = suffix.length();
+
+                    for (const auto& x : aa) {
+                        penalty += 4 * x.size();
+                    }
+
+                    if (penalty <= 5760) {
+                        aa.push_back(suffix);
                     }
                 }
             }
 
-            if (census[apgcode] > 10) { continue; }
+            if (ca > 10) { continue; }
 
             if ((parent != nullptr) && (parent->census.count(apgcode)) && (parent->census[apgcode] > 10)) { continue; }
 
