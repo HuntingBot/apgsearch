@@ -187,8 +187,17 @@ public:
             if ((ignorePathologicals == false) || (apgcode != "PATHOLOGICAL")) {
                 census[apgcode] += kv.second;
                 if (alloccur[apgcode].empty() || alloccur[apgcode].back() != suffix) {
-                    if ((suffix.length() < 1920) && (alloccur[apgcode].size() < 10)) {
-                        alloccur[apgcode].push_back(suffix);
+                    if (alloccur[apgcode].size() < 10) {
+
+                        int penalty = suffix.length();
+
+                        for (const auto& x : alloccur[apgcode]) {
+                            penalty += 4 * x.size();
+                        }
+
+                        if (penalty <= 5760) {
+                            alloccur[apgcode].push_back(suffix);
+                        }
                     }
                 }
             }
